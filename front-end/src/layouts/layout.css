@@ -1,0 +1,19 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-container {
+  display: flex;
+  width: 100%;
+}
+
+/* Ensure the sidebar doesn't shrink */
+.admin-sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: calc(100vh - 70px); /* Adjust based on navbar height */
+  position: sticky;
+  top: 70px;
+}

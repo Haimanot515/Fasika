@@ -1,0 +1,153 @@
+/* ───────── Top Navbar ───────── */
+.top-navbar {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 12px 24px;
+  background-color: #065f46; /* darker green */
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 1200;
+  height:10vh;
+}
+
+/* Logo */
+.top-navbar .brand {
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: #fff;
+}
+
+/* ───────── Dropdown Containers ───────── */
+.top-navbar .dropdown-container {
+  position: relative;
+}
+
+/* Dropdown Button */
+.top-navbar .dropdown-btn {
+  background-color: transparent;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.top-navbar .dropdown-btn:hover {
+  background-color: #fff;
+  color: #065f46;
+}
+
+/* Dropdown Menu (hidden by default, toggle via React state) */
+.top-navbar .dropdown-menu {
+  display: none; /* hidden by default */
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background-color: #065f46;
+  border-radius: 6px;
+  padding: 8px 0;
+  min-width: 220px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  z-index: 1300;
+}
+
+/* Show dropdown when React adds a class */
+.top-navbar .dropdown-menu.show {
+  display: block;
+}
+
+.top-navbar .dropdown-menu li {
+  list-style: none;
+}
+
+.top-navbar .dropdown-menu li a {
+  display: block;
+  padding: 6px 16px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.top-navbar .dropdown-menu li a:hover {
+  background-color: #16a34a; /* lighter green hover */
+}
+
+/* ───────── Search Bar ───────── */
+.search-container {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  max-width: 600px; /* Amazon-style wide search */
+}
+
+.search-container input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px 0 0 4px;
+  border: none;
+  outline: none;
+}
+
+/* Category Selector */
+.search-container .category-select select {
+  border: none;
+  border-radius: 4px 0 0 4px;
+  padding: 8px 12px;
+  outline: none;
+}
+
+/* Search Button */
+.search-container .search-btn {
+  padding: 8px 16px;
+  background-color: #a33716;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.search-container .search-btn:hover {
+  background-color: #065f46;
+}
+
+/* ───────── Wishlist & Cart ───────── */
+.top-navbar .nav-icon {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.top-navbar .cart-container {
+  position: relative;
+}
+
+.top-navbar .item-count {
+  background-color: #fff;
+  color: #065f46;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+
+/* Mini Cart Preview */
+.top-navbar .mini-cart {
+  display: none;
+  position: absolute;
+  top: 130%;
+  right: 0;
+  background-color: #065f46;
+  color: #fff;
+  padding: 8px;
+  border-radius: 6px;
+  min-width: 180px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.top-navbar .cart-container:hover .mini-cart {
+  display: block;
+}

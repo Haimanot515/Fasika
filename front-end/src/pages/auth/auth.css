@@ -1,0 +1,158 @@
+/* ===== General Form Styles ===== */
+.auth-form {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-form h2 {
+  text-align: left;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  color: #27ae60;
+}
+
+/* ===== Input Fields ===== */
+.auth-form input[type="text"],
+.auth-form input[type="tel"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+  border-color: #27ae60;
+  box-shadow: 0 0 5px rgba(39, 174, 96, 0.5);
+  outline: none;
+}
+
+/* ===== Sections (Roles & Verification) ===== */
+.section {
+  margin-bottom: 20px;
+}
+
+.section p {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #27ae60;
+}
+
+.section label {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 15px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: #2c3e50;
+}
+
+.section input[type="checkbox"],
+.section input[type="radio"] {
+  margin-right: 6px;
+  accent-color: #27ae60;
+}
+
+/* ===== Agreements + CAPTCHA Layout ===== */
+.captcha-agreements {
+  display: flex;
+  justify-content: space-between;
+  flex-direction:column;
+  align-items: flex-start;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.agreements {
+  flex: 1;
+}
+
+.agreements label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  cursor: pointer;
+  color: #2c3e50;
+}
+
+.agreements input[type="checkbox"] {
+  margin-right: 6px;
+  accent-color: #27ae60;
+}
+
+.captcha {
+  flex-shrink: 0;
+  width: 300px;
+  text-align: right;
+  background-color: #ffffff;
+}
+
+/* ===== Submit Button ===== */
+.auth-form button[type="submit"] {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #27ae60;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.auth-form button[type="submit"]:hover {
+  background-color: #219150;
+  transform: translateY(-1px);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .auth-form {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .section label {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .captcha-agreements {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .captcha {
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+/* ===== Forgot Password Link ===== */
+.auth-form .forgot-password {
+  text-align: right;
+  font-size: 0.9rem;
+  color: #27ae60;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.auth-form .forgot-password:hover {
+  color: #219150;
+}

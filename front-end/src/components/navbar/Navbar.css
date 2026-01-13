@@ -1,0 +1,126 @@
+/* ────────── Navbar wrapper ────────── */
+.farmer-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #16a34a; /* primary green */
+  color: #ffffff;
+  z-index: 1001;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+}
+
+/* Brand / Logo */
+.farmer-navbar .brand {
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+/* Links container */
+.farmer-navbar .nav-links {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Individual links */
+.farmer-navbar .nav-links a {
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.farmer-navbar .nav-links a:hover {
+  color: #d1fae5; /* lighter green on hover */
+}
+
+/* Logout button */
+.farmer-navbar .nav-links button {
+  background-color: transparent;
+  border: 1px solid #ffffff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.farmer-navbar .nav-links button:hover {
+  background-color: #ffffff;
+  color: #16a34a;
+}
+
+/* My Farm / Market buttons */
+.my-farm-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.5rem 0.8rem;
+  transition: background 0.2s;
+}
+
+.my-farm-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+
+/* Location Dropdown */
+.location-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.location-btn {
+  background-color: transparent;
+  border: 1px solid #ffffff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.location-btn:hover {
+  background-color: #ffffff;
+  color: #16a34a;
+}
+
+.location-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #0d0f18;
+  border-radius: 6px;
+  padding: 8px 0;
+  margin-top: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  z-index: 1100; /* higher than navbar but lower than sidebars */
+}
+
+.location-dropdown li {
+  list-style: none;
+}
+
+.location-dropdown li a {
+  display: block;
+  padding: 6px 16px;
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.location-dropdown li a:hover {
+  background-color: #0d2f32;
+  color: #ffffff;
+}

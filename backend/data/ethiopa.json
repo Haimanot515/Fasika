@@ -1,0 +1,1162 @@
+{
+    "regions": [
+        {
+            "name": "Tigray",
+            "zones": [
+                {
+                    "name": "North Western Tigray",
+                    "woredas": [
+                        "Tahtay Adiyabo",
+                        "Laelay Adiyabo",
+                        "Medebay Zana",
+                        "Tahtay Koraro",
+                        "Asegede Tsimbila",
+                        "Tselemti",
+                        "Shere Endasilasie /Town/",
+                        "Shiraro /Town/"
+                    ]
+                },
+                {
+                    "name": "Central Tigray",
+                    "woredas": [
+                        "Mereb Lehe",
+                        "Ahiferom",
+                        "Were Lehe",
+                        "Adwa",
+                        "Laelay Maychew",
+                        "Tahtay Maychew",
+                        "Nader Adet",
+                        "Kola Temben",
+                        "Dega Temben",
+                        "Tanqua Abergele",
+                        "Abi Adi /Town/",
+                        "Adwa /Town/",
+                        "Axum /Town/"
+                    ]
+                },
+                {
+                    "name": "Eastern Tigray",
+                    "woredas": [
+                        "Gulo Meheda",
+                        "Erob",
+                        "Saesi Tsadamba",
+                        "Ganta Afeshum",
+                        "Hawuzen",
+                        "Kilte Awlalo",
+                        "Atsbi Wonberta",
+                        "Adigrat /Town/",
+                        "Wukro /Town/"
+                    ]
+                },
+                {
+                    "name": "Southern Tigray",
+                    "woredas": [
+                        "Seharti Samre",
+                        "Enderta",
+                        "Hintalo Wajirat",
+                        "Alaje",
+                        "Endamehoni",
+                        "Raya Azebo",
+                        "Alamata",
+                        "Ofla",
+                        "Maychew /Town/",
+                        "Korem /Town/",
+                        "Alamata /Town/"
+                    ]
+                },
+                {
+                    "name": "Western Tigray",
+                    "woredas": ["Kafta Humera", "Welkayit", "Tsegede", "Humera /Town/"]
+                },
+                {
+                    "name": "Mekele Special",
+                    "woredas": ["Debub", "Semen"]
+                }
+            ]
+        },
+        {
+            "name": "Afar",
+            "zones": [
+                {
+                    "name": "Zone 1",
+                    "woredas": [
+                        "Dubti",
+                        "Elidar",
+                        "Asayita",
+                        "Afambo",
+                        "Mile",
+                        "Chifra",
+                        "Kori"
+                    ]
+                },
+                {
+                    "name": "Zone 2",
+                    "woredas": [
+                        "Erebti",
+                        "Kunoba",
+                        "Abala",
+                        "Megale",
+                        "Berahile",
+                        "Dalol",
+                        "Afdera"
+                    ]
+                },
+                {
+                    "name": "Zone 3",
+                    "woredas": [
+                        "Amibara",
+                        "Awash Fentale",
+                        "Gewane",
+                        "Dulacha",
+                        "Bure Mudayitu",
+                        "Argoba Liyu"
+                    ]
+                },
+                {
+                    "name": "Zone 4",
+                    "woredas": ["Awra", "Ewa", "Teru", "Yalo", "Golina"]
+                },
+                {
+                    "name": "Zone 5",
+                    "woredas": ["Telalak", "Sumu Robi", "Dawe", "Dalifage", "Hadele Ele"]
+                }
+            ]
+        },
+        {
+            "name": "Amhara",
+            "zones": [
+                {
+                    "name": "North Gondar",
+                    "woredas": [
+                        "Adi Arkay",
+                        "Beyeda",
+                        "Janamora",
+                        "Debark",
+                        "Dabat",
+                        "Merab Armachoho",
+                        "Tegede",
+                        "Lay Armachoho",
+                        "Wegera",
+                        "Gondar Zuria",
+                        "Dembia",
+                        "Chilga",
+                        "Metema",
+                        "Quara",
+                        "Alefa",
+                        "Merab Belsa",
+                        "Misrak Belesa",
+                        "Gonder /Town/",
+                        "Tselemet",
+                        "Tach Armachoho",
+                        "Takusa"
+                    ]
+                },
+                {
+                    "name": "South Gondar",
+                    "woredas": [
+                        "Ebinat",
+                        "Libokemkem",
+                        "Fogera",
+                        "Farta",
+                        "Lay Gayint",
+                        "Tach Gayint",
+                        "Simada",
+                        "Misrak Este",
+                        "Dera",
+                        "Debre Tabor /Town/",
+                        "Merab Este"
+                    ]
+                },
+                {
+                    "name": "North Wello",
+                    "woredas": [
+                        "Bugna",
+                        "Kobo",
+                        "Gidan",
+                        "Meket",
+                        "Wadla",
+                        "Delanta",
+                        "Gubalafto",
+                        "Habru",
+                        "Woldiya /Town/",
+                        "Lasta",
+                        "Dawunt"
+                    ]
+                },
+                {
+                    "name": "South Wello",
+                    "woredas": [
+                        "Mekdela",
+                        "Tenta",
+                        "Kutaber",
+                        "Ambasel",
+                        "Tehuledere",
+                        "Werebabu",
+                        "Kalu",
+                        "Albuko",
+                        "Dessie Zuria",
+                        "Legambo",
+                        "Sayint",
+                        "Debresina",
+                        "Kelela",
+                        "Jama",
+                        "Were Ilu",
+                        "Wegidi",
+                        "Kombolcha /Town/",
+                        "Dessie /Town/",
+                        "Mehal Saynt",
+                        "Legahida"
+                    ]
+                },
+                {
+                    "name": "North Shewa",
+                    "woredas": [
+                        "Mida Woremo",
+                        "Merhabete",
+                        "Ensaro",
+                        "Moretna Jiru",
+                        "Menz Gera Midir",
+                        "Gishe",
+                        "Antsokiya Gemza",
+                        "Efrata Gidim",
+                        "Menz Mama Midir",
+                        "Tarma Ber",
+                        "Mojana Waderea",
+                        "Kewet",
+                        "Angolala Tera",
+                        "Asagirt",
+                        "Ankober",
+                        "Hagere Mariam Kesem",
+                        "Berehet",
+                        "Minjar Shenkora",
+                        "Basona Werana",
+                        "Debre Berhan /Town/",
+                        "Menz Keya Gebreal",
+                        "Menz Lalo Midir",
+                        "Saya Debirna Wayu"
+                    ]
+                },
+                {
+                    "name": "East Gojjam",
+                    "woredas": [
+                        "Bibugn",
+                        "Hulet Ej Enese",
+                        "Goncha Siso Enese",
+                        "Enebse Sar Midir",
+                        "Enarj Enawga",
+                        "Enemay",
+                        "Debay Tilatgen",
+                        "Debre Elias",
+                        "Machakel",
+                        "Gozamin",
+                        "Baso Liben",
+                        "Awabel",
+                        "Dejen",
+                        "Shebel Berenta",
+                        "Debre Markos /Town/",
+                        "Sinan",
+                        "Aneded"
+                    ]
+                },
+                {
+                    "name": "West Gojjam",
+                    "woredas": [
+                        "Semen Achefer",
+                        "Bahri Dar Zuria",
+                        "Yilma Na Densa",
+                        "Mecha",
+                        "Sekela",
+                        "Quarit",
+                        "Dega Damot",
+                        "Dembecha",
+                        "Jabi Tehnan",
+                        "Bure",
+                        "Wonberma",
+                        "Goncha",
+                        "Debub Achefer",
+                        "Finote Selam /Town/"
+                    ]
+                },
+                {
+                    "name": "Waghemira",
+                    "woredas": [
+                        "Ziquala",
+                        "Sekota",
+                        "Dehena",
+                        "Gazgibla",
+                        "Abergele",
+                        "Sehala",
+                        "Sekota /Town/"
+                    ]
+                },
+                {
+                    "name": "Awi",
+                    "woredas": [
+                        "Dangila",
+                        "Banja Shekudad",
+                        "Ankasha Guagusa",
+                        "Guangua",
+                        "Fagita Lekoma",
+                        "Jawi",
+                        "Guagusa Shikudad"
+                    ]
+                },
+                {
+                    "name": "Oromia",
+                    "woredas": [
+                        "Dawa Chefa",
+                        "Bati",
+                        "Jile Timuga",
+                        "Artuma Fursi",
+                        "Dawe Harewa",
+                        "Kemisie /Town/"
+                    ]
+                },
+                {
+                    "name": "Bahir Dar",
+                    "woredas": ["Bahir Dar"]
+                },
+                {
+                    "name": "Argoba Special",
+                    "woredas": ["Argoba Special", "Argoba Special"]
+                }
+            ]
+        },
+        {
+            "name": "Oromia",
+            "zones": [
+                {
+                    "name": "Arsi",
+                    "woredas": [
+                        "Asasa",
+                        "Dodola",
+                        "Bale Goba",
+                        "Hetosa",
+                        "Robe",
+                        "Chole",
+                        "Amigna"
+                    ]
+                },
+                {
+                    "name": "Bale",
+                    "woredas": [
+                        "Agarfa",
+                        "Dinsho",
+                        "Gasera",
+                        "Goba",
+                        "Legabatu",
+                        "Sinana",
+                        "Sawena"
+                    ]
+                },
+                {
+                    "name": "Borena",
+                    "woredas": [
+                        "Arero",
+                        "Dire",
+                        "Yabelo",
+                        "Teltele",
+                        "Moyale",
+                        "Dilo",
+                        "Meda Welabu"
+                    ]
+                },
+                {
+                    "name": "East Hararge",
+                    "woredas": [
+                        "Babille",
+                        "Deder",
+                        "Gursum",
+                        "Haramaya",
+                        "Meta",
+                        "Jarso",
+                        "Gola Oda"
+                    ]
+                },
+                {
+                    "name": "East Shewa",
+                    "woredas": [
+                        "Adama",
+                        "Batu",
+                        "Bishoftu",
+                        "Liben Chukala",
+                        "Lume",
+                        "Dugda",
+                        "Boosat"
+                    ]
+                },
+                {
+                    "name": "Guji",
+                    "woredas": [
+                        "Aba Bora",
+                        "Bore",
+                        "Hambela",
+                        "Gumi Eldalo",
+                        "Liben",
+                        "Odo Shakiso",
+                        "Uraga"
+                    ]
+                },
+                {
+                    "name": "Horo Gudru Welega",
+                    "woredas": [
+                        "Abay Chomen",
+                        "Amuru",
+                        "Horo",
+                        "Jardega Jarte",
+                        "Kuyu",
+                        "Shambu",
+                        "Jirru"
+                    ]
+                },
+                {
+                    "name": "Illubabor",
+                    "woredas": [
+                        "Alge",
+                        "Bure",
+                        "Darimu",
+                        "Metu",
+                        "Becho",
+                        "Mao-Komo",
+                        "Dega"
+                    ]
+                },
+                {
+                    "name": "Jimma",
+                    "woredas": [
+                        "Agaro",
+                        "Gera",
+                        "Gomma",
+                        "Limu Kosa",
+                        "Mana",
+                        "Omo Nada",
+                        "Seka Chekorsa"
+                    ]
+                },
+                {
+                    "name": "Kelem Welega",
+                    "woredas": [
+                        "Dale Sadi",
+                        "Dembi Dolo",
+                        "Gidami",
+                        "Hawa Galan",
+                        "Sadi Chanka",
+                        "Sayyo",
+                        "Yubdo"
+                    ]
+                },
+                {
+                    "name": "North Shewa",
+                    "woredas": [
+                        "Degem",
+                        "Fiche",
+                        "Girar Jarso",
+                        "Hidhabu Abote",
+                        "Kuyu",
+                        "Wara Jarso",
+                        "Yaya Gulele"
+                    ]
+                },
+                {
+                    "name": "South West Shewa",
+                    "woredas": [
+                        "Becho",
+                        "Tulu Bolo",
+                        "Dawo",
+                        "Illu",
+                        "Kersa Malima",
+                        "Sodo Dachi",
+                        "Waliso"
+                    ]
+                },
+                {
+                    "name": "West Hararge",
+                    "woredas": [
+                        "Anchar",
+                        "Boke",
+                        "Chiro",
+                        "Doba",
+                        "Guba Koricha",
+                        "Hawi Gudina",
+                        "Habro"
+                    ]
+                },
+                {
+                    "name": "West Shewa",
+                    "woredas": [
+                        "Ginde Beret",
+                        "Jeldu",
+                        "Ambo Zuria",
+                        "Midakegn",
+                        "Cheliya",
+                        "Bako Tibe",
+                        "Toke Kutaye"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "South West",
+            "zones": [
+                {
+                    "name": "South Omo",
+                    "woredas": [
+                        "Selamago",
+                        "Debub Ari",
+                        "Semen Ari",
+                        "Hamer",
+                        "Bena Tsemay",
+                        "Dasenech",
+                        "Male",
+                        "Nyangatom"
+                    ]
+                },
+                {
+                    "name": "Sheka",
+                    "woredas": ["Masha", "Anderacha", "Yeki"]
+                },
+                {
+                    "name": "Keffa",
+                    "woredas": [
+                        "Sayilem",
+                        "Gesha Deka",
+                        "Gewata",
+                        "Gimbo",
+                        "Menjiwo",
+                        "Telo",
+                        "Cheta",
+                        "Decha",
+                        "Chena",
+                        "Bita",
+                        "Bonga /Town/"
+                    ]
+                },
+                {
+                    "name": "Bench Maji",
+                    "woredas": [
+                        "Sheko",
+                        "Guraferda",
+                        "Debub Bench",
+                        "Shay Bench",
+                        "Meinit Goldeya",
+                        "Meinit Shasha",
+                        "Maji",
+                        "Bero",
+                        "Surma",
+                        "Semen Bench",
+                        "Mizan Aman /Town/"
+                    ]
+                },
+                {
+                    "name": "Dawro",
+                    "woredas": ["Tocha", "Mareka", "Loma", "Genabosa", "Isara"]
+                },
+                {
+                    "name": "Konta Special",
+                    "woredas": ["Konta"]
+                }
+            ]
+        },
+        {
+            "name": "Sidama",
+            "zones": [
+                {
+                    "name": "Hawassa City",
+                    "woredas": ["Hawassa City Administration"]
+                },
+                {
+                    "name": "Other Weredas",
+                    "woredas": [
+                        "Shebedino",
+                        "Hawassa Zuria",
+                        "Arbegona",
+                        "Dale",
+                        "Aleta Wendo",
+                        "Dara",
+                        "Hula",
+                        "Bensa",
+                        "Aroresa",
+                        "Boricha",
+                        "Gorche",
+                        "Malga",
+                        "Wensho",
+                        "Loko Abeya",
+                        "Chere",
+                        "Bursa",
+                        "Cheko",
+                        "Bona Zuria",
+                        "Wendo Genet"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Gambella",
+            "zones": [
+                {
+                    "name": "Agnewak",
+                    "woredas": [
+                        "Gambella Zuria",
+                        "Abobo",
+                        "Gog",
+                        "Jor",
+                        "Dima",
+                        "Gambella Town"
+                    ]
+                },
+                {
+                    "name": "Nuwer",
+                    "woredas": ["Lare", "Jikawo", "Wantawa", "Akobo"]
+                },
+                {
+                    "name": "Mezhenger",
+                    "woredas": ["Godare", "Mengesh"]
+                },
+                {
+                    "name": "Etang Special Zone",
+                    "woredas": ["Etang"]
+                }
+            ]
+        },
+        {
+            "name": "Harari",
+            "woredas": [
+                "Amir-Nur",
+                "Abadir",
+                "Shenkor",
+                "Jin'Eala",
+                "Aboker",
+                "Hakim",
+                "Sofi",
+                "Erer",
+                "Dire-Teyara"
+            ]
+        },
+        {
+            "name": "Addis Ababa",
+            "zones": [
+                {
+                    "name": "Sub Cities",
+                    "woredas": [
+                        "Akaki Kaliti",
+                        "Nefas Silk-Lafto",
+                        "Kolfe Keraniyo",
+                        "Gulele",
+                        "Lideta",
+                        "Kirkos",
+                        "Arada",
+                        "Addis Ketema",
+                        "Yeka",
+                        "Bole"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Dire Dawa",
+            "woredas": ["Dire Dawa City", "Gurgura"]
+        },
+        {
+            "name": "Central Ethiopia",
+            "zones": [
+                {
+                    "name": "East Gurage",
+                    "woredas": [
+                        "Buee",
+                        "Butajira",
+                        "East Meskane",
+                        "Enseno",
+                        "Meskane",
+                        "North Soddo",
+                        "South Soddo"
+                    ]
+                },
+                {
+                    "name": "Gurage",
+                    "woredas": [
+                        "Abeshge",
+                        "Agena",
+                        "Arekit",
+                        "Cheha",
+                        "Emdibir",
+                        "Endegagn",
+                        "Enemorina Eaner",
+                        "Ezha",
+                        "Geta",
+                        "Gumer",
+                        "Gunchire",
+                        "Kokir Gedebano",
+                        "Muhor Na Aklil",
+                        "Wolkite"
+                    ]
+                },
+                {
+                    "name": "Hadiya",
+                    "woredas": [
+                        "Ameka",
+                        "Ana Lemo",
+                        "Bonosha",
+                        "Duna",
+                        "Fonko",
+                        "Gibe",
+                        "Gimbichu",
+                        "Gomibora",
+                        "Homecho",
+                        "Hosaena",
+                        "Jajura",
+                        "Lemo",
+                        "Mirab Badawacho",
+                        "Mirab Soro",
+                        "Misha",
+                        "Misraq Badawacho",
+                        "Shashogo",
+                        "Shone",
+                        "Siraro Badawacho",
+                        "Soro"
+                    ]
+                },
+                {
+                    "name": "Halaba",
+                    "woredas": ["Atoti Ullo", "Kulito", "Wera", "Wera Jido"]
+                },
+                {
+                    "name": "Kembata",
+                    "woredas": [
+                        "Adilo Zuria",
+                        "Angacha",
+                        "Angacha",
+                        "Damboya",
+                        "Damboya",
+                        "Doyogena",
+                        "Doyogena",
+                        "Durame",
+                        "Hadero Tunto Zuria",
+                        "Hadero",
+                        "Kacha Bira",
+                        "Kedida Gamela",
+                        "Shinshicho"
+                    ]
+                },
+                {
+                    "name": "Siltʼe",
+                    "woredas": [
+                        "Alam Gebeya",
+                        "Alicho Werero",
+                        "Dalocha",
+                        "Dalocha",
+                        "Kibet",
+                        "Lanfro",
+                        "Mirab Azernet Berbere",
+                        "Misraq Azernet Berbere",
+                        "Misraq Silti",
+                        "Mito",
+                        "Sankurra",
+                        "Silti",
+                        "Torra",
+                        "Worabe",
+                        "Wulbareg"
+                    ]
+                },
+                {
+                    "name": "Yem",
+                    "woredas": ["Deri Saja Zuria", "Fofa", "Saja", "Toba"]
+                },
+                {
+                    "name": "Kebena Special",
+                    "woredas": ["Wosherbe"]
+                },
+                {
+                    "name": "Mareko Special",
+                    "woredas": ["Koshe"]
+                },
+                {
+                    "name": "Tembaro Special",
+                    "woredas": ["Mudula"]
+                }
+            ]
+        },
+        {
+            "name": "Somali",
+            "zones": [
+                {
+                    "name": "Afder",
+                    "woredas": [
+                        "Afder",
+                        "Bare",
+                        "Chereti",
+                        "Dolobay",
+                        "Elekere",
+                        "GodGod",
+                        "Hargelle",
+                        "Iligdheere",
+                        "Mirab Imi",
+                        "Raaso",
+                        "Qooxle"
+                    ]
+                },
+                {
+                    "name": "Dhawa",
+                    "woredas": ["Hudet", "Moyale", "Mubaarak", "Qadhaadhumo"]
+                },
+                {
+                    "name": "Dollo",
+                    "woredas": [
+                        "Boh",
+                        "Danot",
+                        "Daratole",
+                        "Gal-Hamur",
+                        "Geladin",
+                        "Lehel-Yucub",
+                        "Warder"
+                    ]
+                },
+                {
+                    "name": "Erer",
+                    "woredas": [
+                        "Fiq",
+                        "Lagahida",
+                        "Mayaa-muluqo",
+                        "Qubi",
+                        "Salahad",
+                        "Waangaay",
+                        "Xamaro",
+                        "Yaxoob"
+                    ]
+                },
+                {
+                    "name": "Fafan",
+                    "woredas": [
+                        "Awbare",
+                        "Babille",
+                        "Goljano",
+                        "Gursum",
+                        "Harawo",
+                        "Haroorayso",
+                        "Harshin",
+                        "Jijiga",
+                        "Kebri Beyah",
+                        "Qooraan/Mulla",
+                        "Shabeeley",
+                        "Tuli Guled"
+                    ]
+                },
+                {
+                    "name": "Jarar",
+                    "woredas": [
+                        "Araarso",
+                        "Awaare",
+                        "Bilcil buur",
+                        "Bir-qod",
+                        "Daroor",
+                        "Degehabur",
+                        "Dhagaxmadow",
+                        "Dig",
+                        "Gunagado",
+                        "Misraq Gashamo",
+                        "Yoocaale"
+                    ]
+                },
+                {
+                    "name": "Korahe",
+                    "woredas": [
+                        "Boodaley",
+                        "Ceel-Ogadeen",
+                        "Debeweyin",
+                        "Higloley",
+                        "Kudunbuur",
+                        "Laas-dhankayre",
+                        "Marsin",
+                        "Shekosh",
+                        "Shilavo"
+                    ]
+                },
+                {
+                    "name": "Liben",
+                    "woredas": [
+                        "Bokolmayo",
+                        "Deka Softi",
+                        "Dolo Odo",
+                        "Filtu",
+                        "Goro Bekeksa",
+                        "Guradamole",
+                        "Kersa Dula"
+                    ]
+                },
+                {
+                    "name": "Nogob",
+                    "woredas": [
+                        "Ayun",
+                        "Dihun",
+                        "Elweyne",
+                        "Gerbo",
+                        "Hararey/Xaraarey",
+                        "Hora-shagax",
+                        "Segeg"
+                    ]
+                },
+                {
+                    "name": "Shabelle",
+                    "woredas": [
+                        "Abaaqoorow",
+                        "Adadle",
+                        "Beercaano",
+                        "Danan",
+                        "Elele",
+                        "Ferfer",
+                        "Imiberi",
+                        "Kelafo",
+                        "Mustahil"
+                    ]
+                },
+                {
+                    "name": "Sitti",
+                    "woredas": [
+                        "Adigala",
+                        "Afdem",
+                        "Ayesha",
+                        "Bike",
+                        "Dambel",
+                        "Erer",
+                        "Gablalu",
+                        "Mieso",
+                        "Shinile"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Southern Ethiopia",
+            "zones": [
+                {
+                    "name": "Ale",
+                    "woredas": ["Kolango", "Kolango Zuria"]
+                },
+                {
+                    "name": "Kore",
+                    "woredas": ["Gorka", "Kelle", "Sarmale"]
+                },
+                {
+                    "name": "Ari",
+                    "woredas": [
+                        "Bako Dawla Ari",
+                        "Debub Ari",
+                        "Gelila",
+                        "Jinka",
+                        "Semen Ari",
+                        "Woba Ari"
+                    ]
+                },
+                {
+                    "name": "Basketo",
+                    "woredas": ["Laska", "Laska Zuria"]
+                },
+                {
+                    "name": "Burji",
+                    "woredas": ["Soyama", "Soyama Zuria"]
+                },
+                {
+                    "name": "Gardula",
+                    "woredas": ["Gidole", "Dirashe Woreda"]
+                },
+                {
+                    "name": "Gamo",
+                    "woredas": [
+                        "Arba Minch",
+                        "Arba Minch Zuria",
+                        "Bonke",
+                        "Boreda",
+                        "Chencha",
+                        "Deramalo",
+                        "Dita",
+                        "Garda Marta",
+                        "Geressie Zuria",
+                        "Gacho Baba",
+                        "Kamba Zuria",
+                        "Kucha",
+                        "Kucha Alfa",
+                        "Mirab Abaya",
+                        "Qogota",
+                        "Selamber"
+                    ]
+                },
+                {
+                    "name": "Gedeo",
+                    "woredas": [
+                        "Bule",
+                        "Dilla",
+                        "Dila Zuria",
+                        "Gedeb",
+                        "Kochere",
+                        "Wenago",
+                        "Yirgachefe"
+                    ]
+                },
+                {
+                    "name": "Gofa",
+                    "woredas": [
+                        "Bulki",
+                        "Demba Gofa",
+                        "Gada",
+                        "Geze Gofa",
+                        "Melokoza",
+                        "Oyda",
+                        "Sawla",
+                        "Uba Debretsehay",
+                        "Zala"
+                    ]
+                },
+                {
+                    "name": "Konso",
+                    "woredas": ["Karat Zuria", "Kena", "Karati", "Kolme", "Segen Zuria"]
+                },
+                {
+                    "name": "South Omo",
+                    "woredas": [
+                        "Bako Gazer",
+                        "Bena Tsemay",
+                        "Dasenech",
+                        "Dimeka",
+                        "Hamer",
+                        "Kuraz",
+                        "Male",
+                        "Nyangatom",
+                        "Selamago",
+                        "Turmi"
+                    ]
+                },
+                {
+                    "name": "Wolayita",
+                    "woredas": [
+                        "Abala Abaya",
+                        "Bayra Koysha",
+                        "Areka",
+                        "Bale Hawassa",
+                        "Boditi",
+                        "Boloso Bombe",
+                        "Boloso Sore",
+                        "Damot Gale",
+                        "Damot Pulasa",
+                        "Damot Sore",
+                        "Damot Weyde",
+                        "Diguna Fango",
+                        "Gesuba",
+                        "Gununo",
+                        "Hobicha",
+                        "Humbo",
+                        "Kawo Koysha",
+                        "Kindo Didaye",
+                        "Kindo Koysha",
+                        "Offa",
+                        "Wolaita Sodo",
+                        "Tebela",
+                        "Sodo Zuria"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "South West Ethiopia",
+            "zones": [
+                {
+                    "name": "Bench Sheko",
+                    "woredas": [
+                        "Debub Bench",
+                        "Gidi Bench",
+                        "Guraferda",
+                        "Mizan Aman",
+                        "Semien Bench",
+                        "Shay Bench",
+                        "Sheko",
+                        "Siz"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Dawro",
+            "zones": [
+                {
+                    "name": "Dawro",
+                    "woredas": [
+                        "Disa",
+                        "Gena",
+                        "Isara",
+                        "Kechi",
+                        "Loma Bosa",
+                        "Mareka",
+                        "Mari Mansa",
+                        "Tarcha",
+                        "Tarcha Zuria",
+                        "Tocha",
+                        "Zaba Gazo"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Keffa",
+            "zones": [
+                {
+                    "name": "Keffa",
+                    "woredas": [
+                        "Adiyo",
+                        "Awurada",
+                        "Bita",
+                        "Bonga",
+                        "Chena",
+                        "Cheta",
+                        "Decha",
+                        "Deka",
+                        "Gesha",
+                        "Gewata",
+                        "Ginbo",
+                        "Goba",
+                        "Menjiwo",
+                        "Sayilem",
+                        "Telo",
+                        "Shishinda",
+                        "Shisho Ende",
+                        "Wacha"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Konta",
+            "zones": [
+                {
+                    "name": "Konta",
+                    "woredas": ["Ameya", "Ameya Zuria", "Ela Hanchano", "Konta Koysha"]
+                }
+            ]
+        },
+        {
+            "name": "Sheka",
+            "zones": [
+                {
+                    "name": "Sheka",
+                    "woredas": ["Anderacha", "Masha", "Tepi", "Yeki"]
+                }
+            ]
+        },
+        {
+            "name": "West Omo",
+            "zones": [
+                {
+                    "name": "West Omo",
+                    "woredas": [
+                        "Bachuma",
+                        "Jemu",
+                        "Maji",
+                        "Surma",
+                        "Bero",
+                        "Meinit Goldiya",
+                        "Meinit Shasha",
+                        "Gachit",
+                        "Gori Gesha"
+                    ]
+                }
+            ]
+        }
+    ]
+}

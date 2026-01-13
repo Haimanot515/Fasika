@@ -1,0 +1,154 @@
+/* Sidebar container */
+.sidebar {
+  position: absolute;
+  top: 40px; /* below navbar */
+  left: 0;
+  width: 280px;
+  background-color: #f0fdf4; /* light green */
+  border-right: 1px solid #d1fae5;
+  padding: 1rem;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  z-index: 1000; /* less than navbar (1001) but above dashboard */
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+}
+
+/* Sidebar main title */
+.sidebar h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #065f46;
+}
+
+/* Sidebar section wrapper */
+.sidebar-section {
+  margin-bottom: 1rem;
+}
+
+/* Sidebar section toggle button */
+.sidebar-section-header {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-weight: 600;
+  color: #047857;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.sidebar-section-header:hover {
+  color: #065f46;
+}
+
+/* Remove bullet points for lists */
+.sidebar-section ul {
+  list-style: none; /* no bullets */
+  margin-left: 0;
+  margin-top: 0.5rem;
+  padding-left: 0;
+}
+
+.sidebar-section ul li {
+  margin-bottom: 0.25rem;
+}
+
+/* Sidebar links */
+.sidebar-section ul li a {
+  text-decoration: none;
+  color: #065f46;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.sidebar-section ul li a:hover {
+  color: #047857;
+  background-color: #d1fae5;
+}
+/* ────────── Sidebar ────────── */
+.sidebar {
+  position: absolute;
+  top: 0px; /* below navbar */
+  left: 0;
+  width: 280px;
+  background-color: #f0fdf4; /* light green background */
+  border-right: 1px solid #d1fae5; /* light border */
+  padding: 1rem;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  z-index: 1000; /* below navbar (1001) but above dashboard content */
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+  transition: transform 0.3s ease; /* optional smooth slide-in */
+}
+
+/* Sidebar main title */
+.sidebar h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #065f46; /* dark green */
+}
+
+/* Section wrapper */
+.sidebar-section {
+  margin-bottom: 1rem;
+}
+
+/* Section toggle button */
+.sidebar-section-header {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-weight: 600;
+  color: #047857; /* accent green */
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.sidebar-section-header:hover {
+  color: #065f46; /* dark green on hover */
+}
+
+/* Remove bullet points from lists */
+.sidebar-section ul {
+  list-style: none;
+  margin-left: 0;
+  margin-top: 0.5rem;
+  padding-left: 0;
+}
+
+/* List items spacing */
+.sidebar-section ul li {
+  margin-bottom: 0.25rem;
+}
+
+/* Sidebar links */
+.sidebar-section ul li a {
+  text-decoration: none;
+  color: #065f46; /* dark green */
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.sidebar-section ul li a:hover {
+  color: #047857; /* accent green */
+  background-color: #d1fae5; /* light green hover background */
+}
