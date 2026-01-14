@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminFarmerController = require('../controllers/farmers/adminFarmersControllers');
-const authenticate = require('../middleware/AuthMiddleware');
+const authenticate = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware'); 
 
 /**
