@@ -11,7 +11,8 @@ const authRoutes = require('./routes/authentication/authRoutes');
 const adminUserRoutes = require('./routes/admin/adminUserRoutes');
 const adminFarmerRoutes = require('./routes/adminFarmerRoutes'); 
 const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes'); 
-const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes');
+const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); 
+const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); // ✅ Added
 
 // 2️⃣ GLOBAL MIDDLEWARE
 app.use(express.json()); 
@@ -23,23 +24,30 @@ app.use((req, res, next) => {
     next();
 });
 
-// 3️⃣ CORS CONFIGURATION (Updated for Production)
+// 🏠 ROOT HEALTH CHECK (Prevents 404 on base URL)
+app.get('/', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Fasika DROP Registry is Live",
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
+// 3️⃣ CORS CONFIGURATION
 const allowedOrigins = [
     'http://localhost:5173', 
     'http://localhost:3000', 
-    'https://fasika-frontend.onrender.com', // 🚀 Explicit Production URL
-    process.env.CLIENT_URL   
+    process.env.CLIENT_URL,
+    process.env.FRONTEND_URL // Ensure this matches your Render frontend URL
 ].filter(Boolean);
 
 app.use(cors({ 
     origin: function (origin, callback) {
-        // Allow requests with no origin (like Postman or internal server calls)
         if (!origin) return callback(null, true); 
-        
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            console.error(`❌ CORS Blocked for origin: ${origin}`);
+            console.error(`❌ CORS Blocked for: ${origin}`);
             callback(new Error('CORS Policy: Origin not allowed.'));
         }
     },
@@ -60,7 +68,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/farmers', adminFarmerRoutes);
 app.use('/api/farmer/farm', farmerFarmRoutes);
-app.use('/api/farmer/listings', farmerListingRoutes);
+app.use('/api/farmer/listings', farmerListingRoutes); 
+app.use('/api/buyer/marketplace', buyerMarketplaceRoutes); // ✅ Mounted
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
@@ -86,6 +95,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 Registry Base: http://localhost:${PORT}/api`);
-    console.log(`🚜 Land Endpoint: http://localhost:${PORT}/api/farmer/farm/land`);
-    console.log(`🌽 Listings Endpoint: http://localhost:${PORT}/api/farmer/listings`);
+    console.log(`🛒 Marketplace: http://localhost:${PORT}/api/buyer/marketplace`);
 });
