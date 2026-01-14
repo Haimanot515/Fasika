@@ -26,7 +26,7 @@ const VerifyEmail = ({ onVerify }) => {
         const res = await api.post("/auth/verify-user", { token }, { withCredentials: true });
         
         /* Backend Response matches: 
-          { authenticated: true, role: 'FARMER', user_id: 'USR-101' } 
+           { authenticated: true, role: 'FARMER', user_id: 'USR-101' } 
         */
         if (res.data.authenticated) {
           const roles = Array.isArray(res.data.role) ? res.data.role : [res.data.role];
