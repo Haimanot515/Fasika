@@ -47,11 +47,12 @@ const refreshToken = async (req, res) => {
     );
 
     /* 3. SET THE NEW ACCESS COOKIE */
+    /* 3. SET THE NEW ACCESS COOKIE (Updated for Render/Production) */
     res.cookie('auth_token', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
-      maxAge: 86400000 // 24 hours
+      secure: true,        // Always true for HTTPS on Render
+      sameSite: 'None',    // Required for cross-site cookie sharing
+      maxAge: 86400000     // 24 hours
     });
 
     return res.status(200).json({
