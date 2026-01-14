@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-// Changed: using your custom api instance
+// Using your custom api instance
 import api from "../../api/axios"; 
 import { MdOutlineMail, MdErrorOutline, MdCheckCircle, MdChevronLeft } from "react-icons/md";
 import { FiLoader } from "react-icons/fi";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); // This state holds the 'identifier' (email or phone)
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -18,11 +18,11 @@ const ForgotPassword = () => {
     setMessage("");
 
     try {
-      // Updated: Using the api instance with relative path
-      const response = await api.post("/auth/forgot-password", { email });
-      setMessage(response.data.message || "Reset link sent! Check your email.");
+      // The backend uses 'identifier' to detect if it's SMS or Email
+      const response = await api.post("/auth/forgot-password", { identifier: email });
+      setMessage(response.data.message || "Instructions sent! Check your email or phone.");
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to send reset email. Try again.");
+      setError(err.response?.data?.error || "Account not found or network failure.");
     } finally {
       setLoading(false);
     }
@@ -32,28 +32,34 @@ const ForgotPassword = () => {
     <div className="register-page-wrapper">
       <div className="level-up-card">
         <div className="farmer-icon">🔑</div>
-        <h2 className="form-title">Forgot Password</h2>
-        <p className="form-subtitle">Enter your email to receive a reset link</p>
+        <h2 className="form-title">Account Recovery</h2>
+        <p className="form-subtitle">Enter your Email or Phone to receive a reset link</p>
 
-        {message && <div className="alert-box success" style={{ background: '#e8f5e9', color: '#2e7d32', padding: '12px', borderRadius: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '600', border: '1px solid #c8e6c9' }}><MdCheckCircle /> {message}</div>}
+        {message && (
+          <div className="alert-box success" style={{ background: '#e8f5e9', color: '#2e7d32', padding: '12px', borderRadius: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '600', border: '1px solid #c8e6c9' }}>
+            <MdCheckCircle /> {message}
+          </div>
+        )}
+        
         {error && <div className="alert-box error"><MdErrorOutline /> {error}</div>}
 
         {!message && (
           <form onSubmit={handleSubmit}>
             <div className="input-group">
-              <label className="input-label"><MdOutlineMail /> Email Address</label>
+              <label className="input-label"><MdOutlineMail /> Registered Identifier</label>
               <input 
                 className="farmer-input" 
-                type="email" 
-                placeholder="Enter your registered email" 
+                type="text" // Changed to text to allow phone numbers
+                placeholder="Email or Phone Number" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
+                autoComplete="username"
               />
             </div>
 
             <button type="submit" className="login-submit-btn" disabled={loading}>
-              {loading ? <FiLoader className="spinner" /> : "Send Reset Link"}
+              {loading ? <FiLoader className="spinner" /> : "Request Reset"}
             </button>
           </form>
         )}
@@ -80,7 +86,7 @@ const ForgotPassword = () => {
         .form-subtitle { color: #666; font-size: 15px; margin-bottom: 25px; font-weight: 600; }
         .input-group { text-align: left; margin-bottom: 20px; }
         .input-label { font-weight: 700; color: #444; margin-bottom: 8px; font-size: 13px; display: flex; align-items: center; gap: 5px; }
-        .farmer-input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; }
+        .farmer-input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; }
         .login-submit-btn { 
           width: 100%; padding: 16px; background: #fb8c00; color: #fff; border: none; border-radius: 12px; 
           cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px;
