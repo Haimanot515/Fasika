@@ -11,7 +11,7 @@ const authRoutes = require('./routes/authentication/authRoutes');
 const adminUserRoutes = require('./routes/admin/adminUserRoutes');
 const adminFarmerRoutes = require('./routes/adminFarmerRoutes'); 
 const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes'); 
-const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); // ✅ added
+const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes');
 
 // 2️⃣ GLOBAL MIDDLEWARE
 app.use(express.json()); 
@@ -23,19 +23,23 @@ app.use((req, res, next) => {
     next();
 });
 
-// 3️⃣ CORS CONFIGURATION
+// 3️⃣ CORS CONFIGURATION (Updated for Production)
 const allowedOrigins = [
     'http://localhost:5173', 
     'http://localhost:3000', 
+    'https://fasika-frontend.onrender.com', // 🚀 Explicit Production URL
     process.env.CLIENT_URL   
 ].filter(Boolean);
 
 app.use(cors({ 
     origin: function (origin, callback) {
-        if (!origin) return callback(null, true); // Postman, curl, etc.
+        // Allow requests with no origin (like Postman or internal server calls)
+        if (!origin) return callback(null, true); 
+        
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.error(`❌ CORS Blocked for origin: ${origin}`);
             callback(new Error('CORS Policy: Origin not allowed.'));
         }
     },
@@ -56,7 +60,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/farmers', adminFarmerRoutes);
 app.use('/api/farmer/farm', farmerFarmRoutes);
-app.use('/api/farmer/listings', farmerListingRoutes); // ✅ added
+app.use('/api/farmer/listings', farmerListingRoutes);
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
