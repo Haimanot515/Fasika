@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+// Changed: using your custom api instance
+import api from "../../api/axios"; 
 
 const LoginForm = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -21,8 +22,9 @@ const LoginForm = ({ onLogin }) => {
     setSuccess("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login-user",
+      // Updated: Using the api instance with relative path
+      const res = await api.post(
+        "/auth/login-user",
         formData,
         { withCredentials: true }
       );
