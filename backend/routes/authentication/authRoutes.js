@@ -34,6 +34,7 @@ router.post('/verify-user', verifyUser);
 // ♻️ Token Refresh (Must be public because it's called when Access Token expires)
 // Changed to GET to match browser "Silent Refresh" standards
 router.get('/refresh-token', refreshToken);
+router.post('/refresh', refreshToken);
 
 // 🔐 Protected Routes (Require valid Access Token)
 router.post('/reset-password', authenticate, resetPassword);
