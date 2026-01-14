@@ -1,15 +1,24 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+// Changed: using your custom api instance
+import api from "../../api/axios"; 
 import Select from "react-select";
-import api from "../../api/axios"; // ✅ Use your configured axios instance
 
-// Farmer-friendly icons
+// Advanced Farmer-Friendly Icons
 import { 
-  MdOutlinePersonOutline, MdPhoneIphone, MdOutlineMail, MdLocationOn, MdSecurity,
-  MdCheckCircle, MdChevronRight, MdChevronLeft, MdErrorOutline, MdOutlineAssignmentTurnedIn,
+  MdOutlinePersonOutline, 
+  MdPhoneIphone, 
+  MdOutlineMail, 
+  MdLocationOn, 
+  MdSecurity, 
+  MdCheckCircle, 
+  MdChevronRight, 
+  MdChevronLeft,
+  MdErrorOutline,
+  MdOutlineAssignmentTurnedIn,
   MdVerifiedUser
 } from "react-icons/md";
-import { FiLoader, FiUserCheck } from "react-icons/fi";
+import { FiLoader, FiUserCheck, FiShield } from "react-icons/fi";
 import { RiSeedlingLine, RiUserSearchLine } from "react-icons/ri";
 
 import ethiopiaData from "../../data/ethiopia.json";
@@ -19,7 +28,7 @@ const RegisterForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false); 
 
   const [formData, setFormData] = useState({
     full_name: "", phone: "", email: "", password: "", confirmPassword: "",
@@ -79,29 +88,21 @@ const RegisterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Password check
-    if (formData.password !== formData.confirmPassword) {
-      return setError("Passwords do not match.");
-    }
-
-    // Agreement check
+    if (formData.password !== formData.confirmPassword) return setError("Passwords do not match.");
     if (!formData.terms_accepted || !formData.privacy_accepted || !formData.platform_rules_accepted) {
       return setError("Please accept all agreements to create your account.");
     }
 
     setLoading(true);
-    setError("");
-
     try {
       const payload = { ...formData, role: formData.role.toLowerCase() };
-
-      // ✅ Use centralized axios instance with env variable
+      
+      // Updated: Using the api instance with relative path as requested
       await api.post("/auth/register-user", payload);
+      
+      setIsRegistered(true); 
 
-      setIsRegistered(true);
-
-      // 5-second redirect delay
+      // 5-Second Delay
       setTimeout(() => {
         if (formData.preferred_method === "EMAIL") navigate("/login");
         else navigate("/verify-otp", { state: { phone: formData.phone } });
@@ -126,9 +127,8 @@ const RegisterForm = () => {
         
         {!isRegistered ? (
           <>
-            {/* Step Progress */}
             <div className="step-progress-container">
-              {[1,2,3].map(step => (
+              {[1, 2, 3].map(step => (
                 <div key={step} className={`step-dot ${currentStep >= step ? 'active' : ''}`}>
                   {currentStep > step ? <MdCheckCircle /> : step}
                 </div>
@@ -147,7 +147,6 @@ const RegisterForm = () => {
             {error && <div className="alert-box error"><MdErrorOutline /> {error}</div>}
 
             <form onSubmit={handleSubmit}>
-              {/* Step 1 */}
               {currentStep === 1 && (
                 <div className="step-content">
                   <div className="input-group">
@@ -166,7 +165,7 @@ const RegisterForm = () => {
                   <div className="method-selector">
                     <p className="small-label">Preferred Verification:</p>
                     <div className="radio-group">
-                      {["SMS","EMAIL"].map(m => (
+                      {["SMS", "EMAIL"].map((m) => (
                         <label key={m} className={`radio-card ${formData.preferred_method === m ? 'selected' : ''}`}>
                           <input type="radio" name="preferred_method" value={m} checked={formData.preferred_method === m} onChange={handleChange} />
                           {m}
@@ -179,7 +178,6 @@ const RegisterForm = () => {
                 </div>
               )}
 
-              {/* Step 2 */}
               {currentStep === 2 && (
                 <div className="step-content">
                   <div className="input-group">
@@ -197,7 +195,6 @@ const RegisterForm = () => {
                 </div>
               )}
 
-              {/* Step 3 */}
               {currentStep === 3 && (
                 <div className="step-content">
                   <div className="input-group">
@@ -209,7 +206,7 @@ const RegisterForm = () => {
                   <div className="role-selector">
                     <p className="small-label">I am joining as a:</p>
                     <div className="role-grid">
-                      {['farmer','buyer','both'].map(r => (
+                      {['farmer', 'buyer', 'both'].map(r => (
                         <label key={r} className={`role-card ${formData.role === r ? 'active' : ''}`}>
                           <input type="radio" checked={formData.role === r} onChange={() => setFormData(p => ({ ...p, role: r }))} />
                           {r === 'farmer' && <RiSeedlingLine />}
@@ -244,7 +241,7 @@ const RegisterForm = () => {
             <p className="form-subtitle">Welcome to our community.</p>
             
             <button className="login-submit-btn success-state" style={{ background: '#1b4d3e', cursor: 'default' }}>
-              <MdVerifiedUser /> Success! Verification code sent via SMS or Email
+              <MdVerifiedUser /> succs wehave sent you verification code via email orsms
             </button>
             
             <div className="loading-bar-minimal" style={{ marginTop: '30px' }}>
@@ -257,6 +254,76 @@ const RegisterForm = () => {
           Already a member? <Link to="/login">Sign In Here</Link>
         </div>
       </div>
+
+      <style>{`
+        .register-page-wrapper {
+          background-color: #1b4d3e; min-height: 100vh; width: 100vw;
+          display: flex; justify-content: center; align-items: center;
+          font-family: 'Segoe UI', sans-serif; 
+          overflow-x: hidden;
+          padding: 20px; box-sizing: border-box;
+          margin: 0;
+        }
+        .level-up-card {
+          background: #fff; padding: 40px; border-radius: 24px; width: 100%; max-width: 500px;
+          box-shadow: 0 20px 60px rgba(0,0,0,.4); border-top: 8px solid #fb8c00; text-align: center; position: relative;
+          box-sizing: border-box;
+        }
+        .step-progress-container { display: flex; justify-content: space-between; position: relative; margin-bottom: 30px; }
+        .step-dot { 
+          width: 35px; height: 35px; border-radius: 50%; background: #eee; z-index: 2; 
+          display: flex; align-items: center; justify-content: center; font-weight: bold; color: #888; transition: 0.3s;
+        }
+        .step-dot.active { background: #fb8c00; color: #fff; transform: scale(1.1); }
+        .progress-line { position: absolute; top: 17px; left: 0; height: 3px; background: #fb8c00; transition: 0.5s; z-index: 1; }
+        
+        .farmer-icon { font-size: 50px; color: #2e7d32; margin-bottom: 10px; }
+        .form-title { color: #1b4d3e; font-size: 24px; font-weight: 800; margin: 0; }
+        .form-subtitle { color: #666; font-size: 15px; margin-bottom: 25px; font-weight: 600; }
+        
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-label { font-weight: 700; color: #444; margin-bottom: 8px; font-size: 13px; display: flex; align-items: center; gap: 5px; }
+        .farmer-input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; transition: 0.3s; }
+        .farmer-input:focus { border-color: #fb8c00; outline: none; }
+        
+        .alert-box.error { background: #ffebee; color: #c62828; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; border: 1px solid #ffcdd2; }
+        
+        .method-selector, .role-selector { text-align: left; margin-bottom: 20px; }
+        .small-label { font-size: 12px; font-weight: 700; color: #777; margin-bottom: 10px; }
+        
+        .radio-group, .role-grid { display: flex; gap: 10px; }
+        .radio-card, .role-card { 
+          flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 12px; cursor: pointer; 
+          text-align: center; font-weight: 700; transition: 0.2s; font-size: 14px;
+        }
+        .role-card { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 12px; }
+        .radio-card.selected, .role-card.active { border-color: #2e7d32; background: #f1f8e9; color: #2e7d32; }
+        .radio-card input, .role-card input { display: none; }
+
+        .checkbox-section { text-align: left; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 12px; }
+        .check-item { display: flex; align-items: center; gap: 10px; font-size: 13px; margin-bottom: 8px; cursor: pointer; color: #444; }
+        
+        .login-submit-btn { 
+          width: 100%; padding: 16px; background: #fb8c00; color: #fff; border: none; border-radius: 12px; 
+          cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; 
+          box-sizing: border-box;
+        }
+        .login-submit-btn:hover:not(.success-state) { background: #ef6c00; transform: translateY(-2px); }
+        .dual-btns { display: flex; gap: 10px; }
+        .back-btn { padding: 16px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; color: #666; }
+        
+        .form-footer { margin-top: 25px; font-size: 14px; color: #666; }
+        .form-footer a { color: #fb8c00; font-weight: 700; text-decoration: none; }
+
+        .loading-bar-minimal { height: 4px; width: 100%; background: #eee; border-radius: 10px; overflow: hidden; }
+        .loading-fill { height: 100%; background: #fb8c00; animation: fill 5s linear forwards; }
+        @keyframes fill { from { width: 0%; } to { width: 100%; } }
+        
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .step-content { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   );
 };
