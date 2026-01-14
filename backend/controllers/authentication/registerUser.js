@@ -1,11 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 const pool = require('../../config/dbConfig');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-
-const { OTP_EXPIRY_MINUTES } = require('../../config/constants');
-const { sendEmail, sendSMS } = require('../../config/smsConfig');
+const { sendEmail } = require('../../config/smsConfig');
 
 exports.registerUser = async (req, res) => {
   const client = await pool.connect();
@@ -18,6 +15,7 @@ exports.registerUser = async (req, res) => {
       platform_rules_accepted, communication_consent
     } = req.body;
 
+    // Validation
     if (!full_name || !phone || !password || !role || !region || !preferred_method) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -65,7 +63,7 @@ exports.registerUser = async (req, res) => {
 
     const userInternalId = insertUser.rows[0].id;
 
-    // 2️⃣ Generate Token (Including numericId for verifyUser)
+    // 2️⃣ Generate Token
     const verificationToken = jwt.sign(
       { email, numericId: userInternalId }, 
       process.env.JWT_SECRET, 
@@ -79,29 +77,33 @@ exports.registerUser = async (req, res) => {
 
     await client.query('COMMIT');
 
-    // 3️⃣ Send Verification Link
-   /* 7️⃣ Send verification (after commit) */
-try {
-  if (preferred_method === 'EMAIL') {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5175';
-    
-    // We construct the URL here
-    const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+    // 3️⃣ Send Verification Link (after commit)
+    try {
+      // FIX: Normalize to handle 'email', 'Email', or 'EMAIL'
+      const method = preferred_method?.toUpperCase();
 
-    // We pass the URL as the HTML content
-    // Note: No "Code:" text exists here. 
-    await sendEmail(
-      email, 
-      'Verify Your Account', 
-      `<p>Click to verify: <a href="${verificationLink}">${verificationLink}</a></p>`
-    );
-    
-    console.log(`✅ Success! Sent link: ${verificationLink}`);
-  }
-} catch (e) {
-  console.log('📧 Email Error:', e.message);
-}
-    // 4️⃣ SUCCESS RESPONSE (Fixed from 500 to 201)
+      if (method === 'EMAIL') {
+        if (!email) {
+            console.error('❌ Email sending skipped: email address is null');
+        } else {
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5175';
+            const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+            await sendEmail(
+              email, 
+              'Verify Your Account', 
+              `<p>Click to verify: <a href="${verificationLink}">${verificationLink}</a></p>`
+            );
+            
+            console.log(`✅ Success! Sent link to ${email}: ${verificationLink}`);
+        }
+      }
+    } catch (e) {
+      // FIX: Log the full error so we can see Resend's API response
+      console.error('📧 Email Error Details:', e);
+    }
+
+    // 4️⃣ SUCCESS RESPONSE
     return res.status(201).json({
       message: 'Success',
       user_id: insertUser.rows[0].user_id
