@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-// Changed: using your custom api instance
+// Using your custom api instance
 import api from "../../api/axios"; 
 import Select from "react-select";
 
@@ -33,7 +33,8 @@ const RegisterForm = () => {
   const [formData, setFormData] = useState({
     full_name: "", phone: "", email: "", password: "", confirmPassword: "",
     role: "farmer", region: "", zone: "", woreda: "", kebele: "",
-    preferred_method: "SMS", terms_accepted: false, privacy_accepted: false,
+    preferred_method: "EMAIL", // FIXED: Changed from "SMS" to "EMAIL" to match your Resend flow
+    terms_accepted: false, privacy_accepted: false,
     platform_rules_accepted: false, communication_consent: true,
   });
 
@@ -97,7 +98,6 @@ const RegisterForm = () => {
     try {
       const payload = { ...formData, role: formData.role.toLowerCase() };
       
-      // Updated: Using the api instance with relative path as requested
       await api.post("/auth/register-user", payload);
       
       setIsRegistered(true); 
@@ -239,11 +239,11 @@ const RegisterForm = () => {
             <div className="farmer-icon" style={{ color: '#2e7d32' }}><MdCheckCircle /></div>
             <h2 className="form-title">Registration Successful!</h2>
             <p className="form-subtitle">Welcome to our community.</p>
-            
+            <br />
             <button className="login-submit-btn success-state" style={{ background: '#1b4d3e', cursor: 'default' }}>
               <MdVerifiedUser /> succs wehave sent you verification code via email orsms
             </button>
-            
+            <br />
             <div className="loading-bar-minimal" style={{ marginTop: '30px' }}>
               <div className="loading-fill"></div>
             </div>
