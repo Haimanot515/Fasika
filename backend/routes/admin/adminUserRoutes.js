@@ -3,7 +3,7 @@ const router = express.Router();
 const adminController = require('../../controllers/admin/adminUserController');
 
 // Middleware imports
-const authenticate = require('../../middleware/AuthMiddleware');
+const authenticate = require('../../middleware/authMiddleware');
 const adminMiddleware = require('../../middleware/adminMiddleware');
 
 /**
