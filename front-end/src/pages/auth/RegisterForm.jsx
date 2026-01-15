@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 // Using your custom api instance
 import api from "../../api/axios"; 
 import Select from "react-select";
+import ReCAPTCHA from "react-google-recaptcha"; // Added Captcha Import
 
 // Advanced Farmer-Friendly Icons
 import { 
@@ -29,11 +30,12 @@ const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isRegistered, setIsRegistered] = useState(false); 
+  const [captchaToken, setCaptchaToken] = useState(null); // Added Captcha State
 
   const [formData, setFormData] = useState({
     full_name: "", phone: "", email: "", password: "", confirmPassword: "",
     role: "farmer", region: "", zone: "", woreda: "", kebele: "",
-    preferred_method: "EMAIL", // FIXED: Changed from "SMS" to "EMAIL" to match your Resend flow
+    preferred_method: "EMAIL", 
     terms_accepted: false, privacy_accepted: false,
     platform_rules_accepted: false, communication_consent: true,
   });
@@ -74,6 +76,10 @@ const RegisterForm = () => {
     setFormData((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
   };
 
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
   const handleRegionChange = (opt) => {
     const region = ethiopiaData.regions.find((r) => r.name === opt.value);
     setFormData((p) => ({ ...p, region: opt.value, zone: "", woreda: "" }));
@@ -93,16 +99,23 @@ const RegisterForm = () => {
     if (!formData.terms_accepted || !formData.privacy_accepted || !formData.platform_rules_accepted) {
       return setError("Please accept all agreements to create your account.");
     }
+    if (!captchaToken) {
+      return setError("Please complete the security check.");
+    }
 
     setLoading(true);
     try {
-      const payload = { ...formData, role: formData.role.toLowerCase() };
+      // Added captchaToken to the payload
+      const payload = { 
+        ...formData, 
+        role: formData.role.toLowerCase(),
+        captchaToken 
+      };
       
       await api.post("/auth/register-user", payload);
       
       setIsRegistered(true); 
 
-      // 5-Second Delay
       setTimeout(() => {
         if (formData.preferred_method === "EMAIL") navigate("/login");
         else navigate("/verify-otp", { state: { phone: formData.phone } });
@@ -111,6 +124,7 @@ const RegisterForm = () => {
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed. Try again.");
       setLoading(false);
+      setCaptchaToken(null); // Reset captcha on error
     }
   };
 
@@ -224,9 +238,17 @@ const RegisterForm = () => {
                     <label className="check-item"><input type="checkbox" name="platform_rules_accepted" onChange={handleChange} /> Accept Community Rules</label>
                   </div>
 
+                  {/* Added Captcha Display */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                    <ReCAPTCHA
+                      sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                      onChange={handleCaptchaChange}
+                    />
+                  </div>
+
                   <div className="dual-btns">
                     <button type="button" onClick={() => setCurrentStep(2)} className="back-btn"><MdChevronLeft /> Back</button>
-                    <button type="submit" className="login-submit-btn" disabled={loading}>
+                    <button type="submit" className="login-submit-btn" disabled={loading || !captchaToken}>
                       {loading ? <FiLoader className="spinner" /> : <><FiUserCheck /> Complete Registration</>}
                     </button>
                   </div>
@@ -239,11 +261,11 @@ const RegisterForm = () => {
             <div className="farmer-icon" style={{ color: '#2e7d32' }}><MdCheckCircle /></div>
             <h2 className="form-title">Registration Successful!</h2>
             <p className="form-subtitle">Welcome to our community.</p>
-            <br /><br />
+            <br /><br /><br />
             <button className="login-submit-btn success-state" style={{ background: '#1b4d3e', cursor: 'default' }}>
               <MdVerifiedUser /> succs wehave sent you verification code via email orsms
             </button>
-            <br /><br />
+            <br /><br /><br />
             <div className="loading-bar-minimal" style={{ marginTop: '30px' }}>
               <div className="loading-fill"></div>
             </div>
