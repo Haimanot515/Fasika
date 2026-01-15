@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import api from "../../api/axios"; // Points to https://fasika-yg5m.onrender.com/api
 import { useNavigate } from "react-router-dom";
 import { 
   FaPlus, FaStar, FaShieldAlt, FaSearch, FaCaretDown, 
@@ -30,10 +30,15 @@ const ViewFarmerListing = () => {
 
   const fetchMyListings = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/farmer/listings/my-listings", { withCredentials: true });
+      // Using your api instance for secure cookie handshake with Render
+      const { data } = await api.get("/farmer/listings/my-listings");
       setListings(data.data || []);
       setFilteredListings(data.data || []);
-    } catch (err) { console.error(err); } finally { setLoading(false); }
+    } catch (err) { 
+      console.error("Fetch Error:", err); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   useEffect(() => {
@@ -50,7 +55,7 @@ const ViewFarmerListing = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this listing?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/farmer/listings/${id}`, { withCredentials: true });
+        await api.delete(`/farmer/listings/${id}`);
         setListings(prev => prev.filter(item => item.id !== id));
         alert("Listing removed successfully.");
       } catch (err) { console.error(err); }
@@ -61,15 +66,15 @@ const ViewFarmerListing = () => {
   const handlePauseToggle = async (item) => {
     const action = item.status === "PAUSED" ? "resume" : "pause";
     try {
-      await axios.patch(`http://localhost:5000/api/farmer/listings/${item.id}/${action}`, {}, { withCredentials: true });
+      await api.patch(`/farmer/listings/${item.id}/${action}`);
       
       setListings(prev => prev.map(i => 
         i.id === item.id ? { ...i, status: item.status === "PAUSED" ? "ACTIVE" : "PAUSED" } : i
       ));
       setShowMenuId(null);
     } catch (err) {
-      console.error("Pause Error:", err);
-      alert("Failed to update status");
+      console.error("Status Update Error:", err);
+      alert("Failed to update status on Render node.");
     }
   };
 
@@ -77,7 +82,7 @@ const ViewFarmerListing = () => {
   const handleArchive = async (id) => {
     if (window.confirm("Move this listing to archives? It will be hidden from your active list.")) {
       try {
-        await axios.patch(`http://localhost:5000/api/farmer/listings/${id}/archive`, {}, { withCredentials: true });
+        await api.patch(`/farmer/listings/${id}/archive`);
         setListings(prev => prev.filter(item => item.id !== id));
         setShowMenuId(null);
       } catch (err) {
@@ -86,7 +91,7 @@ const ViewFarmerListing = () => {
     }
   };
 
-  if (loading) return <div style={premiumStyles.loader}>🌾 Loading your marketplace...</div>;
+  if (loading) return <div style={premiumStyles.loader}>🌾 Accessing Secure Registry...</div>;
 
   return (
     <div style={premiumStyles.pageWrapper} onClick={() => setShowMenuId(null)}>
@@ -148,7 +153,6 @@ const ViewFarmerListing = () => {
                     <FaEdit color="#007185"/> Edit
                   </div>
                   
-                  {/* Dynamic Pause/Resume Button */}
                   <div className="menu-item" onClick={() => handlePauseToggle(item)}>
                     {item.status === "PAUSED" ? (
                       <><FaPlay color="green"/> Resume</>
