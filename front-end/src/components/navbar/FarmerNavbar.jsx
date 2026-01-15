@@ -62,8 +62,7 @@ const FarmerNavbar = ({ toggle }) => {
     transition: "all 0.3s ease",
     display: "flex",
     alignItems: "center",
-    gap: "8px",
-    whiteSpace: "nowrap" // Prevents text from wrapping
+    gap: "8px"
   });
 
   const linkStyle = {
@@ -72,8 +71,7 @@ const FarmerNavbar = ({ toggle }) => {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    fontWeight: "500",
-    whiteSpace: "nowrap" // Prevents text from wrapping
+    fontWeight: "500"
   };
 
   useEffect(() => {
@@ -96,12 +94,11 @@ const FarmerNavbar = ({ toggle }) => {
         zIndex: 9999,
         display: "flex", 
         alignItems: "center", 
-        padding: "0 20px",
+        padding: "0 30px",
         height: "78px", 
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
         boxSizing: "border-box",
-        width: "100%",
-        overflow: "hidden" // Prevents horizontal scroll within the nav
+        maxWidth: "100vw"
       }}>
         
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
@@ -113,7 +110,7 @@ const FarmerNavbar = ({ toggle }) => {
 
         <div className="nav-links" style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", flex: 1, minWidth: 0 }}>
           
-          <div style={{ display: "flex", gap: "15px", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "25px" }}>
             <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={24}/></Link>
             <button style={getBtnStyle(showMyFarm)} onClick={handleMyFarmClick}>
               My Farm <MdDashboard size={24}/>
@@ -121,12 +118,12 @@ const FarmerNavbar = ({ toggle }) => {
             <Link to="/advisory" style={linkStyle}>Advisory <MdAgriculture size={24}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "15px", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "25px" }}>
             <Link to="/notifications" style={linkStyle}>Notifications <MdOutlineNotificationsActive size={24}/></Link>
             <Link to="/support" style={linkStyle}>Support <MdHelpOutline size={24}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "15px", alignItems: "center", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "25px", alignItems: "center" }}>
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={24}/>
             </button>
