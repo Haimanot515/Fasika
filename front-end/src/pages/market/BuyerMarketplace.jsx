@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios"; // Updated to use your standardized api instance
 import { 
   FaSearch, FaCommentDots, FaShieldAlt, FaMapMarkerAlt, 
   FaStar 
@@ -13,7 +13,8 @@ const BuyerMarketplace = () => {
   useEffect(() => {
     const fetchMarketplace = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/buyer/marketplace/public");
+        // Using your api instance for secure handshake with Render
+        const { data } = await api.get("/buyer/marketplace/public");
         setProducts(data.data || []);
       } catch (err) {
         console.error("Marketplace Fetch Error:", err);
