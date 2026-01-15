@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import { FaLeaf, FaWeightHanging, FaTags, FaImage, FaCloudUploadAlt } from "react-icons/fa";
 
@@ -57,7 +57,7 @@ const AddFarmerListing = () => {
         galleryImages.forEach(img => fd.append("gallery_images", img));
       }
 
-      await axios.post("http://localhost:5000/api/farmer/listings", fd, {
+      await api.post("/farmer/listings", fd, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
