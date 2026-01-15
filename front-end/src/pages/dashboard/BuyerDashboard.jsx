@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios"; // Standardized api instance for Render deployment
 import { 
   FaShieldAlt, FaMapMarkerAlt, FaStar, FaWarehouse, FaTruck, 
   FaFire, FaMapPin, FaMedal, FaPercentage, FaLeaf, FaBoxOpen, 
@@ -15,7 +15,8 @@ const BuyerMarketplace = () => {
   useEffect(() => {
     const fetchMarketplace = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/buyer/marketplace/public");
+        // Using the configured api instance instead of raw axios
+        const { data } = await api.get("/buyer/marketplace/public");
         setProducts(data.data || []);
       } catch (err) {
         console.error("Marketplace Fetch Error:", err);
@@ -75,7 +76,6 @@ const BuyerMarketplace = () => {
           border-bottom: 1px solid #e5e7eb;
         }
 
-        /* Horizontal Scrollable Tabs */
         .tab-wrapper {
           display: flex;
           gap: 30px;
@@ -83,7 +83,7 @@ const BuyerMarketplace = () => {
           overflow-x: auto;
           scrollbar-width: none; 
           -ms-overflow-style: none;
-          padding-right: 40px; /* Space for end of scroll */
+          padding-right: 40px;
         }
 
         .tab-wrapper::-webkit-scrollbar {
@@ -132,7 +132,6 @@ const BuyerMarketplace = () => {
         }
       `}</style>
 
-      {/* Greeting Section */}
       <div className="welcome-section">
         <h1 style={{ color: "#065f46", margin: "0 0 5px 0", fontSize: "28px", fontWeight: "900" }}>
           Welcome to the Digital Gebeya 
@@ -141,7 +140,6 @@ const BuyerMarketplace = () => {
           Explore fresh produce and quality livestock direct from verified Ethiopian farmers.
         </p>
         
-        {/* Deep Navigation Tabs */}
         <div className="tab-wrapper">
           <div className={`market-tab ${activeTab === "for-you" ? "active" : ""}`} onClick={() => setActiveTab("for-you")}>
             For You
@@ -188,7 +186,6 @@ const BuyerMarketplace = () => {
         </div>
       </div>
 
-      {/* Grid Display */}
       <div className="full-edge-grid">
         {products.map((item) => (
           <div key={item.id} className="agri-card">
