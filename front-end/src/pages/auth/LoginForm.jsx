@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 // Changed: using your custom api instance
 import api from "../../api/axios"; 
+import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginForm = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -9,23 +10,34 @@ const LoginForm = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(""); // New state for success message
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!captchaToken) {
+      setError("Please complete the security check.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      // Updated: Using the api instance with relative path
+      // Updated: Using the api instance with relative path and captchaToken
       const res = await api.post(
         "/auth/login-user",
-        formData,
+        { ...formData, captchaToken },
         { withCredentials: true }
       );
 
@@ -47,6 +59,7 @@ const LoginForm = ({ onLogin }) => {
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.error || "Login Failed";
       setError(msg);
+      setCaptchaToken(null); // Reset captcha on error
     } finally {
       setLoading(false);
     }
@@ -76,7 +89,15 @@ const LoginForm = ({ onLogin }) => {
             <input className="farmer-input" type="password" name="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required />
           </div>
 
-          <button type="submit" className="login-submit-btn" disabled={loading}>
+          {/* Captcha Section */}
+          <div className="captcha-container">
+            <ReCAPTCHA
+              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+              onChange={handleCaptchaChange}
+            />
+          </div>
+
+          <button type="submit" className="login-submit-btn" disabled={loading || !captchaToken}>
             {loading ? "Verifying..." : "Enter Marketplace"}
           </button>
 
@@ -86,7 +107,7 @@ const LoginForm = ({ onLogin }) => {
           </div>
         </form>
       </div>
-      <style>{`.login-full-width-wrapper{background-color:#1b4d3e;min-height:100vh;max-width:100%;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI',sans-serif;overflow-x:hidden}.level-up-card{background:#fff;padding:40px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);border-top:8px solid #fb8c00;text-align:center;width:400px;max-width:90%}.form-title{color:#1b4d3e;font-size:24px;font-weight:800;margin-bottom:5px}.input-group{text-align:left;margin-bottom:20px}.input-label{display:block;font-weight:700;color:#444;margin-bottom:8px;font-size:14px}.farmer-input{width:100%;padding:15px;border:2px solid #eee;border-radius:12px;box-sizing:border-box;font-size:16px}.login-submit-btn{width:100%;padding:16px;background:#fb8c00;color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:18px;font-weight:700}.login-submit-btn:hover{background:#ef6c00}.form-footer{margin-top:20px;display:flex;justify-content:space-between;font-size:14px}.form-footer a{color:#fb8c00;text-decoration:none;font-weight:600}`}</style>
+      <style>{`.login-full-width-wrapper{background-color:#1b4d3e;min-height:100vh;max-width:100%;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI',sans-serif;overflow-x:hidden}.level-up-card{background:#fff;padding:40px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);border-top:8px solid #fb8c00;text-align:center;width:400px;max-width:90%}.form-title{color:#1b4d3e;font-size:24px;font-weight:800;margin-bottom:5px}.input-group{text-align:left;margin-bottom:20px}.input-label{display:block;font-weight:700;color:#444;margin-bottom:8px;font-size:14px}.farmer-input{width:100%;padding:15px;border:2px solid #eee;border-radius:12px;box-sizing:border-box;font-size:16px}.captcha-container{display:flex;justify-content:center;margin-bottom:20px}.login-submit-btn{width:100%;padding:16px;background:#fb8c00;color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:18px;font-weight:700}.login-submit-btn:disabled{background:#ccc;cursor:not-allowed}.login-submit-btn:hover:not(:disabled){background:#ef6c00}.form-footer{margin-top:20px;display:flex;justify-content:space-between;font-size:14px}.form-footer a{color:#fb8c00;text-decoration:none;font-weight:600}`}</style>
     </div>
   );
 };
