@@ -3,6 +3,7 @@ const pool = require('../../config/dbConfig');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { sendEmail } = require('../../config/smsConfig');
+const axios = require('axios'); // Added axios for captcha verification
 
 exports.registerUser = async (req, res) => {
   const client = await pool.connect();
@@ -12,8 +13,22 @@ exports.registerUser = async (req, res) => {
       full_name, phone, email, password, role,
       region, zone, woreda, kebele,
       preferred_method, terms_accepted, privacy_accepted,
-      platform_rules_accepted, communication_consent
+      platform_rules_accepted, communication_consent,
+      captchaToken // Received from frontend
     } = req.body;
+
+    // --- RECAPTCHA VERIFICATION START ---
+    if (!captchaToken) {
+      return res.status(400).json({ error: 'Please complete the security check.' });
+    }
+
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
+    const recaptchaRes = await axios.post(verifyUrl);
+
+    if (!recaptchaRes.data.success) {
+      return res.status(400).json({ error: 'Security check failed. Please try again.' });
+    }
+    // --- RECAPTCHA VERIFICATION END ---
 
     // Validation
     if (!full_name || !phone || !password || !role || !region || !preferred_method) {
@@ -79,7 +94,6 @@ exports.registerUser = async (req, res) => {
 
     // 3️⃣ Send Verification Link (after commit)
     try {
-      // FIX: Normalize to handle 'email', 'Email', or 'EMAIL'
       const method = preferred_method?.toUpperCase();
 
       if (method === 'EMAIL') {
@@ -99,7 +113,6 @@ exports.registerUser = async (req, res) => {
         }
       }
     } catch (e) {
-      // FIX: Log the full error so we can see Resend's API response
       console.error('📧 Email Error Details:', e);
     }
 
