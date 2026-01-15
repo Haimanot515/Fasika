@@ -29,7 +29,6 @@ const FarmerDashboard = () => {
     { id: "amhara", region: "NORTH GONDAR", title: "Nile Basin Irrigation", body: "GERD-fed irrigation network monitoring. Water pressure in the Tana-Beles tunnel is stable.", stats: ["PRESSURE: 8 bar", "FLOW: 450m³/s"] }
   ];
 
-  // NEW: FARM ANIMAL CARDS
   const animalSectors = [
     { id: "cattle", region: "NATIONAL CATTLE HERD", title: "Bovine Health Matrix", body: "Real-time tracking of the Boran and Zebu breeds. Grazing patterns optimized for highland pastures.", stats: ["POP: 70M", "HEALTH: 94%"] },
     { id: "poultry", region: "POULTRY CLUSTERS", title: "Avian Production Flow", body: "Automated climate control for central Ethiopian poultry hubs. Feed efficiency at maximum capacity.", stats: ["DAILY EGGS: 2M", "TEMP: 24°C"] },
@@ -46,6 +45,7 @@ const FarmerDashboard = () => {
             background-size: cover; background-position: center;
             background-attachment: fixed; background-repeat: no-repeat;
             scroll-behavior: smooth;
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
           }
           .glass-card { 
             background: ${theme.glass}; 
@@ -55,13 +55,13 @@ const FarmerDashboard = () => {
             margin-bottom: 0px; 
             border-bottom: 1px solid ${theme.border}; 
             width: 100%; 
-            box-sizing: border-box;
+            box-sizing: border-box; /* Ensure padding doesn't add to width */
             min-height: 80vh; 
             display: flex;
             align-items: center;
           }
           .animal-card {
-            background: rgba(6, 78, 59, 0.05); /* Slight tint for animal cards */
+            background: rgba(6, 78, 59, 0.05);
           }
           .stat-badge {
             background: ${theme.primary}; color: white; padding: 12px 24px;
@@ -88,7 +88,6 @@ const FarmerDashboard = () => {
       </header>
 
       <main style={{ width: "100%" }}>
-        {/* ORIGINAL REGION CARDS */}
         {regions.map((item) => (
           <section id={item.id} key={item.id} className="glass-card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
@@ -107,7 +106,6 @@ const FarmerDashboard = () => {
           </section>
         ))}
 
-        {/* NEW ANIMAL MONITORING CARDS */}
         {animalSectors.map((item, index) => (
           <section id={item.id} key={item.id} className="glass-card animal-card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
@@ -139,11 +137,18 @@ const FarmerDashboard = () => {
 
 // ──────────────── STYLES ────────────────
 
-const containerStyle = { marginLeft: "70px", minHeight: "100vh", fontFamily: "'Inter', sans-serif", position: "relative", width: "calc(100% - 70px)" };
+const containerStyle = { 
+  marginLeft: "70px", 
+  minHeight: "100vh", 
+  fontFamily: "'Inter', sans-serif", 
+  position: "relative", 
+  width: "calc(100% - 70px)",
+  maxWidth: "calc(100vw - 70px)" // Extra constraint to ensure it stays within viewport
+};
 const sidebarStyle = { position: "fixed", left: 0, top: 0, bottom: 0, width: "70px", background: "rgba(6, 78, 59, 0.95)", zIndex: 1000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", paddingBottom: "50px" };
-const headerStyle = { padding: "150px 100px 100px 100px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", background: "rgba(0,0,0,0.2)" };
+const headerStyle = { padding: "150px 100px 100px 100px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", background: "rgba(0,0,0,0.2)", boxSizing: "border-box" };
 const tagStyle = { fontSize: "14px", fontWeight: "900", color: "#ffffff", background: "rgba(6, 78, 59, 0.9)", padding: "8px 24px", borderRadius: "0px", letterSpacing: "8px" };
 const titleStyle = { fontSize: "90px", fontWeight: "900", margin: "30px 0 0 0", color: "#ffffff", letterSpacing: "-5px", textShadow: "0 15px 50px rgba(0,0,0,0.5)" };
-const footerStyle = { padding: "120px 0", textAlign: "center", background: "rgba(0,0,0,0.6)" };
+const footerStyle = { padding: "120px 0", textAlign: "center", background: "rgba(0,0,0,0.6)", boxSizing: "border-box" };
 
 export default FarmerDashboard;
