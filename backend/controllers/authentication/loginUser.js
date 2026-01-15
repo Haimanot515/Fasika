@@ -2,6 +2,7 @@ const pool = require('../../config/dbConfig');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const axios = require('axios'); // Ensure axios is installed: npm install axios
 const { logAudit } = require('../../utils/auditLogger');
 const { checkRateLimit } = require('../../utils/rateLimiter');
 
@@ -15,13 +16,26 @@ const normalizePhone = (phone) => {
 const loginUser = async (req, res) => {
   const client = await pool.connect();
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, captchaToken } = req.body; // Added captchaToken
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 
     if (!identifier || !password) {
       return res.status(400).json({ error: 'Email or phone and password are required' });
     }
+
+    // --- Google reCAPTCHA Verification ---
+    if (!captchaToken) {
+      return res.status(400).json({ error: 'Security check required.' });
+    }
+
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
+    const captchaRes = await axios.post(verifyUrl);
+    
+    if (!captchaRes.data.success) {
+      return res.status(400).json({ error: 'Invalid security token. Please try again.' });
+    }
+    // --------------------------------------
 
     // 1️⃣ Rate Limiting
     const allowed = await checkRateLimit({
