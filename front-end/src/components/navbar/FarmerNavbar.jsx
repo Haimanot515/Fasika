@@ -62,7 +62,8 @@ const FarmerNavbar = ({ toggle }) => {
     transition: "all 0.3s ease",
     display: "flex",
     alignItems: "center",
-    gap: "8px"
+    gap: "8px",
+    whiteSpace: "nowrap" // Prevents text from wrapping
   });
 
   const linkStyle = {
@@ -71,7 +72,8 @@ const FarmerNavbar = ({ toggle }) => {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    fontWeight: "500"
+    fontWeight: "500",
+    whiteSpace: "nowrap" // Prevents text from wrapping
   };
 
   useEffect(() => {
@@ -90,15 +92,15 @@ const FarmerNavbar = ({ toggle }) => {
         position: "fixed", 
         top: 0, 
         left: 0, 
-        right: 0, 
+        width: "100%", // Changed to width 100%
         zIndex: 9999,
         display: "flex", 
         alignItems: "center", 
-        padding: "0 30px",
+        padding: "0 20px",
         height: "78px", 
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        boxSizing: "border-box",
-        maxWidth: "100vw"
+        boxSizing: "border-box", // Essential to prevent horizontal scroll
+        overflow: "hidden" // Prevents any inner element from leaking out
       }}>
         
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
@@ -108,9 +110,15 @@ const FarmerNavbar = ({ toggle }) => {
           </Link>
         </div>
 
-        <div className="nav-links" style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", flex: 1, minWidth: 0 }}>
+        <div className="nav-links" style={{ 
+          display: "flex", 
+          justifyContent: "space-evenly", 
+          alignItems: "center", 
+          flex: 1,
+          flexWrap: "nowrap" 
+        }}>
           
-          <div style={{ display: "flex", gap: "25px" }}>
+          <div style={{ display: "flex", gap: "20px", flexShrink: 0 }}>
             <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={24}/></Link>
             <button style={getBtnStyle(showMyFarm)} onClick={handleMyFarmClick}>
               My Farm <MdDashboard size={24}/>
@@ -118,15 +126,14 @@ const FarmerNavbar = ({ toggle }) => {
             <Link to="/advisory" style={linkStyle}>Advisory <MdAgriculture size={24}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "25px" }}>
+          <div style={{ display: "flex", gap: "20px", flexShrink: 0 }}>
             <Link to="/notifications" style={linkStyle}>Notifications <MdOutlineNotificationsActive size={24}/></Link>
             <Link to="/support" style={linkStyle}>Support <MdHelpOutline size={24}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "25px", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "20px", alignItems: "center", flexShrink: 0 }}>
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
-              Market <MdOutlineShoppingBag size={24}/>
-            </button>
+              Market <MdOutlineShoppingBag size={24}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
               Profile <MdOutlineAccountCircle size={26}/>
             </button>
