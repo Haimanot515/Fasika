@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import api from "../../api/api"; // Updated path as requested
+import api from "../../api/axios"; // Updated to use your standardized api instance
 import { useNavigate } from "react-router-dom";
 import { 
   FaPlus, FaStar, FaShieldAlt, FaSearch, FaCaretDown, 
