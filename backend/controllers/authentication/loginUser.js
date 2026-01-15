@@ -23,7 +23,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ error: 'Email or phone and password are required' });
     }
 
-    // 1. Rate Limiting
+    // 1️⃣ Rate Limiting
     const allowed = await checkRateLimit({
       ipKey: `login:ip:${ipAddress}`,
       userKey: `login:user:${identifier}`,
@@ -34,56 +34,69 @@ const loginUser = async (req, res) => {
 
     const normalizedIdentifier = identifier.includes('@') ? identifier : normalizePhone(identifier);
 
-    // 2. Fetch User
+    // 2️⃣ Fetch User
     const { rows } = await client.query(
       `SELECT id, user_id, password_hash, role, account_status FROM users WHERE email = $1 OR phone = $1`,
       [normalizedIdentifier]
     );
     const user = rows[0];
 
-    // 3. Password Check
+    // 3️⃣ Password Check
     const dummyHash = '$2b$12$abcdefghijklmnopqrstuvABCDEFGHIJKLmnopqrstu';
-    const hashToCompare = user?.password_hash || dummyHash;
-    const isValid = await bcrypt.compare(password, hashToCompare);
+    const isValid = user ? await bcrypt.compare(password, user.password_hash) : false;
 
     if (!user || !isValid) {
       if (user) await logAudit({ userId: user.id, status: 'FAILED', method: 'LOGIN', ipAddress, userAgent });
       return res.status(401).json({ error: 'Invalid login credentials' });
     }
 
-    // 4. Status Check
-    if (user.account_status !== 'VERIFIED' && user.account_status !== 'ACTIVE') {
+    // 4️⃣ Status Check
+    if (!['VERIFIED', 'ACTIVE'].includes(user.account_status)) {
       return res.status(403).json({ error: 'Account not verified. Please verify first.' });
     }
 
-    // 5. Tokens
+    // 5️⃣ Tokens
     const accessToken = jwt.sign(
       { userInternalId: user.id, userId: user.user_id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+
     const refreshToken = crypto.randomBytes(64).toString('hex');
     const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-    // 6. Store Session (Matches your schema: user_internal_id)
+    // 6️⃣ Store Session
     await client.query(
       `INSERT INTO user_sessions (user_internal_id, refresh_token_hash, ip_address, user_agent)
        VALUES ($1, $2, $3, $4)`,
       [user.id, refreshTokenHash, ipAddress, userAgent]
     );
 
-    // 7. Cookies
-    res.cookie('auth_token', accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite:'None', maxAge: 86400000 });
-    res.cookie('refresh_token', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite:'None'
-      ', maxAge: 604800000 });
+    // 7️⃣ Set Cookies (Clean & deploy-ready)
+    res.cookie('auth_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
 
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // 8️⃣ Log Audit & Respond
     await logAudit({ userId: user.id, status: 'SUCCESS', method: 'LOGIN', ipAddress, userAgent });
 
     return res.status(200).json({
       message: 'Login successful',
       authenticated: true,
       role: user.role,
-      user_id: user.user_id 
+      user_id: user.user_id
     });
   } catch (err) {
     console.error('Login error:', err);
