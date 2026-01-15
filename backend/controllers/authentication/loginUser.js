@@ -74,7 +74,7 @@ const loginUser = async (req, res) => {
 
     // 7. Cookies
     res.cookie('auth_token', accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'None', maxAge: 86400000 });
-    res.cookie('refresh_token', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'None
+    res.cookie('refresh_token', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'None'
       ', maxAge: 604800000 });
 
     await logAudit({ userId: user.id, status: 'SUCCESS', method: 'LOGIN', ipAddress, userAgent });
