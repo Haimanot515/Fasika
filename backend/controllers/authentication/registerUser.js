@@ -86,7 +86,7 @@ exports.registerUser = async (req, res) => {
         if (!email) {
             console.error('❌ Email sending skipped: email address is null');
         } else {
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5175';
+            const frontendUrl = process.env.FRONTEND_URL || 'https://fasika-frontend.onrender.com';
             const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
             await sendEmail(
