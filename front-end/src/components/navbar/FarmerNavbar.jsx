@@ -106,7 +106,7 @@ const FarmerNavbar = ({ toggle }) => {
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
           <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "bold", fontSize: "1.4rem", pointerEvents: "none" }}>
             <FaSeedling size={30} color="#2ecc71" /> 
-            <span style={{ marginLeft: "8px" }}>Fasika Farmer</span>
+            <span style={{ marginLeft: "8px" }}>Farmers</span>
           </Link>
         </div>
 
