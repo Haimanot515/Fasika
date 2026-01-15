@@ -48,7 +48,7 @@ const FarmerNavbar = ({ toggle }) => {
 
   const handleProfileClick = () => {
     setShowProfile(!showProfile);
-    if (!showProfile) { setShowMyFarm(false); setShowMarket(false); setShowLogoPage(false); }
+    if (!showProfile) { setShowMyFarm(false); setShowProfile(false); setShowLogoPage(false); }
   };
 
   const getBtnStyle = (isActive) => ({
@@ -62,8 +62,7 @@ const FarmerNavbar = ({ toggle }) => {
     transition: "all 0.3s ease",
     display: "flex",
     alignItems: "center",
-    gap: "8px",
-    whiteSpace: "nowrap" // Prevents text from wrapping
+    gap: "8px"
   });
 
   const linkStyle = {
@@ -72,8 +71,7 @@ const FarmerNavbar = ({ toggle }) => {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    fontWeight: "500",
-    whiteSpace: "nowrap" // Prevents text from wrapping
+    fontWeight: "500"
   };
 
   useEffect(() => {
@@ -92,18 +90,20 @@ const FarmerNavbar = ({ toggle }) => {
         position: "fixed", 
         top: 0, 
         left: 0, 
-        width: "100%", // Changed to width 100%
+        width: "100%", 
         zIndex: 9999,
         display: "flex", 
         alignItems: "center", 
-        padding: "0 20px",
-        height: "78px", 
+        padding: "10px 20px",
+        minHeight: "78px", 
+        height: "auto", 
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        boxSizing: "border-box", // Essential to prevent horizontal scroll
-        overflow: "hidden" // Prevents any inner element from leaking out
+        boxSizing: "border-box",
+        overflowX: "hidden",
+        flexWrap: "wrap" 
       }}>
         
-        <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
+        <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0, padding: "5px 0" }}>
           <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "bold", fontSize: "1.4rem", pointerEvents: "none" }}>
             <FaSeedling size={30} color="#2ecc71" /> 
             <span style={{ marginLeft: "8px" }}>Farmers</span>
@@ -115,10 +115,11 @@ const FarmerNavbar = ({ toggle }) => {
           justifyContent: "space-evenly", 
           alignItems: "center", 
           flex: 1,
-          flexWrap: "nowrap" 
+          flexWrap: "wrap",
+          gap: "10px"
         }}>
           
-          <div style={{ display: "flex", gap: "20px", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
             <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={24}/></Link>
             <button style={getBtnStyle(showMyFarm)} onClick={handleMyFarmClick}>
               My Farm <MdDashboard size={24}/>
@@ -126,12 +127,12 @@ const FarmerNavbar = ({ toggle }) => {
             <Link to="/advisory" style={linkStyle}>Advisory <MdAgriculture size={24}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "20px", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
             <Link to="/notifications" style={linkStyle}>Notifications <MdOutlineNotificationsActive size={24}/></Link>
             <Link to="/support" style={linkStyle}>Support <MdHelpOutline size={24}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "20px", alignItems: "center", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "20px", alignItems: "center", flexWrap: "wrap" }}>
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={24}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
