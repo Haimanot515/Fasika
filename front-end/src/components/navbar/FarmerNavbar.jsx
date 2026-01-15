@@ -58,11 +58,11 @@ const FarmerNavbar = ({ toggle }) => {
     color: "white",
     fontWeight: "600",
     cursor: "pointer",
-    padding: "10px 15px", 
+    padding: "10px 10px", // Slightly reduced horizontal padding
     transition: "all 0.3s ease",
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "4px",           // Reduced gap between icon and text (was 8px)
     whiteSpace: "nowrap"
   });
 
@@ -71,7 +71,7 @@ const FarmerNavbar = ({ toggle }) => {
     textDecoration: "none",
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "4px",           // Reduced gap between icon and text (was 8px)
     fontWeight: "500",
     whiteSpace: "nowrap"
   };
@@ -96,7 +96,7 @@ const FarmerNavbar = ({ toggle }) => {
         zIndex: 9999,
         display: "flex", 
         alignItems: "center", 
-        padding: "0 20px",
+        padding: "0 15px",    // Slightly reduced side padding
         height: "78px", 
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
         boxSizing: "border-box",
@@ -104,43 +104,41 @@ const FarmerNavbar = ({ toggle }) => {
       }}>
         
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
-          <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "bold", fontSize: "1.4rem", pointerEvents: "none" }}>
-            <FaSeedling size={30} color="#2ecc71" /> 
-            <span style={{ marginLeft: "8px" }}>Farmers</span>
+          <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "bold", fontSize: "1.3rem", pointerEvents: "none" }}>
+            <FaSeedling size={28} color="#2ecc71" /> 
+            <span style={{ marginLeft: "4px" }}>Farmers</span> {/* Reduced from 8px */}
           </Link>
         </div>
 
         <div className="nav-links" style={{ 
           display: "flex", 
-          justifyContent: "flex-start", // Changed to start to maintain spacing during scroll
+          justifyContent: "space-evenly", 
           alignItems: "center", 
           flex: 1,
-          flexWrap: "nowrap",           // Kept as nowrap as requested
-          overflowX: "auto",            // Allows horizontal scrolling if items exceed width
-          msOverflowStyle: "none",      // Hides scrollbar in IE/Edge
-          scrollbarWidth: "none",       // Hides scrollbar in Firefox
-          paddingLeft: "20px",
-          gap: "20px"
+          flexWrap: "nowrap",
+          overflowX: "auto",
+          msOverflowStyle: "none",
+          scrollbarWidth: "none"
         }}>
-          {/* Internal wrapper to maintain the three-group layout */}
-          <div style={{ display: "flex", gap: "20px", flexShrink: 0 }}>
-            <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={24}/></Link>
+          
+          <div style={{ display: "flex", gap: "12px", flexShrink: 0 }}> {/* Reduced gap from 20px */}
+            <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={22}/></Link>
             <button style={getBtnStyle(showMyFarm)} onClick={handleMyFarmClick}>
-              My Farm <MdDashboard size={24}/>
+              My Farm <MdDashboard size={22}/>
             </button>
-            <Link to="/advisory" style={linkStyle}>Advisory <MdAgriculture size={24}/></Link>
+            <Link to="/advisory" style={linkStyle}>Advisory <MdAgriculture size={22}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "20px", flexShrink: 0 }}>
-            <Link to="/notifications" style={linkStyle}>Notifications <MdOutlineNotificationsActive size={24}/></Link>
-            <Link to="/support" style={linkStyle}>Support <MdHelpOutline size={24}/></Link>
+          <div style={{ display: "flex", gap: "12px", flexShrink: 0 }}> {/* Reduced gap from 20px */}
+            <Link to="/notifications" style={linkStyle}>Notifications <MdOutlineNotificationsActive size={22}/></Link>
+            <Link to="/support" style={linkStyle}>Support <MdHelpOutline size={22}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "20px", alignItems: "center", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}> {/* Reduced gap from 20px */}
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
-              Market <MdOutlineShoppingBag size={24}/></button>
+              Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
-              Profile <MdOutlineAccountCircle size={26}/>
+              Profile <MdOutlineAccountCircle size={24}/>
             </button>
           </div>
         </div>
