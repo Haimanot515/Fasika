@@ -96,11 +96,11 @@ const FarmerNavbar = ({ toggle }) => {
         zIndex: 9999,
         display: "flex", 
         alignItems: "center", 
-        padding: "10px 20px", // Changed padding to allow vertical breathing
-        minHeight: "78px",    // Changed height to minHeight
+        padding: "0 20px",
+        height: "78px", 
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
         boxSizing: "border-box",
-        overflow: "visible"   // Changed to visible so wrapped content isn't hidden
+        overflow: "hidden" 
       }}>
         
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
@@ -112,13 +112,17 @@ const FarmerNavbar = ({ toggle }) => {
 
         <div className="nav-links" style={{ 
           display: "flex", 
-          justifyContent: "space-evenly", 
+          justifyContent: "flex-start", // Changed to start to maintain spacing during scroll
           alignItems: "center", 
           flex: 1,
-          flexWrap: "wrap", // Changed from nowrap to wrap
-          gap: "10px"       // Added gap for when items wrap
+          flexWrap: "nowrap",           // Kept as nowrap as requested
+          overflowX: "auto",            // Allows horizontal scrolling if items exceed width
+          msOverflowStyle: "none",      // Hides scrollbar in IE/Edge
+          scrollbarWidth: "none",       // Hides scrollbar in Firefox
+          paddingLeft: "20px",
+          gap: "20px"
         }}>
-          
+          {/* Internal wrapper to maintain the three-group layout */}
           <div style={{ display: "flex", gap: "20px", flexShrink: 0 }}>
             <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={24}/></Link>
             <button style={getBtnStyle(showMyFarm)} onClick={handleMyFarmClick}>
