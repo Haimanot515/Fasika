@@ -40,7 +40,7 @@ const ResetPassword = () => {
       setIsSuccess(true);
       
       // Dramatic redirect delay to show success state
-      setTimeout(() => navigate("/login"), 3500);
+      setTimeout(() => navigate("/dashboard"), 3500);
     } catch (err) {
       setError(err.response?.data?.error || "Token expired or handshake failed.");
       setLoading(false);
