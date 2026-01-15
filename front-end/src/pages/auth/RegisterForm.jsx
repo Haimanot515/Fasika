@@ -239,11 +239,11 @@ const RegisterForm = () => {
             <div className="farmer-icon" style={{ color: '#2e7d32' }}><MdCheckCircle /></div>
             <h2 className="form-title">Registration Successful!</h2>
             <p className="form-subtitle">Welcome to our community.</p>
-            <br />
+            <br /><br />
             <button className="login-submit-btn success-state" style={{ background: '#1b4d3e', cursor: 'default' }}>
               <MdVerifiedUser /> succs wehave sent you verification code via email orsms
             </button>
-            <br />
+            <br /><br />
             <div className="loading-bar-minimal" style={{ marginTop: '30px' }}>
               <div className="loading-fill"></div>
             </div>
@@ -257,7 +257,7 @@ const RegisterForm = () => {
 
       <style>{`
         .register-page-wrapper {
-          background-color: #1b4d3e; min-height: 100vh; width: 100vw;
+          background-color: #1b4d3e; min-height: 100vh; max-width: 100%;
           display: flex; justify-content: center; align-items: center;
           font-family: 'Segoe UI', sans-serif; 
           overflow-x: hidden;
