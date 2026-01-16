@@ -3,11 +3,11 @@ const router = express.Router();
 const { 
   getNotifications, 
   markAsRead 
-} = require("../../controllers/farmer/farmerNotificationsController);
+} = require("../../controllers/farmer/farmerNotificationsController"); // <-- FIXED: Added closing quote "
 
 // --- Protective Middleware (Optional) ---
 // If you have a middleware to verify the farmer's token, import it here
-// const { protect } = require("../middleware/authMiddleware");
+// const { protect } = require("../../middleware/authMiddleware");
 
 /**
  * @route   GET /api/farmer/notifications
