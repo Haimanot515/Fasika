@@ -9,7 +9,7 @@ import VerifyEmail from "./pages/auth/VerifyEmail";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
-import SupportPage from "./pages/SupportPage";
+import SupportPage from "./pages/Help";
 
 // --- ADMIN PAGES ---
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
