@@ -18,7 +18,8 @@ exports.getFarmSummary = async (req, res) => {
       SELECT 
         u.full_name,
         f.farm_name,
-        f.farmer_id AS official_reg_no,
+        f.farm_type,
+        f.public_farmer_id AS official_reg_no, 
         COALESCE(SUM(lp.area_size), 0) AS total_hectares,
         COUNT(DISTINCT lp.id) AS total_plots,
         (SELECT COUNT(*) FROM animals WHERE user_internal_id = u.id) AS total_livestock,
@@ -28,7 +29,7 @@ exports.getFarmSummary = async (req, res) => {
       LEFT JOIN land_plots lp ON lp.farmer_id = f.id
       LEFT JOIN crops c ON c.land_plot_id = lp.id
       WHERE u.id = $1
-      GROUP BY u.full_name, f.farm_name, f.farmer_id, u.id
+      GROUP BY u.full_name, f.farm_name, f.farm_type, f.public_farmer_id, u.id
     `, [userId]);
 
     res.json({ success: true, data: rows[0] || {} });
@@ -43,7 +44,7 @@ exports.addLand = async (req, res) => {
   try {
     const farmerId = await getInternalFarmerId(req.user.id);
     if (!farmerId)
-      return res.status(404).json({ success: false, message: "Farmer profile missing" });
+      return res.status(404).json({ success: false, message: "Farmer profile missing from registry" });
 
     const { plot_name, area_size, land_status } = req.body;
 
@@ -102,8 +103,8 @@ exports.deleteLand = async (req, res) => {
       [req.params.id, farmerId]
     );
 
-    res.json({ success: true, message: "Land plot deleted" });
-  } catch {
+    res.json({ success: true, message: "Land plot deleted from registry" });
+  } catch (err) {
     res.status(500).json({ success: false, error: "Delete failed" });
   }
 };
@@ -114,7 +115,6 @@ exports.addCrop = async (req, res) => {
     const farmerId = await getInternalFarmerId(req.user.id);
     const { land_plot_id, crop_name, current_stage, planting_date } = req.body;
 
-    // 🔒 verify land ownership
     const land = await pool.query(
       'SELECT id FROM land_plots WHERE id=$1 AND farmer_id=$2',
       [land_plot_id, farmerId]
@@ -184,7 +184,7 @@ exports.deleteCrop = async (req, res) => {
       [req.params.cropId, farmerId]
     );
 
-    res.json({ success: true, message: "Crop deleted" });
+    res.json({ success: true, message: "Crop removed from registry" });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -240,7 +240,7 @@ exports.deleteAnimal = async (req, res) => {
       [req.params.animalId, req.user.id]
     );
 
-    res.json({ success: true, message: "Livestock deleted" });
+    res.json({ success: true, message: "Livestock asset removed" });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
