@@ -147,7 +147,7 @@ const MarketSidebar = ({ isOpen = true }) => {
                   <NavLink to="/market/sales/add-listing" style={l3LinkStyle}><FaPlusCircle /> <span className="sentence-case">Add new listing</span></NavLink>
                   <NavLink to="/market/sales" style={l3LinkStyle}><FaListUl /> <span className="sentence-case">My active listings</span></NavLink>
                   <NavLink to="/market/sales/record-transaction" style={l3LinkStyle}><FaExchangeAlt /> <span className="sentence-case">Record transaction</span></NavLink>
-                  <NavLink to="/market/sales/transaction-history" style={l3LinkStyle}><FaHistory /> <span className="sentence-case">History</span></NavLink>
+                  <NavLink to="/market/sales/transaction-history" style={l3LinkStyle}><FaHistory /> <span className="sentence-case">Delete All </span></NavLink>
                 </div>
               </div>
             )}
