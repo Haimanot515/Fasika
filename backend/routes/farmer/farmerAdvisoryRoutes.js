@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getFarmerAdvisory } = require("../controllers/advisoryController");
+const { getFarmerAdvisory } = require("../../controllers/farmer/advisoryController");
 
 // This route will be available at /api/farmer/advisory
 router.get("/advisory", getFarmerAdvisory);
