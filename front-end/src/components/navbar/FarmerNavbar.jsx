@@ -56,13 +56,14 @@ const FarmerNavbar = ({ toggle }) => {
     border: "none",
     borderBottom: isActive ? "3px solid white" : "3px solid transparent",
     color: "white",
-    fontWeight: "600",
+    fontSize: "1.05rem",      // Increased font size
+    fontWeight: "700",        // Bold weight for standard
     cursor: "pointer",
-    padding: "10px 10px", // Slightly reduced horizontal padding
+    padding: "10px 5px", 
     transition: "all 0.3s ease",
     display: "flex",
     alignItems: "center",
-    gap: "4px",           // Reduced gap between icon and text (was 8px)
+    gap: "6px",               
     whiteSpace: "nowrap"
   });
 
@@ -71,8 +72,9 @@ const FarmerNavbar = ({ toggle }) => {
     textDecoration: "none",
     display: "flex",
     alignItems: "center",
-    gap: "4px",           // Reduced gap between icon and text (was 8px)
-    fontWeight: "500",
+    gap: "6px",               
+    fontSize: "1.05rem",      // Increased font size
+    fontWeight: "700",        // Bold weight for standard
     whiteSpace: "nowrap"
   };
 
@@ -96,7 +98,7 @@ const FarmerNavbar = ({ toggle }) => {
         zIndex: 9999,
         display: "flex", 
         alignItems: "center", 
-        padding: "0 15px",    // Slightly reduced side padding
+        padding: "0 30px",    // Increased side padding for balance
         height: "78px", 
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
         boxSizing: "border-box",
@@ -104,24 +106,25 @@ const FarmerNavbar = ({ toggle }) => {
       }}>
         
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
-          <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "bold", fontSize: "1.3rem", pointerEvents: "none" }}>
-            <FaSeedling size={28} color="#2ecc71" /> 
-            <span style={{ marginLeft: "4px" }}>Farmers</span> {/* Reduced from 8px */}
+          <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "800", fontSize: "1.4rem", pointerEvents: "none" }}>
+            <FaSeedling size={30} color="#2ecc71" /> 
+            <span style={{ marginLeft: "6px" }}>Farmers</span>
           </Link>
         </div>
 
         <div className="nav-links" style={{ 
           display: "flex", 
-          justifyContent: "space-evenly", 
+          justifyContent: "space-between", // Ensures equal spacing across nav
           alignItems: "center", 
           flex: 1,
+          marginLeft: "40px",              // Gap from logo
           flexWrap: "nowrap",
           overflowX: "auto",
           msOverflowStyle: "none",
           scrollbarWidth: "none"
         }}>
           
-          <div style={{ display: "flex", gap: "12px", flexShrink: 0 }}> {/* Reduced gap from 20px */}
+          <div style={{ display: "flex", gap: "25px", flexShrink: 0 }}> 
             <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={22}/></Link>
             <button style={getBtnStyle(showMyFarm)} onClick={handleMyFarmClick}>
               My Farm <MdDashboard size={22}/>
@@ -129,12 +132,12 @@ const FarmerNavbar = ({ toggle }) => {
             <Link to="/advisory" style={linkStyle}>Advisory <MdAgriculture size={22}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "12px", flexShrink: 0 }}> {/* Reduced gap from 20px */}
+          <div style={{ display: "flex", gap: "25px", flexShrink: 0 }}> 
             <Link to="/notifications" style={linkStyle}>Notifications <MdOutlineNotificationsActive size={22}/></Link>
             <Link to="/support" style={linkStyle}>Support <MdHelpOutline size={22}/></Link>
           </div>
 
-          <div style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}> {/* Reduced gap from 20px */}
+          <div style={{ display: "flex", gap: "25px", alignItems: "center", flexShrink: 0 }}> 
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
