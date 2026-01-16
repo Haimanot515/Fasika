@@ -1,235 +1,166 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
-  FaShoppingCart, FaStar, FaHandPointer, FaTrashAlt, 
-  FaCloudSun, FaChartLine, FaGavel, FaMapMarkedAlt, FaShieldAlt 
+  FaArrowRight, FaGlobe, FaAward, FaTruckMoving, FaLeaf 
 } from "react-icons/fa";
-import { GiCow, GiWheat, GiCoffeeBeans, GiHoneyJar, GiRibbonMedal } from "react-icons/gi";
+import { GiCoffeeBeans, GiSeedling } from "react-icons/gi";
 
-const DraggablePromotionPage = () => {
-  const [cartCount, setCartCount] = useState(0);
-  const [activeTab, setActiveTab] = useState("all");
-  const [isAccepted, setIsAccepted] = useState(false); // Controls the Full Screen Promotion
+const EditorialPromotion = () => {
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
-  const ethiopianProducts = [
-    { id: 1, category: "cattle", name: "Borena Bull (Select)", price: "105,000", location: "Oromia", img: "https://images.unsplash.com/photo-1543964402-e05448330777?q=80&w=400", tag: "Heavyweight" },
-    { id: 2, category: "cattle", name: "Afar Camel", price: "120,000", location: "Semera", img: "https://images.unsplash.com/photo-1554123168-b400f9c806ca?q=80&w=400", tag: "Resilient" },
-    { id: 3, category: "grains", name: "Magna Teff (White)", price: "14,200", location: "Ada'a", img: "https://images.unsplash.com/photo-1511413816656-785d41176b92?q=80&w=400", tag: "Grade A" },
-    { id: 4, category: "grains", name: "Black Barley", price: "6,800", location: "Arsi", img: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=400", tag: "Organic" },
-    { id: 5, category: "specialty", name: "Yirgacheffe Coffee", price: "550", location: "Gedeo", img: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=400", tag: "Export" },
-    { id: 6, category: "specialty", name: "Gojjam White Honey", price: "800", location: "Debre Markos", img: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=400", tag: "Pure" },
+  const collections = [
+    { 
+      id: "01", 
+      name: "Harar Coffee", 
+      detail: "Wild-grown, sun-dried, and deeply complex.",
+      category: "Single Origin" 
+    },
+    { 
+      id: "02", 
+      name: "Organic Honey", 
+      detail: "Sourced from the lush forests of Maji.",
+      category: "Floral & Pure" 
+    },
+    { 
+      id: "03", 
+      name: "Highland Pulses", 
+      detail: "Nutrient-dense lentils and chickpeas.",
+      category: "Soil to Table" 
+    },
   ];
 
-  const filteredProducts = activeTab === "all" 
-    ? ethiopianProducts 
-    : ethiopianProducts.filter(p => p.category === activeTab);
-
   return (
-    <div style={styles.pageContainer}>
+    <div style={styles.container}>
       <style>{`
-        body, html { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
-        .ticker-wrap { overflow: hidden; background: #131921; color: #febd69; padding: 12px 0; border-bottom: 2px solid #065f46; width: 100%; }
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        .ticker-text { display: inline-block; white-space: nowrap; animation: ticker 40s linear infinite; font-weight: bold; font-family: 'Courier New', monospace; }
-        .product-card:active { cursor: grabbing; }
-        .full-grid { 
-          display: grid; 
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-          gap: 30px; 
-          padding: 40px; 
-          width: 100%; 
-          max-width: 100%;
-          box-sizing: border-box; 
-        }
-        /* Prevents scrolling when promotion is active */
-        .no-scroll { overflow: hidden; height: 100vh; }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;700&display=swap');
+        body { margin: 0; background: #ffffff !important; font-family: 'Inter', sans-serif; }
       `}</style>
 
-      {/* 1. FULL SCREEN COOKIE & TERMS PROMOTION */}
-      <AnimatePresence>
-        {!isAccepted && (
-          <motion.div 
-            initial={{ y: 0 }}
-            exit={{ y: "-100vh" }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            style={styles.fullScreenOverlay}
-          >
-            <motion.div 
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               style={styles.promotionBox}
-            >
-              <FaShieldAlt size={50} color="#febd69" />
-              <h1 style={{fontSize: '32px', margin: '20px 0'}}>Marketplace Transparency</h1>
-              <p style={{lineHeight: '1.6', opacity: 0.9, fontSize: '18px'}}>
-                To ensure a secure Gebeya experience, we use cookies for trade analytics and secure sessions. 
-                By entering, you agree to our Terms of Service and acknowledge that all data schemas 
-                utilize <b>DROP</b> protocols for verified inventory refreshes.
-              </p>
-              <div style={{display: 'flex', gap: '20px', marginTop: '30px', width: '100%'}}>
-                <button onClick={() => setIsAccepted(true)} style={styles.acceptBtn}>Accept & Enter Gebeya</button>
-                <button style={styles.declineBtn}>Learn More</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 2. MARKET TICKER */}
-      <div className="ticker-wrap">
-        <div className="ticker-text">
-          LIVE GEBEYA: White Teff ↑ 5% (Ada'a) • Coffee (Yirgacheffe) ↔ Stable • Borena Cattle Demand [HIGH] • [SYSTEM] DROP new verified stock inventory...
+      {/* 1. MINIMAL NAVIGATION */}
+      <nav style={styles.nav}>
+        <div style={styles.logo}>GEBEYA SELECT</div>
+        <div style={styles.navLinks}>
+          <span>Origin</span>
+          <span>Traceability</span>
+          <button style={styles.contactBtn}>Partner with us</button>
         </div>
-      </div>
+      </nav>
 
-      {/* 3. HERO SECTION */}
+      {/* 2. HERO SECTION - CLEAN & BOLD */}
       <section style={styles.hero}>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <span style={styles.badge}><GiRibbonMedal /> ETHIOPIA AGRO-HUB 2026</span>
-          <h1 style={styles.heroTitle}>The Digital <span style={{color: '#febd69'}}>Gebeya</span></h1>
-          <p style={styles.heroSub}>Connecting global buyers directly to the heart of Ethiopian farming.</p>
-        </motion.div>
-
-        <div style={styles.statsGrid}>
-          <div style={styles.statBox}><FaCloudSun color="#febd69"/> 24°C Addis</div>
-          <div style={styles.statBox}><FaChartLine color="#4caf50"/> Trade Vol: +12%</div>
-          <div style={styles.statBox}><FaMapMarkedAlt color="#3498db"/> 14 Regions</div>
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={styles.heroTitle}
+        >
+          Ethiopia’s Finest <br /> 
+          <span style={{color: '#c4a484'}}>Export Collection.</span>
+        </motion.h1>
+        
+        <div style={styles.heroLayout}>
+          <div style={styles.heroImageWrapper}>
+            <img 
+              src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1200" 
+              alt="Premium Coffee" 
+              style={styles.heroImg}
+            />
+          </div>
+          <div style={styles.heroText}>
+            <p style={styles.introPara}>
+              Our marketplace utilizes a refined data architecture. 
+              By implementing <b>DROP</b> schema protocols for real-time inventory 
+              verification, we ensure that what you see is exactly what is in the warehouse.
+            </p>
+            <div style={styles.metricRow}>
+              <div><FaAward color="#c4a484"/> Grade 1 Certified</div>
+              <div><FaGlobe color="#c4a484"/> 100% Traceable</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* 4. FILTER BAR */}
-      <div style={styles.filterBar}>
-        {['all', 'cattle', 'grains', 'specialty'].map(tab => (
-          <button 
-            key={tab} 
-            onClick={() => setActiveTab(tab)}
-            style={{
-              ...styles.filterTab, 
-              backgroundColor: activeTab === tab ? '#febd69' : 'transparent', 
-              color: activeTab === tab ? '#131921' : '#fff',
-              border: activeTab === tab ? 'none' : '1px solid rgba(255,255,255,0.3)'
-            }}
-          >
-            {tab.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
-      {/* 5. DRAGGABLE INTERACTIVE GRID */}
-      <div className="full-grid">
-        <AnimatePresence mode='popLayout'>
-          {filteredProducts.map((product) => (
-            <motion.div
-              layout
-              key={product.id}
-              drag
-              dragSnapToOrigin={true}
-              whileDrag={{ scale: 1.05, zIndex: 100, rotate: 1 }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              style={styles.card}
-              className="product-card"
+      {/* 3. VERTICAL LIST FEATURE (No Grids) */}
+      <section style={styles.listSection}>
+        <h2 style={styles.sectionHeading}>Current Availability</h2>
+        <div style={styles.verticalList}>
+          {collections.map((item, index) => (
+            <motion.div 
+              key={item.id}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={styles.listItem}
             >
-              <div style={styles.imgContainer}>
-                <img src={product.img} alt={product.name} style={styles.productImg} draggable="false" />
-                <span style={styles.tag}>{product.tag}</span>
-                <div style={styles.locationBadge}><FaMapMarkedAlt /> {product.location}</div>
-              </div>
-              
-              <div style={styles.cardBody}>
-                <h3 style={styles.productName}>{product.name}</h3>
-                <div style={styles.priceRow}>
-                  <span style={styles.currentPrice}>ETB {product.price}</span>
+              <div style={styles.itemMain}>
+                <span style={styles.itemId}>{item.id}</span>
+                <div style={styles.itemInfo}>
+                  <h3 style={styles.itemName}>{item.name}</h3>
+                  <p style={styles.itemCategory}>{item.category}</p>
                 </div>
-                <button onClick={() => setCartCount(c => c+1)} style={styles.buyBtn}>
-                  <FaShoppingCart /> Negotiate & Add
-                </button>
+              </div>
+              <p style={{...styles.itemDetail, opacity: hoveredIndex === index ? 1 : 0}}>
+                {item.detail}
+              </p>
+              <div style={styles.arrowIcon}>
+                <FaArrowRight color={hoveredIndex === index ? "#000" : "#ccc"} />
               </div>
             </motion.div>
           ))}
-        </AnimatePresence>
-      </div>
+        </div>
+      </section>
 
-      {/* 6. FLOATING CART */}
-      <div style={styles.floatingControls}>
-        <motion.div whileHover={{ scale: 1.1 }} style={styles.cartDropZone}>
-          <FaShoppingCart size={24} />
-          <span style={styles.cartBadge}>{cartCount}</span>
-        </motion.div>
-      </div>
+      {/* 4. FOOTER FEATURE */}
+      <footer style={styles.footer}>
+        <div style={styles.footerInner}>
+          <FaLeaf size={30} color="#2d5a27" />
+          <h2 style={{fontSize: '40px', fontWeight: '700'}}>Sustainably Grown.</h2>
+          <p>Connecting the world to the cradle of humanity.</p>
+        </div>
+      </footer>
     </div>
   );
 };
 
 const styles = {
-  // New Promotion Styles
-  fullScreenOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: '#131921',
-    zIndex: 9999,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '20px',
-    boxSizing: 'border-box',
-    backgroundImage: 'radial-gradient(circle at center, #065f46 0%, #0f1111 100%)'
+  container: { backgroundColor: "#ffffff", color: "#1a1a1a", minHeight: "100vh" },
+  nav: { 
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+    padding: '30px 6%', borderBottom: '1px solid #f0f0f0' 
   },
-  promotionBox: {
-    maxWidth: '600px',
-    textAlign: 'center',
-    color: '#fff',
-    padding: '40px',
-    background: 'rgba(255,255,255,0.05)',
-    borderRadius: '24px',
-    border: '1px solid rgba(254, 189, 105, 0.3)',
-    backdropFilter: 'blur(10px)'
+  logo: { fontSize: '20px', fontWeight: '800', letterSpacing: '2px' },
+  navLinks: { display: 'flex', alignItems: 'center', gap: '40px', fontSize: '14px', fontWeight: '600' },
+  contactBtn: { 
+    padding: '10px 20px', backgroundColor: '#1a1a1a', color: '#fff', 
+    border: 'none', borderRadius: '4px', cursor: 'pointer' 
   },
-  acceptBtn: { flex: 1, padding: '15px', background: '#febd69', color: '#131921', border: 'none', borderRadius: '8px', fontWeight: '900', cursor: 'pointer', fontSize: '16px' },
-  declineBtn: { flex: 1, padding: '15px', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' },
 
-  pageContainer: { 
-    backgroundColor: "#0f1111", 
-    minHeight: "100vh", 
-    color: "#fff", 
-    width: "100%", 
-    margin: 0, 
-    padding: 0 
+  hero: { padding: '80px 6% 40px' },
+  heroTitle: { 
+    fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 8vw, 90px)', 
+    lineHeight: '1.1', margin: '0 0 60px 0' 
   },
-  hero: { 
-    padding: "80px 0", 
-    textAlign: "center", 
-    background: "#131921",
-    width: "100%",
-    backgroundImage: 'radial-gradient(circle at center, #065f46 0%, #131921 100%)'
-  },
-  badge: { background: "rgba(255,255,255,0.1)", padding: "8px 20px", borderRadius: "50px", fontSize: "12px", fontWeight: "bold", color: "#febd69" },
-  heroTitle: { fontSize: "clamp(32px, 5vw, 64px)", margin: "20px 0", fontWeight: "900" },
-  heroSub: { fontSize: "18px", opacity: 0.8, maxWidth: "600px", margin: "0 auto 30px" },
-  statsGrid: { display: "flex", justifyContent: "center", gap: "15px", flexWrap: "wrap", padding: "0 20px" },
-  statBox: { background: "rgba(255,255,255,0.05)", padding: "10px 20px", borderRadius: "8px", fontSize: "14px", border: "1px solid rgba(255,255,255,0.1)" },
-  
-  filterBar: { display: "flex", justifyContent: "center", gap: "15px", padding: "25px", position: "sticky", top: "0", zIndex: 1000, background: "#131921", width: "100%", boxSizing: "border-box" },
-  filterTab: { padding: "10px 25px", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", transition: "0.3s" },
-  
-  card: { background: "#fff", borderRadius: "12px", overflow: "hidden", cursor: "grab", color: "#131921", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" },
-  imgContainer: { height: "200px", position: "relative" },
-  productImg: { width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" },
-  tag: { position: "absolute", top: "10px", right: "10px", background: "#CC0C39", color: "#fff", padding: "4px 12px", fontSize: "11px", fontWeight: "bold", borderRadius: "4px" },
-  locationBadge: { position: "absolute", bottom: "10px", left: "10px", background: "rgba(0,0,0,0.7)", color: "white", padding: "4px 8px", borderRadius: "4px", fontSize: "10px" },
-  
-  cardBody: { padding: "20px" },
-  productName: { fontSize: "18px", fontWeight: "800", margin: "0 0 10px" },
-  currentPrice: { fontSize: "22px", fontWeight: "900", color: "#B12704" },
-  buyBtn: { width: "100%", padding: "12px", background: "#febd69", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", marginTop: "15px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" },
+  heroLayout: { display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '80px', alignItems: 'flex-end' },
+  heroImageWrapper: { height: '500px', overflow: 'hidden', borderRadius: '4px' },
+  heroImg: { width: '100%', height: '100%', objectFit: 'cover' },
+  heroText: { paddingBottom: '40px' },
+  introPara: { fontSize: '18px', lineHeight: '1.8', color: '#555', marginBottom: '30px' },
+  metricRow: { display: 'flex', gap: '30px', fontWeight: '700', fontSize: '14px' },
 
-  floatingControls: { position: "fixed", bottom: "30px", right: "30px", display: "flex", flexDirection: "column", gap: "15px", zIndex: 2000 },
-  cartDropZone: { width: "70px", height: "70px", background: "#febd69", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#131921", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", position: "relative" },
-  cartBadge: { position: "absolute", top: "-5px", right: "-5px", background: "#CC0C39", color: "white", width: "24px", height: "24px", borderRadius: "50%", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" },
+  listSection: { padding: '100px 6%' },
+  sectionHeading: { fontSize: '12px', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '40px', color: '#999' },
+  verticalList: { borderTop: '1px solid #eee' },
+  listItem: { 
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+    padding: '40px 0', borderBottom: '1px solid #eee', cursor: 'pointer', transition: '0.3s' 
+  },
+  itemMain: { display: 'flex', alignItems: 'center', gap: '40px' },
+  itemId: { fontSize: '14px', fontWeight: '700', color: '#c4a484' },
+  itemName: { fontSize: '32px', fontWeight: '700', margin: 0 },
+  itemCategory: { margin: '5px 0 0 0', color: '#999', fontSize: '14px' },
+  itemDetail: { maxWidth: '300px', fontSize: '15px', color: '#666', transition: '0.5s' },
+  arrowIcon: { fontSize: '20px' },
+
+  footer: { padding: '100px 6%', textAlign: 'center', backgroundColor: '#fcfcfc' },
+  footerInner: { maxWidth: '600px', margin: '0 auto' }
 };
 
-export default DraggablePromotionPage;
+export default EditorialPromotion;
