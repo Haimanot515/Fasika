@@ -43,7 +43,7 @@ const SupportPage = () => {
   const theme = {
     primary: "#064e3b",
     accent: "#10b981",
-    glass: "rgba(255, 255, 255, 0.95)", // High opacity white glass
+    glass: "rgba(255, 255, 255, 0.95)",
     blur: "blur(20px)",
     border: "rgba(0, 0, 0, 0.05)"
   };
@@ -58,7 +58,7 @@ const SupportPage = () => {
     <div style={containerStyle}>
       <style>
         {`
-          body, html { margin: 0; padding: 0; background: #f4f7f6; scroll-behavior: smooth; overflow-x: hidden; }
+          body, html { margin: 0; padding: 0; background: #ffffff; scroll-behavior: smooth; overflow-x: hidden; }
           .glass-card { 
             background: ${theme.glass}; 
             backdrop-filter: ${theme.blur}; 
@@ -71,7 +71,7 @@ const SupportPage = () => {
             align-items: center;
             transition: background 0.4s ease;
           }
-          .glass-card:hover { background: #ffffff; }
+          .glass-card:hover { background: #fafafa; }
           .stat-badge {
             background: ${theme.primary}; color: white; padding: 12px 24px;
             border-radius: 4px; font-weight: 900; font-size: 13px; margin-right: 15px;
@@ -88,15 +88,15 @@ const SupportPage = () => {
         <div style={{ color: "white", fontWeight: "900", fontSize: "20px", transform: "rotate(-90deg)", marginBottom: "50px", letterSpacing: "5px" }}>FASIKA</div>
       </div>
 
-      {/* HEADER SECTION */}
+      {/* HEADER SECTION - CHANGED TO WHITE BACKGROUND */}
       <header style={headerStyle}>
         <div>
           <span style={tagStyle}>FASIKA REGISTRY SUPPORT</span>
           <h1 style={titleStyle}>Farmer Support Hub</h1>
         </div>
-        <div style={{ textAlign: "right", color: "white" }}>
+        <div style={{ textAlign: "right", color: theme.primary }}>
           <div style={{ fontSize: "56px", fontWeight: "900" }}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-          <div style={{ fontSize: "16px", fontWeight: "800", opacity: 0.9 }}>LIVE DROP DATABASE CONNECTED</div>
+          <div style={{ fontSize: "16px", fontWeight: "800", opacity: 0.7 }}>LIVE DROP DATABASE CONNECTED</div>
         </div>
       </header>
 
@@ -168,18 +168,20 @@ const sidebarStyle = {
 const headerStyle = { 
   padding: "150px 100px 100px 100px", display: "flex", 
   justifyContent: "space-between", alignItems: "flex-end", 
-  background: "linear-gradient(to bottom, #064e3b, #0d9488)", boxSizing: "border-box" 
+  background: "#ffffff", // Changed to pure white
+  borderBottom: "1px solid #f0f0f0",
+  boxSizing: "border-box" 
 };
 
 const tagStyle = { 
   fontSize: "14px", fontWeight: "900", color: "#ffffff", 
-  background: "rgba(0, 0, 0, 0.3)", padding: "8px 24px", 
+  background: "#064e3b", padding: "8px 24px", 
   borderRadius: "0px", letterSpacing: "8px" 
 };
 
 const titleStyle = { 
   fontSize: "90px", fontWeight: "900", margin: "30px 0 0 0", 
-  color: "#ffffff", letterSpacing: "-5px", textShadow: "0 10px 30px rgba(0,0,0,0.2)" 
+  color: "#064e3b", letterSpacing: "-5px" 
 };
 
 const footerStyle = { padding: "120px 0", textAlign: "center", background: "#064e3b" };
