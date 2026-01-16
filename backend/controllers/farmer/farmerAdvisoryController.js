@@ -1,20 +1,21 @@
 const pool = require("../config/db");
 
-const getAdvisories = async (req, res) => {
+const getFarmerAdvisory = async (req, res) => {
   try {
-    // Fetch latest advisories first
+    // We filter by target_role 'FARMER' to keep the board relevant
     const result = await pool.query(
-      "SELECT * FROM advisory ORDER BY created_at DESC"
+      "SELECT * FROM advisory WHERE target_role = 'FARMER' OR target_role = 'ALL' ORDER BY created_at DESC"
     );
 
     res.status(200).json({
       success: true,
+      count: result.rowCount,
       data: result.rows
     });
   } catch (err) {
-    console.error("Error fetching advisory:", err.message);
-    res.status(500).json({ success: false, message: "Server Error" });
+    console.error("Advisory Error:", err.message);
+    res.status(500).json({ success: false, message: "Database Error" });
   }
 };
 
-module.exports = { getAdvisories };
+module.exports = { getFarmerAdvisory };
