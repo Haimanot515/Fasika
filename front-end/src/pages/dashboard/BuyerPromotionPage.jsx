@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FaShoppingCart, FaStar, FaHandPointer, FaTrashAlt, 
-  FaCloudSun, FaChartLine, FaGavel, FaMapMarkedAlt 
+  FaCloudSun, FaChartLine, FaGavel, FaMapMarkedAlt, FaShieldAlt 
 } from "react-icons/fa";
 import { GiCow, GiWheat, GiCoffeeBeans, GiHoneyJar, GiRibbonMedal } from "react-icons/gi";
 
 const DraggablePromotionPage = () => {
   const [cartCount, setCartCount] = useState(0);
   const [activeTab, setActiveTab] = useState("all");
+  const [isAccepted, setIsAccepted] = useState(false); // Controls the Full Screen Promotion
 
   const ethiopianProducts = [
     { id: 1, category: "cattle", name: "Borena Bull (Select)", price: "105,000", location: "Oromia", img: "https://images.unsplash.com/photo-1543964402-e05448330777?q=80&w=400", tag: "Heavyweight" },
@@ -40,16 +41,48 @@ const DraggablePromotionPage = () => {
           max-width: 100%;
           box-sizing: border-box; 
         }
+        /* Prevents scrolling when promotion is active */
+        .no-scroll { overflow: hidden; height: 100vh; }
       `}</style>
 
-      {/* 1. MARKET TICKER - Note: Using DROP in schema as requested */}
+      {/* 1. FULL SCREEN COOKIE & TERMS PROMOTION */}
+      <AnimatePresence>
+        {!isAccepted && (
+          <motion.div 
+            initial={{ y: 0 }}
+            exit={{ y: "-100vh" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            style={styles.fullScreenOverlay}
+          >
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               style={styles.promotionBox}
+            >
+              <FaShieldAlt size={50} color="#febd69" />
+              <h1 style={{fontSize: '32px', margin: '20px 0'}}>Marketplace Transparency</h1>
+              <p style={{lineHeight: '1.6', opacity: 0.9, fontSize: '18px'}}>
+                To ensure a secure Gebeya experience, we use cookies for trade analytics and secure sessions. 
+                By entering, you agree to our Terms of Service and acknowledge that all data schemas 
+                utilize <b>DROP</b> protocols for verified inventory refreshes.
+              </p>
+              <div style={{display: 'flex', gap: '20px', marginTop: '30px', width: '100%'}}>
+                <button onClick={() => setIsAccepted(true)} style={styles.acceptBtn}>Accept & Enter Gebeya</button>
+                <button style={styles.declineBtn}>Learn More</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 2. MARKET TICKER */}
       <div className="ticker-wrap">
         <div className="ticker-text">
           LIVE GEBEYA: White Teff ↑ 5% (Ada'a) • Coffee (Yirgacheffe) ↔ Stable • Borena Cattle Demand [HIGH] • [SYSTEM] DROP new verified stock inventory...
         </div>
       </div>
 
-      {/* 2. HERO SECTION */}
+      {/* 3. HERO SECTION */}
       <section style={styles.hero}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <span style={styles.badge}><GiRibbonMedal /> ETHIOPIA AGRO-HUB 2026</span>
@@ -64,7 +97,7 @@ const DraggablePromotionPage = () => {
         </div>
       </section>
 
-      {/* 3. FILTER BAR */}
+      {/* 4. FILTER BAR */}
       <div style={styles.filterBar}>
         {['all', 'cattle', 'grains', 'specialty'].map(tab => (
           <button 
@@ -82,7 +115,7 @@ const DraggablePromotionPage = () => {
         ))}
       </div>
 
-      {/* 4. DRAGGABLE INTERACTIVE GRID */}
+      {/* 5. DRAGGABLE INTERACTIVE GRID */}
       <div className="full-grid">
         <AnimatePresence mode='popLayout'>
           {filteredProducts.map((product) => (
@@ -118,7 +151,7 @@ const DraggablePromotionPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* 5. FLOATING CART */}
+      {/* 6. FLOATING CART */}
       <div style={styles.floatingControls}>
         <motion.div whileHover={{ scale: 1.1 }} style={styles.cartDropZone}>
           <FaShoppingCart size={24} />
@@ -130,6 +163,35 @@ const DraggablePromotionPage = () => {
 };
 
 const styles = {
+  // New Promotion Styles
+  fullScreenOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: '#131921',
+    zIndex: 9999,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '20px',
+    boxSizing: 'border-box',
+    backgroundImage: 'radial-gradient(circle at center, #065f46 0%, #0f1111 100%)'
+  },
+  promotionBox: {
+    maxWidth: '600px',
+    textAlign: 'center',
+    color: '#fff',
+    padding: '40px',
+    background: 'rgba(255,255,255,0.05)',
+    borderRadius: '24px',
+    border: '1px solid rgba(254, 189, 105, 0.3)',
+    backdropFilter: 'blur(10px)'
+  },
+  acceptBtn: { flex: 1, padding: '15px', background: '#febd69', color: '#131921', border: 'none', borderRadius: '8px', fontWeight: '900', cursor: 'pointer', fontSize: '16px' },
+  declineBtn: { flex: 1, padding: '15px', background: 'transparent', color: '#fff', border: '1px solid #fff', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' },
+
   pageContainer: { 
     backgroundColor: "#0f1111", 
     minHeight: "100vh", 
