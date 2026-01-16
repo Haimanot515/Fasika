@@ -1,33 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Leaf, Map, Ruler, Activity, X, Save } from 'lucide-react';
+import api from "../../api/axios"; 
+import { 
+  Plus, X, Save, Map, MapPin, Maximize, 
+  Activity, Wheat, Info, Loader2, Thermometer
+} from 'lucide-react';
 
 const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         plot_name: '',
         area_size: '',
-        land_status: 'Active'
+        land_status: 'Active',
+        crops: [],
+        animals: []
     });
-    const [loading, setLoading] = useState(true);
 
-    const token = localStorage.getItem('token');
-    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const LAND_PATH = `/farmer/farm/land/${plotId}`;
 
     useEffect(() => {
         const fetchCurrentPlot = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/farmer/farm/land', config);
-                const currentPlot = res.data.data.find(p => p.id === parseInt(plotId));
-                if (currentPlot) {
+                // Fetch specific plot from the registry
+                const res = await api.get('/farmer/farm/land');
+                const plot = res.data.data.find(p => p.id === parseInt(plotId));
+                if (plot) {
                     setFormData({
-                        plot_name: currentPlot.plot_name,
-                        area_size: currentPlot.area_size,
-                        land_status: currentPlot.land_status
+                        plot_name: plot.plot_name,
+                        area_size: plot.area_size,
+                        land_status: plot.land_status || 'Active',
+                        crops: plot.crops || [], // Assuming backend returns associated data
+                        animals: plot.animals || []
                     });
                 }
                 setLoading(false);
             } catch (err) {
-                console.error("Error loading plot details", err);
+                console.error("Registry Sync Failed", err);
                 setLoading(false);
             }
         };
@@ -37,109 +44,118 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:5000/api/farmer/farm/land/${plotId}`, formData, config);
-            onUpdateSuccess(); 
+            await api.put(LAND_PATH, formData);
+            alert("Success! Registry node updated.");
+            onUpdateSuccess();
         } catch (err) {
-            alert("Update failed. Please check the registry connection.");
+            alert("DROP update failed. Check node connection.");
         }
     };
 
     if (loading) return (
-        <div className="flex justify-center items-center p-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        <div style={styles.centerBlock}>
+            <Loader2 style={styles.spinner} size={40} />
+            <p style={styles.loadingText}>Loading Node #{plotId}...</p>
         </div>
     );
 
     return (
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-emerald-100">
-            {/* Header Section */}
-            <div className="bg-emerald-600 p-6 text-white flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-lg">
-                        <Map className="w-6 h-6 text-white" />
-                    </div>
+        <div style={styles.container}>
+            {/* Header: Smart OS Style */}
+            <div style={styles.header}>
+                <div style={styles.headerLeft}>
+                    <div style={styles.iconBox}><Map size={24} /></div>
                     <div>
-                        <h3 className="text-xl font-bold">Update Land Registry</h3>
-                        <p className="text-emerald-100 text-sm">Editing Plot ID: #{plotId}</p>
+                        <h2 style={styles.title}>UPDATE ASSET</h2>
+                        <p style={styles.subtitle}>Registry ID: 0x{plotId?.toString().padStart(4, '0')}</p>
                     </div>
                 </div>
-                <button onClick={onCancel} className="hover:bg-emerald-700 p-2 rounded-full transition">
-                    <X className="w-6 h-6" />
-                </button>
+                <button onClick={onCancel} style={styles.closeBtn}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleUpdate} className="p-8 space-y-6">
-                {/* Plot Name */}
-                <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                        <Leaf className="w-4 h-4 text-emerald-600" />
-                        Plot Name / Designation
-                    </label>
-                    <input 
-                        type="text" 
-                        placeholder="e.g. North Orchard"
-                        value={formData.plot_name}
-                        onChange={(e) => setFormData({...formData, plot_name: e.target.value})}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-gray-50"
-                        required 
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Area Size */}
-                    <div className="space-y-2">
-                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                            <Ruler className="w-4 h-4 text-emerald-600" />
-                            Area Size (Hectares)
-                        </label>
+            <form onSubmit={handleUpdate} style={styles.form}>
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>Identity Name</label>
+                    <div style={styles.inputWrapper}>
+                        <MapPin style={styles.innerIcon} size={18} />
                         <input 
-                            type="number" 
-                            step="0.01"
-                            value={formData.area_size}
-                            onChange={(e) => setFormData({...formData, area_size: e.target.value})}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-gray-50"
-                            required 
+                            style={styles.input}
+                            value={formData.plot_name}
+                            onChange={(e) => setFormData({...formData, plot_name: e.target.value})}
+                            required
                         />
                     </div>
+                </div>
 
-                    {/* Status Select */}
-                    <div className="space-y-2">
-                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                            <Activity className="w-4 h-4 text-emerald-600" />
-                            Current Status
-                        </label>
+                <div style={styles.row}>
+                    <div style={{flex: 1}}>
+                        <label style={styles.label}>Calculated Area (Ha)</label>
+                        <div style={styles.inputWrapper}>
+                            <Maximize style={styles.innerIcon} size={18} />
+                            <input 
+                                style={styles.input}
+                                type="number" step="0.01"
+                                value={formData.area_size}
+                                onChange={(e) => setFormData({...formData, area_size: e.target.value})}
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div style={{flex: 1}}>
+                        <label style={styles.label}>Node Status</label>
                         <select 
+                            style={styles.select}
                             value={formData.land_status}
                             onChange={(e) => setFormData({...formData, land_status: e.target.value})}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-gray-50 appearance-none cursor-pointer"
                         >
-                            <option value="Active">🟢 Active Production</option>
-                            <option value="Fallow">🟡 Fallow (Resting)</option>
-                            <option value="Under Maintenance">🟠 Under Maintenance</option>
+                            <option value="Active">Active Production</option>
+                            <option value="Fallow">Fallow (Resting)</option>
+                            <option value="Maintenance">Maintenance</option>
                         </select>
                     </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <button 
-                        type="submit" 
-                        className="flex-1 bg-emerald-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-emerald-700 transform hover:-translate-y-0.5 transition-all shadow-lg flex items-center justify-center gap-2"
-                    >
-                        <Save className="w-5 h-5" />
-                        Save Changes
+                <div style={styles.infoBox}>
+                    <Info size={16} color="#10b981" />
+                    <p style={styles.infoText}>Modifying this asset will update all linked biological data across the node.</p>
+                </div>
+
+                <div style={styles.footer}>
+                    <button type="submit" style={styles.saveBtn}>
+                        <Save size={18} /> SAVE CHANGES
                     </button>
-                    <button 
-                        type="button" 
-                        onClick={onCancel}
-                        className="flex-1 bg-gray-100 text-gray-600 py-3 px-6 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
-                    >
-                        Cancel
+                    <button type="button" onClick={onCancel} style={styles.cancelBtn}>
+                        CANCEL
                     </button>
                 </div>
             </form>
         </div>
     );
+};
+
+const styles = {
+    container: { backgroundColor: '#fff', borderRadius: '32px', border: '1px solid #f1f5f9', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.1)' },
+    header: { padding: '30px', backgroundColor: '#0f172a', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+    headerLeft: { display: 'flex', alignItems: 'center', gap: '15px' },
+    iconBox: { padding: '12px', backgroundColor: '#10b981', borderRadius: '14px', color: '#fff' },
+    title: { margin: 0, fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px' },
+    subtitle: { margin: 0, fontSize: '11px', color: '#94a3b8', fontWeight: '700', letterSpacing: '1px' },
+    closeBtn: { background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' },
+    form: { padding: '40px', display: 'flex', flexDirection: 'column', gap: '25px' },
+    label: { fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'block' },
+    inputWrapper: { position: 'relative' },
+    innerIcon: { position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#cbd5e1' },
+    input: { width: '100%', padding: '15px 15px 15px 45px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '15px', fontWeight: '700', boxSizing: 'border-box' },
+    select: { width: '100%', padding: '15px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '15px', fontWeight: '700', cursor: 'pointer' },
+    row: { display: 'flex', gap: '20px' },
+    infoBox: { display: 'flex', gap: '12px', padding: '15px', backgroundColor: '#f0fdf4', borderRadius: '15px' },
+    infoText: { fontSize: '12px', color: '#166534', margin: 0, fontWeight: '500' },
+    footer: { display: 'flex', gap: '15px', marginTop: '10px' },
+    saveBtn: { flex: 2, padding: '18px', backgroundColor: '#0f172a', color: '#fff', border: 'none', borderRadius: '18px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' },
+    cancelBtn: { flex: 1, padding: '18px', backgroundColor: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '18px', fontWeight: '800', cursor: 'pointer' },
+    centerBlock: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '50px' },
+    spinner: { color: '#10b981', animation: 'spin 2s linear infinite', marginBottom: '15px' },
+    loadingText: { fontSize: '12px', fontWeight: '800', color: '#cbd5e1', letterSpacing: '1px' }
 };
 
 export default UpdateLand;
