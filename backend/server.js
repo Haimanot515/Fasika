@@ -18,7 +18,7 @@ const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes');
 const advisoryRoutes = require("./routes/farmer/farmerAdvisoryRoutes");
 const farmerSupportRoutes = require('./routes/farmer/farmerSupportRoutes');
 // Import Routes
-const notificationRoutes = require("./routes/farmerNotificationsRoutes");
+const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 
 // 2️⃣ GLOBAL MIDDLEWARE
