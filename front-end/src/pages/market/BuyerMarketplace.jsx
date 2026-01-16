@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import api from "../../api/axios"; 
-import { FaSearch, FaShieldAlt, FaMapMarkerAlt, FaStar } from "react-icons/fa";
+import { FaSearch, FaShieldAlt, FaMapMarkerAlt, FaStar, FaStore, FaArrowRight } from "react-icons/fa";
 
 const BuyerMarketplace = () => {
   const [products, setProducts] = useState([]);
@@ -9,7 +9,6 @@ const BuyerMarketplace = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  // Ref for the Intersection Observer (The "Anchor")
   const observer = useRef();
   const lastElementRef = useCallback(node => {
     if (loading) return;
@@ -25,16 +24,10 @@ const BuyerMarketplace = () => {
   const fetchMarketplace = useCallback(async () => {
     setLoading(true);
     try {
-      // Backend handles LIMIT and OFFSET based on page
       const { data } = await api.get(`/buyer/marketplace/public?page=${page}&limit=12`);
       const newProducts = data.data || [];
-      
       setProducts(prev => [...prev, ...newProducts]);
-      
-      // If we got less than 12 items, we've hit the end of the database
-      if (newProducts.length < 12) {
-        setHasMore(false);
-      }
+      if (newProducts.length < 12) setHasMore(false);
     } catch (err) {
       console.error("Marketplace Fetch Error:", err);
     } finally {
@@ -49,141 +42,208 @@ const BuyerMarketplace = () => {
   const categories = [
     "Cereals & Grains", "Fruits & Vegetables", "Oilseeds", "Livestock", 
     "Spices & Herbs", "Processed Goods", "Dairy Products", "Poultry", 
-    "Coffee & Tea", "Pulses", "Tubers & Roots", "Agricultural Tools",
-    "Organic Fertilizers", "Animal Feed", "Honey & Wax", "Textile Fibers"
+    "Coffee & Tea", "Pulses", "Tubers & Roots"
   ];
-
-  const filtered = products.filter(p =>
-    p.product_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div style={premiumStyles.pageWrapper}>
       <style>{`
-        body, html { margin: 0; padding: 0; overflow-x: hidden; background: #e2e5e9; font-family: 'Segoe UI', Roboto, sans-serif; }
-        .amazon-header { background-color: #131921; padding: 10px 20px; display: flex; align-items: center; gap: 30px; position: sticky; top: 0; z-index: 1001; }
-        .search-container-amazon { display: flex; flex: 1; max-width: 700px; height: 42px; border-radius: 4px; overflow: hidden; background-color: #fff; }
-        .search-input-amazon { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
-        .search-button-amazon { background-color: #febd69; border: none; width: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
         
-        .full-edge-grid { 
-          display: grid; 
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
-          gap: 15px; 
-          width: 100%;
-          padding: 15px; 
-          box-sizing: border-box;
+        body, html { 
+          margin: 0; padding: 0; overflow-x: hidden; 
+          background: #f8fafc; 
+          font-family: 'Plus Jakarta Sans', sans-serif; 
         }
 
-        .alibaba-card { 
-          background: #ffffff; 
-          height: 455px; 
-          display: flex; 
-          flex-direction: column; 
-          border-radius: 8px; 
+        /* PREMIUM GLASS HEADER */
+        .glass-header {
+          background: rgba(19, 25, 33, 0.95);
+          backdrop-filter: blur(10px);
+          padding: 15px 40px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: sticky;
+          top: 0;
+          z-index: 1001;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .search-pill {
+          display: flex;
+          background: rgba(255,255,255,0.08);
+          border-radius: 50px;
+          padding: 5px 20px;
+          width: 40%;
+          border: 1px solid rgba(255,255,255,0.1);
+          transition: all 0.3s ease;
+        }
+        .search-pill:focus-within {
+          background: #fff;
+          width: 45%;
+          box-shadow: 0 0 0 4px rgba(254, 189, 105, 0.2);
+        }
+        .search-pill input {
+          background: transparent; border: none; outline: none;
+          color: #fff; padding: 10px; width: 100%; font-size: 14px;
+        }
+        .search-pill:focus-within input { color: #111; }
+
+        /* PRODUCT CARD DESIGN */
+        .premium-card {
+          background: #fff;
+          border-radius: 20px;
           overflow: hidden;
-          transition: transform 0.2s;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* SKELETON ANIMATION */
-        @keyframes shimmer {
-          0% { background-position: -468px 0; }
-          100% { background-position: 468px 0; }
-        }
-        .skeleton {
-          background: #f6f7f8;
-          background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
-          background-repeat: no-repeat;
-          background-size: 800px 100%;
-          display: inline-block;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid #f1f5f9;
+          display: flex;
+          flex-direction: column;
           position: relative;
-          animation: shimmer 1.5s linear infinite forwards;
+        }
+        .premium-card:hover {
+          transform: translateY(-10px);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
         }
 
-        .spinner {
-          width: 40px; height: 40px;
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #febd69;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
+        .img-zoom-cont {
+          height: 240px;
+          overflow: hidden;
+          position: relative;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .premium-card img {
+          width: 100%; height: 100%; object-fit: cover;
+          transition: transform 0.6s ease;
+        }
+        .premium-card:hover img { transform: scale(1.1); }
+
+        .price-tag {
+          background: #131921;
+          color: #febd69;
+          padding: 8px 15px;
+          border-radius: 12px;
+          font-weight: 800;
+          font-size: 18px;
+          position: absolute;
+          bottom: 15px;
+          right: 15px;
+          box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        }
+
+        .contact-btn-premium {
+          background: #131921;
+          color: #fff;
+          border: none;
+          padding: 14px;
+          border-radius: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          transition: all 0.3s ease;
+          margin-top: 15px;
+        }
+        .contact-btn-premium:hover {
+          background: #febd69;
+          color: #131921;
+        }
+
+        /* SHIMMER SKELETON */
+        .shimmer-box {
+          height: 400px;
+          background: #eceef1;
+          background-image: linear-gradient(90deg, #eceef1 0px, #f4f4f4 40px, #eceef1 80px);
+          background-size: 250px;
+          animation: shine-loading 2s infinite linear;
+          border-radius: 20px;
+        }
+        @keyframes shine-loading { 0% { background-position: -100px; } 100% { background-position: 300px; } }
+
+        .spinner-modern {
+          width: 40px; height: 40px;
+          border: 3px solid rgba(19, 25, 33, 0.1);
+          border-top: 3px solid #131921;
+          border-radius: 50%;
+          animation: spin 0.8s infinite linear;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
       `}</style>
       
-      <div className="amazon-header">
-        <div style={premiumStyles.logo}>FASIKA<span style={{ color: "#febd69" }}>MARKET</span></div>
-        <div style={{flex: 1, display: 'flex', justifyContent: 'center'}}>
-          <div className="search-container-amazon">
-            <input type="text" className="search-input-amazon" placeholder="Search products..." onChange={(e) => setSearchTerm(e.target.value)} />
-            <button className="search-button-amazon"><FaSearch size={18} /></button>
-          </div>
+      <header className="glass-header">
+        <div style={premiumStyles.logo}>FASIKA<span style={{color: '#febd69'}}>MARKET</span></div>
+        <div className="search-pill">
+          <FaSearch color="#febd69" style={{marginTop: '12px'}} />
+          <input 
+            placeholder="Search premium agricultural goods..." 
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      </div>
+        <div style={{color: '#fff', fontSize: '14px', fontWeight: '600'}}>
+          <FaStore /> Marketplace v2.0
+        </div>
+      </header>
 
-      <nav style={premiumStyles.catNav}>
-        {categories.map(cat => <span key={cat} style={premiumStyles.categoryItem}>{cat}</span>)}
-      </nav>
+      <div style={premiumStyles.mainContent}>
+        <div style={premiumStyles.heroSection}>
+          <h1 style={premiumStyles.heroTitle}>Direct from the Source</h1>
+          <p style={premiumStyles.heroSub}>Ethopian's premium marketplace for quality agricultural trade.</p>
+        </div>
 
-      <div className="full-edge-grid">
-        {filtered.map((item, index) => {
-          // If it's the last item in the list, attach the observer ref
-          const isLast = products.length === index + 1;
-          return (
-            <div key={`${item.id}-${index}`} ref={isLast ? lastElementRef : null} className="alibaba-card">
-              <div style={premiumStyles.imgBox}>
-                <img src={item.primary_image_url || "https://via.placeholder.com/300"} alt="" style={premiumStyles.pImg} />
-                <div style={premiumStyles.badge}><FaShieldAlt size={11} /> VERIFIED</div>
-              </div>
-              <div style={premiumStyles.content}>
-                <h2 style={premiumStyles.title}>{item.product_name}</h2>
-                <div style={premiumStyles.priceRow}>
-                   <span style={premiumStyles.price}>ETB {item.price_per_unit}</span>
-                   <span style={premiumStyles.unit}>/ {item.unit || 'Qtl'}</span>
+        <div style={premiumStyles.grid}>
+          {products.filter(p => p.product_name?.toLowerCase().includes(searchTerm.toLowerCase())).map((item, index) => {
+            const isLast = products.length === index + 1;
+            return (
+              <div key={`${item.id}-${index}`} ref={isLast ? lastElementRef : null} className="premium-card">
+                <div className="img-zoom-cont">
+                  <img src={item.primary_image_url || "https://via.placeholder.com/400"} alt="" />
+                  <div className="price-tag">ETB {item.price_per_unit}</div>
                 </div>
-                <div style={premiumStyles.location}><FaMapMarkerAlt size={11} /> Ethiopia</div>
-                <button style={premiumStyles.btn}>Contact Supplier</button>
+                <div style={{padding: '20px', display: 'flex', flexDirection: 'column', flex: 1}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <span style={premiumStyles.catLabel}>AGRICULTURE</span>
+                    <div style={{display: 'flex', gap: '2px'}}>
+                      {[...Array(5)].map((_, i) => <FaStar key={i} size={10} color="#febd69" />)}
+                    </div>
+                  </div>
+                  <h3 style={premiumStyles.pTitle}>{item.product_name}</h3>
+                  <div style={premiumStyles.locText}>
+                    <FaMapMarkerAlt /> Addis Ababa, Ethiopia • <strong>{item.quantity} {item.unit || 'Qtl'} Available</strong>
+                  </div>
+                  <button className="contact-btn-premium">
+                    Contact Supplier <FaArrowRight size={14} />
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        {/* Industry Level Skeletons while loading */}
-        {loading && [1, 2, 3, 4].map(i => (
-          <div key={`skel-${i}`} className="alibaba-card">
-             <div className="skeleton" style={{ height: '200px', width: '100%' }}></div>
-             <div style={{ padding: '15px' }}>
-                <div className="skeleton" style={{ height: '20px', width: '80%', marginBottom: '10px' }}></div>
-                <div className="skeleton" style={{ height: '30px', width: '50%' }}></div>
-             </div>
-          </div>
-        ))}
-      </div>
+          {loading && [1, 2, 3, 4].map(i => <div key={i} className="shimmer-box"></div>)}
+        </div>
 
-      <div style={premiumStyles.footer}>
-        {loading && <div className="spinner"></div>}
-        {!hasMore && <span>Inventory fully loaded.</span>}
+        <div style={premiumStyles.loadArea}>
+          {loading && <div className="spinner-modern"></div>}
+          {!hasMore && <div style={premiumStyles.endNote}>All verified listings have been loaded.</div>}
+        </div>
       </div>
     </div>
   );
 };
 
 const premiumStyles = {
-  pageWrapper: { width: "100vw", minHeight: "100vh" },
-  logo: { fontSize: "24px", fontWeight: "900", color: "#fff" },
-  catNav: { background: "#232f3e", padding: "12px 20px", overflowX: "auto", whiteSpace: "nowrap", display: "flex", gap: "50px" },
-  categoryItem: { color: "#fff", cursor: "pointer", fontSize: "14px" },
-  imgBox: { height: "200px", position: "relative", overflow: "hidden" },
-  pImg: { width: "100%", height: "100%", objectFit: "cover" },
-  badge: { position: "absolute", top: "10px", left: "10px", background: "#131921", color: "#fff", padding: "4px 8px", fontSize: "10px", borderRadius: "4px" },
-  content: { padding: "15px", display: "flex", flexDirection: "column", flex: 1 },
-  title: { fontSize: "16px", fontWeight: "bold", margin: "0 0 10px 0", height: "40px" },
-  priceRow: { margin: "5px 0" },
-  price: { fontSize: "20px", fontWeight: "800" },
-  unit: { fontSize: "12px", color: "#666" },
-  location: { fontSize: "12px", color: "#6b7280", marginTop: "10px" },
-  btn: { marginTop: "auto", width: "100%", padding: "10px", background: "transparent", border: "2px solid #131921", fontWeight: "bold", cursor: "pointer", borderRadius: "6px" },
-  footer: { padding: "50px", display: "flex", justifyContent: "center", color: "#131921", fontWeight: "bold" }
+  pageWrapper: { minHeight: "100vh" },
+  logo: { fontSize: "26px", fontWeight: "900", color: "#fff", letterSpacing: "-1px" },
+  mainContent: { maxWidth: "1400px", margin: "0 auto", padding: "0 40px" },
+  heroSection: { padding: "60px 0", textAlign: "center" },
+  heroTitle: { fontSize: "48px", fontWeight: "800", color: "#131921", margin: 0 },
+  heroSub: { fontSize: "18px", color: "#64748b", marginTop: "10px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "30px" },
+  catLabel: { fontSize: "10px", fontWeight: "800", color: "#64748b", letterSpacing: "1px" },
+  pTitle: { fontSize: "20px", fontWeight: "700", color: "#1e293b", margin: "10px 0" },
+  locText: { fontSize: "13px", color: "#64748b", display: "flex", alignItems: "center", gap: "5px" },
+  loadArea: { padding: "80px", display: "flex", justifyContent: "center" },
+  endNote: { color: "#94a3b8", fontWeight: "600", fontSize: "14px", borderTop: "1px solid #e2e8f0", paddingTop: "20px", width: "100%", textAlign: "center" }
 };
 
 export default BuyerMarketplace;
