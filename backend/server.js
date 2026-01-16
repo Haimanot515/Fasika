@@ -17,7 +17,6 @@ const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes');
 const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); 
 const advisoryRoutes = require("./routes/farmer/farmerAdvisoryRoutes");
 const farmerSupportRoutes = require('./routes/farmer/farmerSupportRoutes');
-// Import Routes
 const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 
@@ -58,17 +57,17 @@ pool.connect((err, client, release) => {
   }
 });
 
-// 5️⃣ MOUNT ROUTES
+// 5️⃣ MOUNT ROUTES (Organized to avoid conflicts)
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/farmers', adminFarmerRoutes);
 app.use('/api/farmer/farm', farmerFarmRoutes);
 app.use('/api/farmer/listings', farmerListingRoutes);
 app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
-app.use("/api/farmer", advisoryRoutes);
-// This makes Support Hub available at: /api/farmer/support/resources
-app.use('/api/farmer', farmerSupportRoutes);
-// This matches your frontend call: api.get("/farmer/notifications")
+
+// Specialized Farmer Registry Routes
+app.use("/api/farmer/advisory", advisoryRoutes);
+app.use('/api/farmer/support', farmerSupportRoutes);
 app.use("/api/farmer/notifications", notificationRoutes);
 
 // 6️⃣ CATCH-ALL 404 HANDLER
@@ -79,7 +78,6 @@ app.use((req, res) => {
     message: `The path ${req.originalUrl} does not exist on this DROP registry.`
   });
 });
-
 
 // 7️⃣ GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
