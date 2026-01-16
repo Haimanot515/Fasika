@@ -103,7 +103,7 @@ const BuyerMarketplace = () => {
           padding-bottom: 15px;
           cursor: pointer;
           font-size: 15px;
-          font-weight: 800; /* Bold for brightness/legibility */
+          font-weight: 800; 
           color: #999;
           white-space: nowrap;
           transition: 0.2s;
@@ -124,21 +124,6 @@ const BuyerMarketplace = () => {
           height: 4px;
           background: #ff9900;
           border-radius: 10px;
-        }
-
-        /* Clean badges */
-        .verified-badge {
-          position: absolute; top: 15px; left: 15px; background: #00b411;
-          color: white; padding: 5px 12px; fontSize: 11px; fontWeight: 900; 
-          borderRadius: 4px; zIndex: 2; display: flex; alignItems: center; gap: 5px;
-          box-shadow: 0 4px 10px rgba(0,180,17,0.3);
-        }
-
-        .type-badge {
-          position: absolute; bottom: 15px; right: 15px; background: #ffffff;
-          padding: 7px 15px; borderRadius: 30px; fontSize: 11px; fontWeight: 900;
-          display: flex; alignItems: center; gap: 8px; 
-          box-shadow: 0 4px 15px rgba(0,0,0,0.1); zIndex: 2; color: #111;
         }
         
         button:focus, .agri-card:focus { outline: none; }
@@ -205,11 +190,7 @@ const BuyerMarketplace = () => {
                 alt={item.product_name} 
                 className="product-img" 
               />
-              <div className="verified-badge"><FaShieldAlt size={11} /> </div>
-              <div className="type-badge">
-                {item.category === "Livestock" ? <GiCow color="#5d4037" size={16}/> : <GiFruitBowl color="#e67e22" size={16}/>}
-                {item.category || ""}
-              </div>
+              {/* Badges removed from here */}
             </div>
 
             <div style={styles.textHalf}>
