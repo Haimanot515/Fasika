@@ -31,6 +31,7 @@ import AddFarmerListing from "./pages/market/AddFarmerListing";
 import ViewFarmerListing from "./pages/market/ViewFarmerListing";
 import EditFarmerListing from "./pages/market/EditFarmerListing"; 
 import BuyerMarketplace from "./pages/market/BuyerMarketplace";
+import AdvisoryBoard from "./pages/farmer/AdvisoryBoard";
 
 // --- ECOSYSTEM & DASHBOARD ---
 import DynamicDashboard from "./pages/dashboard/DynamicDashboard";
