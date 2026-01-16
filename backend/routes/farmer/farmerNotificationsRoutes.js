@@ -1,12 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authenticate = require('../../middleware/authMiddleware');
+const { 
+  getNotifications, 
+  markAsRead 
+} = require("../controllers/farmerNotificationsController);
 
-const { getNotifications } = require('../../controllers/farmer/farmerNotificationsController');
+// --- Protective Middleware (Optional) ---
+// If you have a middleware to verify the farmer's token, import it here
+// const { protect } = require("../middleware/authMiddleware");
 
-// =======================
-// Notifications
-// =======================
-router.get('/notifications', authenticate, getNotifications);
+/**
+ * @route   GET /api/farmer/notifications
+ * @desc    Fetch all vertical log notifications from DROP Registry
+ * @access  Private
+ */
+router.get("/", getNotifications);
+
+/**
+ * @route   PUT /api/farmer/notifications/:id/read
+ * @desc    Acknowledge a specific notification
+ * @access  Private
+ */
+router.put("/:id/read", markAsRead);
 
 module.exports = router;
