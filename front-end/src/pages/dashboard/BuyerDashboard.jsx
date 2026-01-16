@@ -15,7 +15,6 @@ const BuyerMarketplace = () => {
   useEffect(() => {
     const fetchMarketplace = async () => {
       try {
-        // Using the configured api instance instead of raw axios
         const { data } = await api.get("/buyer/marketplace/public");
         setProducts(data.data || []);
       } catch (err) {
@@ -32,6 +31,8 @@ const BuyerMarketplace = () => {
   return (
     <div style={styles.pageWrapper}>
       <style>{`
+        body, html { margin: 0; padding: 0; background: #ffffff; }
+
         .full-edge-grid { 
           display: grid; 
           grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -43,37 +44,47 @@ const BuyerMarketplace = () => {
 
         .agri-card { 
           background: #ffffff; 
-          height: 480px; 
+          height: 500px; 
           cursor: pointer; 
           display: flex; 
           flex-direction: column; 
           border-radius: 12px; 
           overflow: hidden;
-          transition: 0.3s;
-          border: 1px solid #e5e7eb;
+          transition: all 0.3s ease;
+          border: 1px solid #f0f0f0;
           position: relative;
+          outline: none; /* Removes border line on click */
+          user-select: none;
         }
         
         .agri-card:hover { 
-          box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
           transform: translateY(-5px);
           border-color: #065f46;
         }
 
+        /* 1. Zoom Effect on Hover */
         .image-container { 
-          height: 220px; 
+          height: 230px; 
           width: 100%; 
           overflow: hidden; 
           position: relative; 
-          background: #f9fafb;
+          background: #fdfdfd;
         }
-        
-        .product-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .product-img { 
+          width: 100%; 
+          height: 100%; 
+          object-fit: cover; 
+          transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .agri-card:hover .product-img { 
+          transform: scale(1.1); 
+        }
 
         .welcome-section {
           padding: 40px 20px 0px;
           background: #ffffff;
-          border-bottom: 1px solid #e5e7eb;
+          border-bottom: 1px solid #eeeeee;
         }
 
         .tab-wrapper {
@@ -85,17 +96,14 @@ const BuyerMarketplace = () => {
           -ms-overflow-style: none;
           padding-right: 40px;
         }
-
-        .tab-wrapper::-webkit-scrollbar {
-          display: none;
-        }
+        .tab-wrapper::-webkit-scrollbar { display: none; }
 
         .market-tab {
           padding-bottom: 15px;
           cursor: pointer;
           font-size: 15px;
           font-weight: 700;
-          color: #718096;
+          color: #888;
           white-space: nowrap;
           transition: 0.3s;
           display: flex;
@@ -104,46 +112,36 @@ const BuyerMarketplace = () => {
           position: relative;
           flex-shrink: 0;
         }
-
-        .market-tab:hover {
-          color: #065f46;
-        }
-
-        .market-tab.active {
-          color: #065f46;
-        }
-
+        .market-tab:hover { color: #065f46; }
+        .market-tab.active { color: #065f46; }
         .market-tab.active::after {
           content: "";
           position: absolute;
           bottom: 0;
           left: 0;
           width: 100%;
-          height: 3px;
+          height: 3.5px;
           background: #febd69;
           border-radius: 10px;
         }
 
-        .icon-glow {
-          filter: drop-shadow(0 0 2px rgba(0,0,0,0.1));
-        }
-        .active .icon-glow {
-          filter: drop-shadow(0 0 5px rgba(39, 174, 96, 0.4));
-        }
+        .icon-glow { filter: drop-shadow(0 0 2px rgba(0,0,0,0.1)); }
+        .active .icon-glow { filter: drop-shadow(0 0 5px rgba(39, 174, 96, 0.4)); }
+        
+        /* Remove button click outline */
+        button:focus, .agri-card:focus { outline: none; }
       `}</style>
 
       <div className="welcome-section">
         <h1 style={{ color: "#065f46", margin: "0 0 5px 0", fontSize: "28px", fontWeight: "900" }}>
           Welcome to the Digital Gebeya 
         </h1>
-        <p style={{ color: "#666", margin: 0, fontSize: "16px" }}>
+        <p style={{ color: "#444", margin: 0, fontSize: "16px" }}>
           Explore fresh produce and quality livestock direct from verified Ethiopian farmers.
         </p>
         
         <div className="tab-wrapper">
-          <div className={`market-tab ${activeTab === "for-you" ? "active" : ""}`} onClick={() => setActiveTab("for-you")}>
-            For You
-          </div>
+          <div className={`market-tab ${activeTab === "for-you" ? "active" : ""}`} onClick={() => setActiveTab("for-you")}>For You</div>
           <div className={`market-tab ${activeTab === "recommended" ? "active" : ""}`} onClick={() => setActiveTab("recommended")}>
             <FaFire className="icon-glow" size={14} color={activeTab === "recommended" ? "#e67e22" : "#999"} /> Recommended
           </div>
@@ -188,7 +186,7 @@ const BuyerMarketplace = () => {
 
       <div className="full-edge-grid">
         {products.map((item) => (
-          <div key={item.id} className="agri-card">
+          <div key={item.id} className="agri-card" tabIndex="0">
             <div className="image-container">
               <img 
                 src={item.primary_image_url || "https://images.unsplash.com/photo-1546501078-c53c82990ddd?q=80&w=300&auto=format&fit=crop"} 
@@ -229,28 +227,28 @@ const BuyerMarketplace = () => {
 };
 
 const styles = {
-  pageWrapper: { width: "100%", background: "#f0f2f2", minHeight: "100vh" },
-  textHalf: { padding: "15px", display: "flex", flexDirection: "column", flex: 1, gap: '8px' },
-  productTitle: { fontSize: "18px", fontWeight: "700", color: "#111", margin: 0 },
+  pageWrapper: { width: "100%", background: "#ffffff", minHeight: "100vh" },
+  textHalf: { padding: "18px", display: "flex", flexDirection: "column", flex: 1, gap: '10px' },
+  productTitle: { fontSize: "19px", fontWeight: "700", color: "#111", margin: 0 },
   priceRow: { display: "flex", alignItems: "baseline", gap: "5px" },
-  priceMain: { fontSize: "24px", fontWeight: "800", color: "#065f46" },
+  priceMain: { fontSize: "26px", fontWeight: "800", color: "#111" },
   unit: { fontSize: "14px", color: "#666" },
-  infoRow: { display: 'flex', gap: '15px', fontSize: '13px', color: '#444' },
-  location: { fontSize: "12px", color: "#6b7280", display: 'flex', alignItems: 'center', gap: '5px' },
+  infoRow: { display: 'flex', gap: '15px', fontSize: '13px', color: '#333' },
+  location: { fontSize: "12px", color: "#888", display: 'flex', alignItems: 'center', gap: '5px' },
   ratingRow: { display: "flex", alignItems: 'center', gap: "3px" },
   verifiedBadge: {
-    position: "absolute", top: "10px", left: "10px", background: "rgba(6, 95, 70, 0.9)",
-    color: "white", padding: "4px 10px", fontSize: "11px", fontWeight: "700", borderRadius: "4px",
-    zIndex: 2, display: "flex", alignItems: "center", gap: "5px"
+    position: "absolute", top: "12px", left: "12px", background: "#27ae60",
+    color: "white", padding: "5px 12px", fontSize: "11px", fontWeight: "800", borderRadius: "4px",
+    zIndex: 2, display: "flex", alignItems: "center", gap: "5px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
   },
   typeBadge: {
-    position: "absolute", bottom: "10px", right: "10px", background: "#fff",
-    padding: "5px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold",
-    display: "flex", alignItems: "center", gap: "6px", boxShadow: "0 2px 5px rgba(0,0,0,0.1)", zIndex: 2
+    position: "absolute", bottom: "12px", right: "12px", background: "#fff",
+    padding: "6px 14px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold",
+    display: "flex", alignItems: "center", gap: "6px", boxShadow: "0 3px 6px rgba(0,0,0,0.08)", zIndex: 2
   },
   contactBtn: { 
-    width: "100%", marginTop: "auto", padding: "12px", borderRadius: "8px", border: "none", 
-    color: "#fff", background: "#065f46", fontWeight: "bold", fontSize: "14px", cursor: 'pointer'
+    width: "100%", marginTop: "auto", padding: "14px", borderRadius: "25px", border: "none", 
+    color: "#fff", background: "linear-gradient(90deg, #ff9000 0%, #ff5000 100%)", fontWeight: "bold", fontSize: "14px", cursor: 'pointer', outline: 'none'
   },
   loader: { textAlign: 'center', padding: '100px', fontSize: '18px', color: '#065f46', fontWeight: 'bold' }
 };
