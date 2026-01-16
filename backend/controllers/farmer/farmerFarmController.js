@@ -43,8 +43,11 @@ exports.getFarmSummary = async (req, res) => {
 exports.addLand = async (req, res) => {
   try {
     const farmerId = await getInternalFarmerId(req.user.id);
-    if (!farmerId)
-      return res.status(404).json({ success: false, message: "Farmer profile missing from registry" });
+    
+    if (!farmerId) {
+        console.warn(`[REGISTRY] AddLand failed: No farmer profile for User ${req.user.id}`);
+        return res.status(404).json({ success: false, message: "Farmer profile missing from registry" });
+    }
 
     const { plot_name, area_size, land_status } = req.body;
 
@@ -56,6 +59,7 @@ exports.addLand = async (req, res) => {
 
     res.status(201).json({ success: true, data: rows[0] });
   } catch (err) {
+    console.error("AddLand DB Error:", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -63,6 +67,10 @@ exports.addLand = async (req, res) => {
 exports.getLand = async (req, res) => {
   try {
     const farmerId = await getInternalFarmerId(req.user.id);
+    
+    if (!farmerId) {
+        return res.status(404).json({ success: false, message: "Farmer profile missing" });
+    }
 
     const { rows } = await pool.query(
       'SELECT * FROM land_plots WHERE farmer_id = $1 ORDER BY created_at DESC',
@@ -71,6 +79,7 @@ exports.getLand = async (req, res) => {
 
     res.json({ success: true, data: rows });
   } catch (err) {
+    console.error("GetLand DB Error:", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 };
