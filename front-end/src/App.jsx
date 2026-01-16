@@ -86,6 +86,7 @@ function App() {
           <Route path="/my-farm/land/view" element={<ViewLand />} />
           <Route path="/my-farm/land/add" element={<AddLand />} />
           <Route path="/my-farm/land/update/:id" element={<UpdateLand />} />
+          <Route path="/advisory" element={<AdvisoryBoard />} />
 
         
        
