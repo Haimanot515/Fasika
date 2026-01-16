@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "../../api/axios"; 
+import api from "../api/axios"; 
 import { 
   FaLightbulb, FaCloudSun, FaExclamationTriangle, FaSeedling, 
   FaCalendarAlt, FaChevronRight 
@@ -106,3 +106,4 @@ const styles = {
 };
 
 export default AdvisoryBoard;
+
