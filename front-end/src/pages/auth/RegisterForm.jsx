@@ -220,12 +220,12 @@ const RegisterForm = () => {
                   <div className="role-selector">
                     <p className="small-label">I am joining as a:</p>
                     <div className="role-grid">
-                      {['farmer', 'buyer', 'both'].map(r => (
+                      {['farmer', 'buyer'].map(r => (
                         <label key={r} className={`role-card ${formData.role === r ? 'active' : ''}`}>
                           <input type="radio" checked={formData.role === r} onChange={() => setFormData(p => ({ ...p, role: r }))} />
                           {r === 'farmer' && <RiSeedlingLine />}
                           {r === 'buyer' && <RiUserSearchLine />}
-                          {r === 'both' && <MdOutlineAssignmentTurnedIn />}
+    
                           <span>{r.toUpperCase()}</span>
                         </label>
                       ))}
