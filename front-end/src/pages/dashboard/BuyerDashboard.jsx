@@ -26,7 +26,7 @@ const BuyerMarketplace = () => {
     fetchMarketplace();
   }, []);
 
-  if (loading) return <div style={styles.loader}>🚜 Loading Marketplace Grid...</div>;
+  if (loading) return <div style={styles.loader}> Loading Fasika Marketplace Grid...</div>;
 
   return (
     <div style={styles.pageWrapper}>
@@ -205,10 +205,10 @@ const BuyerMarketplace = () => {
                 alt={item.product_name} 
                 className="product-img" 
               />
-              <div className="verified-badge"><FaShieldAlt size={11} /> VERIFIED</div>
+              <div className="verified-badge"><FaShieldAlt size={11} /> </div>
               <div className="type-badge">
                 {item.category === "Livestock" ? <GiCow color="#5d4037" size={16}/> : <GiFruitBowl color="#e67e22" size={16}/>}
-                {item.category || "Produce"}
+                {item.category || ""}
               </div>
             </div>
 
