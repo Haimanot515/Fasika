@@ -3,30 +3,27 @@ import api from "../api/axios";
 import { 
   FaHeadset, FaGavel, FaCloudSun, 
   FaHandHoldingUsd, FaChevronRight, FaLifeRing,
-  FaWarehouse, FaTools, FaDatabase
+  FaWarehouse, FaTools, FaTerminal
 } from "react-icons/fa";
 
 const SupportPage = () => {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [time, setTime] = useState(new Date());
+  const [timestamp] = useState(new Date().toLocaleDateString());
 
-  // --- Logic Stays Exactly The Same ---
+  // --- Logic Preserved: Fetching from Backend ---
   useEffect(() => {
     const fetchSupport = async () => {
       try {
         const res = await api.get("/farmer/support/resources");
         setResources(res.data.data || []);
       } catch (err) {
-        console.error("Failed to fetch support data from DROP Registry");
+        console.error("Failed to fetch support data");
       } finally {
         setLoading(false);
       }
     };
     fetchSupport();
-
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
   }, []);
 
   const getIcon = (type) => {
@@ -40,129 +37,120 @@ const SupportPage = () => {
     }
   };
 
-  // --- Shared Inline Styles from Admin Template ---
-  const pageStyle = {
+  // --- Elite Styles: Long-Page "Log" Aesthetics ---
+  const containerStyle = {
     marginTop: "78px",
     marginLeft: "70px",
-    padding: "0 50px 100px 50px",
-    background: "#f4f7f6",
+    padding: "0 0 100px 0",
+    background: "#0f172a", // Deep Midnight Dark Theme
     fontFamily: "'Inter', sans-serif",
-    color: "#1e293b",
-    overflowX: "hidden"
+    color: "#f8fafc",
+    minHeight: "100vh"
   };
 
-  const glassCard = {
-    background: "#ffffff",
-    borderRadius: "24px",
-    padding: "35px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.02)",
-    border: "1px solid #eef2f1",
-  };
-
-  const sectionLabel = {
-    fontSize: "12px",
-    fontWeight: "800",
-    color: "#16a34a",
-    textTransform: "uppercase",
-    letterSpacing: "2px",
-    marginBottom: "15px",
-    display: "block"
+  const logRow = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    padding: "60px 100px",
+    borderBottom: "1px solid rgba(255,255,255,0.05)",
+    transition: "background 0.3s ease"
   };
 
   if (loading) return (
-    <div style={{ ...pageStyle, display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      <h2 style={{ color: "#16a34a" }}>🔄 SYNCHRONIZING WITH DROP REGISTRY...</h2>
+    <div style={{ ...containerStyle, display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <p style={{ letterSpacing: "5px", color: "#16a34a" }}>INITIALIZING REGISTRY STREAM...</p>
     </div>
   );
 
   return (
-    <div style={pageStyle}>
+    <div style={containerStyle}>
       <style>
         {`
-          .hero-gradient { background: linear-gradient(135deg, #064e3b 0%, #16a34a 100%); }
-          @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-          .animate-reveal { animation: slideUp 0.8s ease-out forwards; }
-          .scroll-indicator { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; color: white; opacity: 0.6; }
-          @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0) translateX(-50%);} 40% {transform: translateY(-10px) translateX(-50%);} 60% {transform: translateY(-5px) translateX(-50%);} }
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          .log-entry { animation: fadeIn 0.6s ease-out forwards; }
+          .glow-text { text-shadow: 0 0 20px rgba(22, 163, 74, 0.4); }
+          .accent-line { width: 40px; height: 2px; background: #16a34a; margin-bottom: 20px; }
         `}
       </style>
 
-      {/* ──────────────── PAGE 1: SYSTEM SALUTATION ──────────────── */}
-      <section style={{ minHeight: "95vh", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }} className="animate-reveal">
-        <div className="hero-gradient" style={{ padding: "100px 80px", borderRadius: "40px", color: "white", position: "relative", boxShadow: "0 40px 80px rgba(22, 163, 74, 0.2)" }}>
-          <div style={{ background: "rgba(255,255,255,0.15)", padding: "10px 25px", borderRadius: "50px", display: "inline-block", fontSize: "12px", fontWeight: "bold", marginBottom: "25px", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}>
-            🌐 FASIKA ECOSYSTEM: FARMER SUPPORT INTERFACE
-          </div>
-          <h1 style={{ fontSize: "72px", fontWeight: "900", margin: "0 0 20px 0", letterSpacing: "-3px", lineHeight: "1" }}>
-            Farmer Support Hub<br/>Knowledge Base
-          </h1>
-          <p style={{ fontSize: "24px", opacity: 0.85, maxWidth: "750px", lineHeight: "1.6", fontWeight: "400" }}>
-            Accessing dynamic resources from the DROP Registry. Your localized agricultural intelligence, logistics, and financial guides are fully synchronized.
-          </p>
-          
-          <div style={{ marginTop: "60px", display: "flex", gap: "80px" }}>
-            <div>
-              <div style={{ fontSize: "42px", fontWeight: "800" }}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-              <div style={{ fontSize: "13px", opacity: 0.6, letterSpacing: "1px", textTransform: "uppercase" }}>Current System Time</div>
-            </div>
-            <div style={{ borderLeft: "1px solid rgba(255,255,255,0.2)", paddingLeft: "80px" }}>
-              <div style={{ fontSize: "42px", fontWeight: "800" }}>{resources.length}</div>
-              <div style={{ fontSize: "13px", opacity: 0.6, letterSpacing: "1px", textTransform: "uppercase" }}>Active Resource Modules</div>
-            </div>
-          </div>
-          <div className="scroll-indicator">▼ Scroll to Access Resources</div>
+      {/* ──────────────── HEADER: SYSTEM BROADCAST ──────────────── */}
+      <header style={{ padding: "120px 100px", background: "radial-gradient(circle at top left, #064e3b 0%, #0f172a 50%)" }}>
+        <div style={{ color: "#16a34a", fontWeight: "900", letterSpacing: "4px", fontSize: "12px", marginBottom: "20px" }}>
+          FASIKA // SUPPORT_REGISTRY // v.2026
         </div>
-      </section>
-
-      {/* ──────────────── PAGE 2: DYNAMIC RESOURCE GRID ──────────────── */}
-      <section style={{ minHeight: "100vh", padding: "120px 0" }}>
-        <span style={sectionLabel}>Sector 01: Resource Modules</span>
-        <h2 style={{ fontSize: "48px", fontWeight: "900", marginBottom: "60px", letterSpacing: "-1px" }}>Registry Documentation</h2>
-        
-        {/* Dynamic Grid using your original logic */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "30px" }}>
-          {resources.map((item) => (
-            <div key={item.id} style={{ ...glassCard, transition: "transform 0.3s ease", cursor: "pointer" }} onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-10px)"} onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}>
-              <div style={{ color: "#16a34a", fontSize: "32px", marginBottom: "20px" }}>
-                {getIcon(item.icon_type)}
-              </div>
-              <div style={{ fontSize: "11px", fontWeight: "900", color: "#16a34a", background: "#dcfce7", padding: "4px 12px", borderRadius: "50px", width: "fit-content", marginBottom: "15px", textTransform: "uppercase" }}>
-                {item.category}
-              </div>
-              <h3 style={{ fontSize: "22px", fontWeight: "800", marginBottom: "15px" }}>{item.title}</h3>
-              <p style={{ fontSize: "15px", color: "#64748b", lineHeight: "1.6", marginBottom: "25px" }}>{item.content}</p>
-              <div style={{ display: "flex", alignItems: "center", color: "#16a34a", fontWeight: "800", fontSize: "14px" }}>
-                INITIALIZE GUIDE <FaChevronRight size={10} style={{ marginLeft: "8px" }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ──────────────── PAGE 3: SYSTEM INTEGRITY ──────────────── */}
-      <section style={{ minHeight: "60vh", padding: "100px 0" }}>
-        <span style={sectionLabel}>Sector 02: Support Status</span>
-        <div style={{ ...glassCard, background: "#1e293b", color: "white", padding: "60px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h2 style={{ fontSize: "32px", fontWeight: "800", margin: "0 0 10px 0" }}>Registry Integrity: 100%</h2>
-            <p style={{ opacity: 0.6 }}>All support documentation is verified and digitally signed by Fasika Core Operations.</p>
-          </div>
-          <div style={{ display: "flex", gap: "20px" }}>
-             <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "24px", fontWeight: "800", color: "#16a34a" }}>SECURE</div>
-                <div style={{ fontSize: "11px", opacity: 0.5 }}>Connection Mode</div>
-             </div>
-             <FaDatabase size={40} color="#16a34a" />
-          </div>
-        </div>
-      </section>
-
-      <footer style={{ padding: "80px 0", textAlign: "center", borderTop: "1px solid #eef2f1" }}>
-        <div style={{ fontSize: "20px", fontWeight: "900", color: "#16a34a", marginBottom: "10px" }}>🌿 Fasika Support Portal</div>
-        <p style={{ fontSize: "12px", color: "#94a3b8", letterSpacing: "1px" }}>
-          RESOURCE LAYER v2.1 // DATA SOURCE: DROP_REGISTRY<br/>
-          © 2026 Fasika Agricultural Global Operations.
+        <h1 style={{ fontSize: "84px", fontWeight: "900", margin: 0, letterSpacing: "-4px" }} className="glow-text">
+          Resources Log
+        </h1>
+        <p style={{ fontSize: "20px", color: "#94a3b8", maxWidth: "800px", marginTop: "20px", lineHeight: "1.6" }}>
+          Automated documentation stream for the global agricultural network. 
+          Real-time access to protocols, logistics, and trade governance modules.
         </p>
+        <div style={{ marginTop: "40px", display: "flex", gap: "40px", fontSize: "14px", color: "#64748b" }}>
+          <span>STATUS: <span style={{ color: "#16a34a" }}>ONLINE</span></span>
+          <span>DATE: {timestamp}</span>
+          <span>SOURCE: DROP_DB</span>
+        </div>
+      </header>
+
+      {/* ──────────────── VERTICAL FLEX COLUMN LOG ──────────────── */}
+      <main style={{ display: "flex", flexDirection: "column" }}>
+        {resources.map((item, index) => (
+          <section key={item.id} className="log-entry" style={{ ...logRow, animationDelay: `${index * 0.1}s` }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+              <span style={{ color: "#334155", fontWeight: "900", fontSize: "14px", fontFamily: "monospace" }}>
+                ID: 00{item.id}
+              </span>
+              <div className="accent-line"></div>
+            </div>
+
+            <div style={{ display: "flex", gap: "60px", alignItems: "flex-start" }}>
+              {/* Left Column: Icon & Category */}
+              <div style={{ minWidth: "200px" }}>
+                <div style={{ fontSize: "40px", color: "#16a34a", marginBottom: "10px" }}>
+                  {getIcon(item.icon_type)}
+                </div>
+                <div style={{ fontSize: "12px", fontWeight: "900", color: "#64748b", textTransform: "uppercase", letterSpacing: "2px" }}>
+                  {item.category}
+                </div>
+              </div>
+
+              {/* Right Column: Title & Content */}
+              <div style={{ maxWidth: "800px" }}>
+                <h2 style={{ fontSize: "32px", fontWeight: "800", color: "#f8fafc", marginBottom: "15px" }}>
+                  {item.title}
+                </h2>
+                <p style={{ fontSize: "18px", color: "#94a3b8", lineHeight: "1.8", marginBottom: "30px" }}>
+                  {item.content}
+                </p>
+                <button 
+                  style={{ 
+                    background: "rgba(22, 163, 74, 0.1)", 
+                    border: "1px solid #16a34a", 
+                    color: "#16a34a", 
+                    padding: "12px 25px", 
+                    borderRadius: "4px", 
+                    fontWeight: "bold", 
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px"
+                  }}
+                >
+                  DECRYPT FULL DOCUMENT <FaChevronRight size={10} />
+                </button>
+              </div>
+            </div>
+          </section>
+        ))}
+      </main>
+
+      {/* ──────────────── FOOTER: END OF STREAM ──────────────── */}
+      <footer style={{ padding: "100px", textAlign: "center", background: "#020617" }}>
+        <FaTerminal size={30} color="#1e293b" style={{ marginBottom: "20px" }} />
+        <div style={{ fontSize: "12px", color: "#334155", letterSpacing: "2px" }}>
+          --- END OF REGISTRY DATA STREAM ---
+        </div>
       </footer>
     </div>
   );
