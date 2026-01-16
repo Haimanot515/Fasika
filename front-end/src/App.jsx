@@ -10,7 +10,7 @@ import VerifyOTP from "./pages/auth/VerifyOTP";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import SupportPage from "./pages/Help";
-import NotificationsPage from "./pages/Notifications;
+import NotificationsPage from "./pages/Notifications";
 
 // --- ADMIN PAGES ---
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
