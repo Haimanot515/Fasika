@@ -8,6 +8,6 @@ const { getSupportResources } = require('../../controllers/farmer/farmerSupportC
  * @desc    Fetch all support hub articles for the general support page
  * @access  Public/Farmer
  */
-router.get('/support/resources', getSupportResources);
+router.get('/resources', getSupportResources);
 
 module.exports = router;
