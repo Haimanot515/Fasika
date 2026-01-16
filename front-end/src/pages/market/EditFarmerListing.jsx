@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+// Import your api instance instead of raw axios
+import api from "../../api/axios"; 
 import { useNavigate, useParams } from "react-router-dom";
 
 const EditFarmerListing = () => {
-  // 🛑 IMPORTANT: This must match the name in App.jsx exactly
   const { listing_id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -26,25 +26,24 @@ const EditFarmerListing = () => {
   };
 
   useEffect(() => {
-    // DEBUG: Check your console F12 to see if this is 'undefined'
     console.log("🔍 Edit Page ID Check:", listing_id);
 
     if (!listing_id || listing_id === "undefined") {
-      console.error("❌ No ID found in URL. Check App.jsx Route!");
+      console.error("❌ No ID found in URL.");
       return;
     }
 
     const fetchItem = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/farmer/listings/item/${listing_id}`, { 
-          withCredentials: true 
-        });
+        // Changed from localhost to use the api instance
+        const res = await api.get(`/farmer/listings/item/${listing_id}`);
+        
         if (res.data.success) {
           setForm(res.data.data);
         }
       } catch (err) {
         console.error("Fetch Error:", err);
-        alert("Failed to load harvest details.");
+        alert("Failed to load harvest details from Render.");
         navigate("/market/sales");
       } finally {
         setLoading(false);
@@ -61,14 +60,14 @@ const EditFarmerListing = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/farmer/listings/${listing_id}`, form, { 
-        withCredentials: true 
-      });
+      // Changed from localhost to use the api instance
+      await api.put(`/farmer/listings/${listing_id}`, form);
+      
       alert("Harvest Updated Successfully! ✅");
       navigate("/market/sales");
     } catch (err) {
       console.error("Update Error:", err);
-      alert(err.response?.data?.error || "Update failed.");
+      alert(err.response?.data?.error || "Update failed on Render node.");
     }
   };
 
