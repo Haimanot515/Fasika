@@ -15,6 +15,7 @@ const adminUserRoutes = require('./routes/admin/adminUserRoutes');
 const adminFarmerRoutes = require('./routes/adminFarmerRoutes'); 
 const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes'); 
 const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); 
+const advisoryRoutes = require("./routes/farmer/advisoryRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 
 // 2️⃣ GLOBAL MIDDLEWARE
@@ -71,6 +72,7 @@ app.use((req, res) => {
   });
 });
 
+app.use("/api/farmer", advisoryRoutes);
 // 7️⃣ GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("🔥 Server Error:", err.stack);
