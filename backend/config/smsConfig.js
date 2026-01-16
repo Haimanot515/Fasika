@@ -1,40 +1,45 @@
-const { Resend } = require('resend');
+const Brevo = require('@getbrevo/brevo');
 const axios = require('axios');
 
-// Check API key
-if (!process.env.RESEND_API_KEY) {
-  console.error('❌ RESEND_API_KEY is missing');
-}
+// 1. Initialize Brevo Client
+const apiInstance = new Brevo.TransactionalEmailsApi();
+const apiKey = apiInstance.authentications['apiKey'];
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Use the API Key from Render Environment Variables
+if (!process.env.BREVO_API_KEY) {
+  console.error('❌ BREVO_API_KEY is missing');
+}
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
 /**
- * Send email using Resend (works on Render)
+ * Send email using Brevo (No custom domain required)
  */
 async function sendEmail(to, subject, html) {
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.htmlContent = html;
+  
+  // Must be the Gmail/Email you verified in Brevo Dashboard
+  sendSmtpEmail.sender = { 
+    "name": "Fasika Admin", 
+    "email": process.env.EMAIL_FROM 
+  };
+  
+  sendSmtpEmail.to = [{ "email": to }];
+
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Fasika Admin <onboarding@resend.dev>', // Free tier sender
-      to: [to],
-      subject,
-      html,
-    });
-
-    if (error) {
-      console.error('❌ Resend API Error:', error);
-      throw error;
-    }
-
-    console.log(`✅ Email sent to ${to}. ID: ${data.id}`);
+    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log(`✅ Email sent to ${to}. MessageID: ${data.messageId}`);
     return data;
   } catch (err) {
-    console.error('🔥 Email sending failed:', err);
+    console.error('🔥 Brevo Email sending failed:', err);
     throw err;
   }
 }
 
 /**
- * DEV ONLY SMS / Voice (won't work on Render)
+ * DEV ONLY SMS / Voice (Won't work on Render - local network only)
  */
 async function sendSMS(phone, message) {
   try {
