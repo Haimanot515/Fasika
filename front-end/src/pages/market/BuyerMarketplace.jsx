@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import api from "../../api/axios"; // Updated to use your standardized api instance
 import { 
   FaSearch, FaCommentDots, FaShieldAlt, FaMapMarkerAlt, 
@@ -7,25 +7,53 @@ import {
 
 const BuyerMarketplace = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Pagination State for Scrolling
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    const fetchMarketplace = async () => {
-      try {
-        // Using your api instance for secure handshake with Render
-        const { data } = await api.get("/buyer/marketplace/public");
-        setProducts(data.data || []);
-      } catch (err) {
-        console.error("Marketplace Fetch Error:", err);
-      } finally {
-        setLoading(false);
+  const fetchMarketplace = useCallback(async () => {
+    if (loading || !hasMore) return;
+    
+    setLoading(true);
+    try {
+      // API call with page and limit. 
+      // The backend should DROP old cursors and return the next chunk.
+      const { data } = await api.get(`/buyer/marketplace/public?page=${page}&limit=12`);
+      
+      const newProducts = data.data || [];
+      
+      if (newProducts.length === 0) {
+        setHasMore(false);
+      } else {
+        setProducts(prev => [...prev, ...newProducts]);
+        setPage(prev => prev + 1);
       }
-    };
+    } catch (err) {
+      console.error("Marketplace Fetch Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, loading, hasMore]);
+
+  // Initial Fetch
+  useEffect(() => {
     fetchMarketplace();
   }, []);
 
-  // Expanded list of categories
+  // Scroll Listener Logic
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop + 50 >= document.documentElement.offsetHeight) {
+        fetchMarketplace();
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [fetchMarketplace]);
+
   const categories = [
     "Cereals & Grains", "Fruits & Vegetables", "Oilseeds", "Livestock", 
     "Spices & Herbs", "Processed Goods", "Dairy Products", "Poultry", 
@@ -36,8 +64,6 @@ const BuyerMarketplace = () => {
   const filtered = products.filter(p =>
     p.product_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (loading) return <div style={premiumStyles.loader}>🌾 Loading Fasika Marketplace...</div>;
 
   return (
     <div style={premiumStyles.pageWrapper}>
@@ -68,7 +94,6 @@ const BuyerMarketplace = () => {
         .search-input-amazon { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
         .search-button-amazon { background-color: #febd69; border: none; width: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
-        /* HORIZONTAL SCROLLING CATEGORIES */
         .category-scroll-wrapper {
           background: #232f3e;
           padding: 12px 20px;
@@ -76,11 +101,9 @@ const BuyerMarketplace = () => {
           white-space: nowrap;
           display: flex;
           gap: 50px;
-          scrollbar-width: none; /* Firefox */
+          scrollbar-width: none;
         }
-        .category-scroll-wrapper::-webkit-scrollbar {
-          display: none; /* Chrome/Safari */
-        }
+        .category-scroll-wrapper::-webkit-scrollbar { display: none; }
 
         .full-edge-grid { 
           display: grid; 
@@ -105,27 +128,13 @@ const BuyerMarketplace = () => {
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
-        .alibaba-card:hover { 
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-        }
+        .alibaba-card:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
 
-        .image-container { 
-          flex: 0 0 200px; 
-          width: 100%; 
-          overflow: hidden; 
-          position: relative; 
-        }
+        .image-container { flex: 0 0 200px; width: 100%; overflow: hidden; position: relative; }
         
-        .product-img { 
-          width: 100%; 
-          height: 100%; 
-          object-fit: cover; 
-          transition: transform 0.8s cubic-bezier(0.2, 0, 0.2, 1); 
-        }
+        .product-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.2, 0, 0.2, 1); }
 
-        .alibaba-card:hover .product-img { 
-          transform: scale(1.3);
-        }
+        .alibaba-card:hover .product-img { transform: scale(1.3); }
 
         .verified-badge {
           position: absolute;
@@ -156,7 +165,6 @@ const BuyerMarketplace = () => {
         </div>
       </div>
 
-      {/* HORIZONTAL CATEGORY BAR */}
       <nav className="category-scroll-wrapper">
         {categories.map(cat => (
           <span key={cat} style={premiumStyles.categoryItem}>{cat}</span>
@@ -164,8 +172,8 @@ const BuyerMarketplace = () => {
       </nav>
 
       <div className="full-edge-grid">
-        {filtered.map((item) => (
-          <div key={item.id} className="alibaba-card">
+        {filtered.map((item, index) => (
+          <div key={`${item.id}-${index}`} className="alibaba-card">
             <div className="image-container">
               <img 
                 src={item.primary_image_url || "https://via.placeholder.com/300"} 
@@ -196,6 +204,9 @@ const BuyerMarketplace = () => {
           </div>
         ))}
       </div>
+
+      {loading && <div style={premiumStyles.bottomLoader}>🌾 Loading more products...</div>}
+      {!hasMore && <div style={premiumStyles.endMessage}>You've reached the end of the marketplace.</div>}
     </div>
   );
 };
@@ -203,14 +214,7 @@ const BuyerMarketplace = () => {
 const premiumStyles = {
   pageWrapper: { width: "100vw", minHeight: "100vh" },
   logo: { fontSize: "24px", fontWeight: "900", color: "#fff", whiteSpace: "nowrap" },
-  categoryItem: { 
-    fontSize: "16px", 
-    fontWeight: "500", 
-    color: "#fff",
-    cursor: "pointer", 
-    opacity: 0.9,
-    display: "inline-block"
-  },
+  categoryItem: { fontSize: "16px", fontWeight: "500", color: "#fff", cursor: "pointer", opacity: 0.9, display: "inline-block" },
   textHalf: { padding: "15px", display: "flex", flexDirection: "column", flex: 1 },
   productTitle: { fontSize: "17px", fontWeight: "700", color: "#111", height: "40px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" },
   description: { fontSize: "13px", color: "#4b5563", height: "34px", overflow: "hidden", margin: "6px 0" },
@@ -221,7 +225,8 @@ const premiumStyles = {
   location: { fontSize: "12px", color: "#6b7280" },
   ratingRow: { display: "flex", gap: "3px", marginTop: "8px" },
   contactBtn: { width: "100%", marginTop: "auto", padding: "10px", borderRadius: "6px", border: "2px solid #131921", color: "#131921", background: "transparent", fontWeight: "bold", fontSize: "13px" },
-  loader: { textAlign: 'center', padding: '150px', fontSize: '20px', color: '#131921' }
+  bottomLoader: { textAlign: 'center', padding: '20px', fontSize: '16px', color: '#131921', fontWeight: 'bold' },
+  endMessage: { textAlign: 'center', padding: '40px', color: '#6b7280', fontSize: '14px' }
 };
 
 export default BuyerMarketplace;
