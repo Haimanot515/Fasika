@@ -9,7 +9,7 @@ import VerifyEmail from "./pages/auth/VerifyEmail";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
-import Help from "./pages/dashboard/Help";
+import SupportPage from "./pages/SupportPage";
 
 // --- ADMIN PAGES ---
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
@@ -87,6 +87,7 @@ function App() {
           <Route path="/my-farm/land/add" element={<AddLand />} />
           <Route path="/my-farm/land/update/:id" element={<UpdateLand />} />
           <Route path="/advisory" element={<AdvisoryBoard />} />
+          <Route path="/support" element={<SupportPage />} />
 
         
        
