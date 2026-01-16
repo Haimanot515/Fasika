@@ -16,6 +16,7 @@ const adminFarmerRoutes = require('./routes/adminFarmerRoutes');
 const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes'); 
 const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); 
 const advisoryRoutes = require("./routes/farmer/farmerAdvisoryRoutes");
+const farmerSupportRoutes = require('./routes/farmer/farmerSupportRoutes');
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 
 // 2️⃣ GLOBAL MIDDLEWARE
@@ -63,6 +64,8 @@ app.use('/api/farmer/farm', farmerFarmRoutes);
 app.use('/api/farmer/listings', farmerListingRoutes);
 app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
 app.use("/api/farmer", advisoryRoutes);
+// This makes Support Hub available at: /api/farmer/support/resources
+app.use('/api/farmer', farmerSupportRoutes);
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
