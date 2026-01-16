@@ -3,27 +3,30 @@ import api from "../api/axios";
 import { 
   FaHeadset, FaGavel, FaCloudSun, 
   FaHandHoldingUsd, FaChevronRight, FaLifeRing,
-  FaWarehouse, FaTools, FaTerminal
+  FaWarehouse, FaTools 
 } from "react-icons/fa";
 
 const SupportPage = () => {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [timestamp] = useState(new Date().toLocaleDateString());
+  const [time, setTime] = useState(new Date());
 
-  // --- Logic Preserved: Fetching from Backend ---
+  // --- LOGIC PRESERVED: Fetching from DROP Backend ---
   useEffect(() => {
     const fetchSupport = async () => {
       try {
         const res = await api.get("/farmer/support/resources");
         setResources(res.data.data || []);
       } catch (err) {
-        console.error("Failed to fetch support data");
+        console.error("Failed to fetch support data from DROP Registry");
       } finally {
         setLoading(false);
       }
     };
     fetchSupport();
+
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const getIcon = (type) => {
@@ -37,29 +40,17 @@ const SupportPage = () => {
     }
   };
 
-  // --- Elite Styles: Long-Page "Log" Aesthetics ---
-  const containerStyle = {
-    marginTop: "78px",
-    marginLeft: "70px",
-    padding: "0 0 100px 0",
-    background: "#0f172a", // Deep Midnight Dark Theme
-    fontFamily: "'Inter', sans-serif",
-    color: "#f8fafc",
-    minHeight: "100vh"
-  };
-
-  const logRow = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    padding: "60px 100px",
-    borderBottom: "1px solid rgba(255,255,255,0.05)",
-    transition: "background 0.3s ease"
+  const theme = {
+    primary: "#064e3b",
+    accent: "#10b981",
+    glass: "rgba(255, 255, 255, 0.95)", // High opacity white glass
+    blur: "blur(20px)",
+    border: "rgba(0, 0, 0, 0.05)"
   };
 
   if (loading) return (
-    <div style={{ ...containerStyle, display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      <p style={{ letterSpacing: "5px", color: "#16a34a" }}>INITIALIZING REGISTRY STREAM...</p>
+    <div style={{ background: "#f4f7f6", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <h2 style={{ color: theme.primary, letterSpacing: "5px" }}>LOADING DROP RESOURCES...</h2>
     </div>
   );
 
@@ -67,93 +58,136 @@ const SupportPage = () => {
     <div style={containerStyle}>
       <style>
         {`
-          @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-          .log-entry { animation: fadeIn 0.6s ease-out forwards; }
-          .glow-text { text-shadow: 0 0 20px rgba(22, 163, 74, 0.4); }
-          .accent-line { width: 40px; height: 2px; background: #16a34a; margin-bottom: 20px; }
+          body, html { margin: 0; padding: 0; background: #f4f7f6; scroll-behavior: smooth; overflow-x: hidden; }
+          .glass-card { 
+            background: ${theme.glass}; 
+            backdrop-filter: ${theme.blur}; 
+            padding: 120px 100px; 
+            border-bottom: 1px solid ${theme.border}; 
+            width: 100%; 
+            box-sizing: border-box; 
+            min-height: 70vh; 
+            display: flex;
+            align-items: center;
+            transition: background 0.4s ease;
+          }
+          .glass-card:hover { background: #ffffff; }
+          .stat-badge {
+            background: ${theme.primary}; color: white; padding: 12px 24px;
+            border-radius: 4px; font-weight: 900; font-size: 13px; margin-right: 15px;
+            letter-spacing: 2px; text-transform: uppercase;
+          }
+          .icon-bg {
+            position: absolute; right: 100px; font-size: 250px; opacity: 0.03; color: ${theme.primary}; z-index: 0;
+          }
         `}
       </style>
 
-      {/* ──────────────── HEADER: SYSTEM BROADCAST ──────────────── */}
-      <header style={{ padding: "120px 100px", background: "radial-gradient(circle at top left, #064e3b 0%, #0f172a 50%)" }}>
-        <div style={{ color: "#16a34a", fontWeight: "900", letterSpacing: "4px", fontSize: "12px", marginBottom: "20px" }}>
-          FASIKA // SUPPORT_REGISTRY // v.2026
+      {/* SIDEBAR */}
+      <div style={sidebarStyle}>
+        <div style={{ color: "white", fontWeight: "900", fontSize: "20px", transform: "rotate(-90deg)", marginBottom: "50px", letterSpacing: "5px" }}>FASIKA</div>
+      </div>
+
+      {/* HEADER SECTION */}
+      <header style={headerStyle}>
+        <div>
+          <span style={tagStyle}>FASIKA REGISTRY SUPPORT</span>
+          <h1 style={titleStyle}>Farmer Support Hub</h1>
         </div>
-        <h1 style={{ fontSize: "84px", fontWeight: "900", margin: 0, letterSpacing: "-4px" }} className="glow-text">
-          Resources Log
-        </h1>
-        <p style={{ fontSize: "20px", color: "#94a3b8", maxWidth: "800px", marginTop: "20px", lineHeight: "1.6" }}>
-          Automated documentation stream for the global agricultural network. 
-          Real-time access to protocols, logistics, and trade governance modules.
-        </p>
-        <div style={{ marginTop: "40px", display: "flex", gap: "40px", fontSize: "14px", color: "#64748b" }}>
-          <span>STATUS: <span style={{ color: "#16a34a" }}>ONLINE</span></span>
-          <span>DATE: {timestamp}</span>
-          <span>SOURCE: DROP_DB</span>
+        <div style={{ textAlign: "right", color: "white" }}>
+          <div style={{ fontSize: "56px", fontWeight: "900" }}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div style={{ fontSize: "16px", fontWeight: "800", opacity: 0.9 }}>LIVE DROP DATABASE CONNECTED</div>
         </div>
       </header>
 
-      {/* ──────────────── VERTICAL FLEX COLUMN LOG ──────────────── */}
-      <main style={{ display: "flex", flexDirection: "column" }}>
+      {/* VERTICAL LIST OF RESOURCES */}
+      <main style={{ width: "100%" }}>
         {resources.map((item, index) => (
-          <section key={item.id} className="log-entry" style={{ ...logRow, animationDelay: `${index * 0.1}s` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <span style={{ color: "#334155", fontWeight: "900", fontSize: "14px", fontFamily: "monospace" }}>
-                ID: 00{item.id}
-              </span>
-              <div className="accent-line"></div>
-            </div>
-
-            <div style={{ display: "flex", gap: "60px", alignItems: "flex-start" }}>
-              {/* Left Column: Icon & Category */}
-              <div style={{ minWidth: "200px" }}>
-                <div style={{ fontSize: "40px", color: "#16a34a", marginBottom: "10px" }}>
-                  {getIcon(item.icon_type)}
+          <section key={item.id} className="glass-card" style={{ position: "relative" }}>
+            <div className="icon-bg">{getIcon(item.icon_type)}</div>
+            
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%", position: "relative", zIndex: 1 }}>
+              <div style={{ maxWidth: "850px" }}>
+                <span style={{ fontSize: "14px", fontWeight: "900", color: theme.accent, letterSpacing: "5px", textTransform: "uppercase" }}>
+                  {item.category} // MODULE 0{index + 1}
+                </span>
+                
+                <div style={{ display: "flex", alignItems: "center", gap: "25px", margin: "20px 0" }}>
+                  <div style={{ fontSize: "50px", color: theme.primary }}>{getIcon(item.icon_type)}</div>
+                  <h2 style={{ fontSize: "72px", fontWeight: "900", color: theme.primary, margin: 0, letterSpacing: "-3px" }}>
+                    {item.title}
+                  </h2>
                 </div>
-                <div style={{ fontSize: "12px", fontWeight: "900", color: "#64748b", textTransform: "uppercase", letterSpacing: "2px" }}>
-                  {item.category}
-                </div>
-              </div>
 
-              {/* Right Column: Title & Content */}
-              <div style={{ maxWidth: "800px" }}>
-                <h2 style={{ fontSize: "32px", fontWeight: "800", color: "#f8fafc", marginBottom: "15px" }}>
-                  {item.title}
-                </h2>
-                <p style={{ fontSize: "18px", color: "#94a3b8", lineHeight: "1.8", marginBottom: "30px" }}>
+                <p style={{ fontSize: "24px", lineHeight: "1.7", color: "#334155", fontWeight: "400", marginBottom: "40px", maxWidth: "800px" }}>
                   {item.content}
                 </p>
-                <button 
-                  style={{ 
-                    background: "rgba(22, 163, 74, 0.1)", 
-                    border: "1px solid #16a34a", 
-                    color: "#16a34a", 
-                    padding: "12px 25px", 
-                    borderRadius: "4px", 
-                    fontWeight: "bold", 
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px"
-                  }}
-                >
-                  DECRYPT FULL DOCUMENT <FaChevronRight size={10} />
-                </button>
+
+                <div style={{ display: "flex", alignItems: "center" }}>
+                   <div className="stat-badge">Source: DROP Registry</div>
+                   <button style={actionBtnStyle}>
+                     OPEN FULL GUIDE <FaChevronRight size={12} style={{ marginLeft: "10px" }} />
+                   </button>
+                </div>
+              </div>
+              
+              <div style={{ textAlign: "right", opacity: 0.05, fontSize: "180px", fontWeight: "900", color: theme.primary }}>
+                {index + 1}
               </div>
             </div>
           </section>
         ))}
       </main>
 
-      {/* ──────────────── FOOTER: END OF STREAM ──────────────── */}
-      <footer style={{ padding: "100px", textAlign: "center", background: "#020617" }}>
-        <FaTerminal size={30} color="#1e293b" style={{ marginBottom: "20px" }} />
-        <div style={{ fontSize: "12px", color: "#334155", letterSpacing: "2px" }}>
-          --- END OF REGISTRY DATA STREAM ---
-        </div>
+      <footer style={footerStyle}>
+        <div style={{ fontSize: "32px", fontWeight: "900", color: "white", letterSpacing: "5px" }}>🌿 FASIKA KNOWLEDGE BASE</div>
+        <p style={{ fontSize: "14px", color: "white", letterSpacing: "4px", marginTop: "20px", opacity: 0.7 }}>
+          ECOSYSTEM PROTOCOL // VERSION 8.4.1 // SECURE DATA STREAM
+        </p>
       </footer>
     </div>
   );
+};
+
+// ──────────────── STYLES ────────────────
+
+const containerStyle = { 
+  marginLeft: "70px", 
+  minHeight: "100vh", 
+  fontFamily: "'Inter', sans-serif", 
+  position: "relative", 
+  width: "calc(100% - 70px)" 
+};
+
+const sidebarStyle = { 
+  position: "fixed", left: 0, top: 0, bottom: 0, width: "70px", 
+  background: "#064e3b", zIndex: 1000, display: "flex", 
+  flexDirection: "column", alignItems: "center", justifyContent: "flex-end", paddingBottom: "50px" 
+};
+
+const headerStyle = { 
+  padding: "150px 100px 100px 100px", display: "flex", 
+  justifyContent: "space-between", alignItems: "flex-end", 
+  background: "linear-gradient(to bottom, #064e3b, #0d9488)", boxSizing: "border-box" 
+};
+
+const tagStyle = { 
+  fontSize: "14px", fontWeight: "900", color: "#ffffff", 
+  background: "rgba(0, 0, 0, 0.3)", padding: "8px 24px", 
+  borderRadius: "0px", letterSpacing: "8px" 
+};
+
+const titleStyle = { 
+  fontSize: "90px", fontWeight: "900", margin: "30px 0 0 0", 
+  color: "#ffffff", letterSpacing: "-5px", textShadow: "0 10px 30px rgba(0,0,0,0.2)" 
+};
+
+const footerStyle = { padding: "120px 0", textAlign: "center", background: "#064e3b" };
+
+const actionBtnStyle = {
+  background: "none", border: "2px solid #064e3b", color: "#064e3b", 
+  padding: "12px 30px", fontSize: "14px", fontWeight: "900", 
+  cursor: "pointer", display: "flex", alignItems: "center", letterSpacing: "2px"
 };
 
 export default SupportPage;
