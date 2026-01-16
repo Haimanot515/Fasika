@@ -148,6 +148,21 @@ const BuyerMarketplace = () => {
           border-radius: 4px;
           z-index: 2;
         }
+
+        /* SPINNER ANIMATION */
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .loading-spinner {
+          width: 30px;
+          height: 30px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #febd69;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 10px auto;
+        }
       `}</style>
       
       <div className="amazon-header">
@@ -205,7 +220,12 @@ const BuyerMarketplace = () => {
         ))}
       </div>
 
-      {loading && <div style={premiumStyles.bottomLoader}>🌾 Loading more products...</div>}
+      {loading && (
+        <div style={premiumStyles.bottomLoader}>
+          <div className="loading-spinner"></div>
+          🌾 Loading more products...
+        </div>
+      )}
       {!hasMore && <div style={premiumStyles.endMessage}>You've reached the end of the marketplace.</div>}
     </div>
   );
@@ -225,7 +245,7 @@ const premiumStyles = {
   location: { fontSize: "12px", color: "#6b7280" },
   ratingRow: { display: "flex", gap: "3px", marginTop: "8px" },
   contactBtn: { width: "100%", marginTop: "auto", padding: "10px", borderRadius: "6px", border: "2px solid #131921", color: "#131921", background: "transparent", fontWeight: "bold", fontSize: "13px" },
-  bottomLoader: { textAlign: 'center', padding: '20px', fontSize: '16px', color: '#131921', fontWeight: 'bold' },
+  bottomLoader: { textAlign: 'center', padding: '30px', fontSize: '16px', color: '#131921', fontWeight: 'bold', display: 'flex', flexDirection: 'column', alignItems: 'center' },
   endMessage: { textAlign: 'center', padding: '40px', color: '#6b7280', fontSize: '14px' }
 };
 
