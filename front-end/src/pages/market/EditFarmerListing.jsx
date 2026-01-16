@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-// Import your api instance instead of raw axios
+// We use the centralized api instance to ensure the Render URL is used
 import api from "../../api/axios"; 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -26,6 +26,7 @@ const EditFarmerListing = () => {
   };
 
   useEffect(() => {
+    // Check console to ensure the ID is passing correctly from the URL
     console.log("🔍 Edit Page ID Check:", listing_id);
 
     if (!listing_id || listing_id === "undefined") {
@@ -35,7 +36,7 @@ const EditFarmerListing = () => {
 
     const fetchItem = async () => {
       try {
-        // Changed from localhost to use the api instance
+        // GET request to Render backend
         const res = await api.get(`/farmer/listings/item/${listing_id}`);
         
         if (res.data.success) {
@@ -60,7 +61,7 @@ const EditFarmerListing = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      // Changed from localhost to use the api instance
+      // PUT request to Render backend using the 'api' instance
       await api.put(`/farmer/listings/${listing_id}`, form);
       
       alert("Harvest Updated Successfully! ✅");
@@ -91,7 +92,7 @@ const EditFarmerListing = () => {
 
           <div style={{ display: "flex", gap: "10px" }}>
             <div style={{ flex: 1 }}>
-              <label style={styles.label}>Price (ETB) / {form.unit}</label>
+              <label style={styles.label}>Price (ETB) / {form.unit || 'Unit'}</label>
               <input 
                 name="price_per_unit"
                 type="number"
