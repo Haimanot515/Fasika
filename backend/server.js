@@ -15,7 +15,7 @@ const adminUserRoutes = require('./routes/admin/adminUserRoutes');
 const adminFarmerRoutes = require('./routes/adminFarmerRoutes'); 
 const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes'); 
 const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); 
-const advisoryRoutes = require("./routes/farmer/advisoryRoutes");
+const advisoryRoutes = require("./routes/farmer/farmerAdvisoryRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 
 // 2️⃣ GLOBAL MIDDLEWARE
