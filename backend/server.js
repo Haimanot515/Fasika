@@ -62,6 +62,7 @@ app.use('/api/admin/farmers', adminFarmerRoutes);
 app.use('/api/farmer/farm', farmerFarmRoutes);
 app.use('/api/farmer/listings', farmerListingRoutes);
 app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
+app.use("/api/farmer", advisoryRoutes);
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
@@ -72,7 +73,7 @@ app.use((req, res) => {
   });
 });
 
-app.use("/api/farmer", advisoryRoutes);
+
 // 7️⃣ GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("🔥 Server Error:", err.stack);
