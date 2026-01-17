@@ -34,15 +34,12 @@ const FarmerNavbar = ({ toggle }) => {
   useEffect(() => {
     const fetchFarmerProfile = async () => {
       try {
-        // ✅ FIXED: Endpoint changed from /my-profile to /profile
         const res = await api.get('/farmers/profile');
-        
-        // ✅ FIXED: Accessing res.data.data because your controller returns { success: true, data: rows[0] }
         if (res.data && res.data.success) {
           const profile = res.data.data;
           setFarmerData({
             name: profile.full_name || profile.farm_name || "Farmer",
-            photo: profile.photo_url || null // Matches 'photo_url' in your DB/Controller
+            photo: profile.photo_url || null 
           });
         }
       } catch (err) {
@@ -52,7 +49,6 @@ const FarmerNavbar = ({ toggle }) => {
     fetchFarmerProfile();
   }, []);
 
-  // Closes everything
   const closeAll = () => {
     setShowMyFarm(false);
     setShowMarket(false);
@@ -112,9 +108,10 @@ const FarmerNavbar = ({ toggle }) => {
     whiteSpace: "nowrap"
   };
 
+  // ✅ INCREASED SIZE BY 2PX (from 32px to 34px)
   const avatarStyle = {
-    width: "32px",
-    height: "32px",
+    width: "34px",
+    height: "34px",
     borderRadius: "50%",
     objectFit: "cover",
     border: "1px solid rgba(255,255,255,0.3)",
@@ -177,13 +174,13 @@ const FarmerNavbar = ({ toggle }) => {
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
-              {/* Display first name only if available */}
               {farmerData.name ? `Hello, ${farmerData.name.split(' ')[0]}` : "Profile"} 
               <div style={avatarStyle}>
                 {farmerData.photo ? (
                   <img src={farmerData.photo} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <MdOutlineAccountCircle size={28} color="white" />
+                  // ✅ INCREASED ICON SIZE BY 2PX (from 28 to 30)
+                  <MdOutlineAccountCircle size={30} color="white" />
                 )}
               </div>
             </button>
@@ -191,7 +188,6 @@ const FarmerNavbar = ({ toggle }) => {
         </div>
       </nav>
 
-      {/* Overlays and Sidebars */}
       {showLogoPage && (
         <div style={{ position: "fixed", top: "78px", left: 0, width: "100%", height: "calc(100vh - 78px)", zIndex: 9990, backgroundColor: "#0f172a" }}>
           <FarmerLogo />
