@@ -183,7 +183,7 @@ const FarmerUpdateProfile = () => {
           </div>
 
           <button type="submit" disabled={updating} style={{...s.button, opacity: updating ? 0.7 : 1}}>
-            {updating ? 'Saving Changes...' : 'Sync Registry Changes'}
+            {updating ? 'Saving Changes...' : 'Update Profile'}
           </button>
         </form>
       </div>
