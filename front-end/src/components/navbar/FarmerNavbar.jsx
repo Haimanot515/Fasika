@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./navbar.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 import MyFarmSidebar from "../sidebars/MyFarmSidebar";
 import MarketSidebar from "../sidebars/MarketSidebar";
 import ProfileSidebar from "../sidebars/ProfileSidebar";
@@ -25,6 +25,7 @@ const FarmerNavbar = ({ toggle }) => {
   const [showLogoPage, setShowLogoPage] = useState(false); 
   
   const [farmerData, setFarmerData] = useState({ name: "", photo: null });
+  const navigate = useNavigate(); // Initialize navigate
 
   const myFarmRef = useRef(null);
   const marketRef = useRef(null);
@@ -58,8 +59,17 @@ const FarmerNavbar = ({ toggle }) => {
   const handleLogoClick = (e) => {
     e.preventDefault(); 
     const targetState = !showLogoPage;
-    closeAll();
+    
+    // 1. Close other sidebars
+    setShowMyFarm(false);
+    setShowMarket(false);
+    setShowProfile(false);
+    
+    // 2. Toggle the promotion page
     setShowLogoPage(targetState);
+
+    // 3. Always navigate to dashboard in the background
+    navigate("/dashboard"); 
   };
 
   const handleMyFarmClick = () => {
@@ -128,7 +138,6 @@ const FarmerNavbar = ({ toggle }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check if click is outside all three sidebar refs
       const outsideMyFarm = myFarmRef.current && !myFarmRef.current.contains(event.target);
       const outsideMarket = marketRef.current && !marketRef.current.contains(event.target);
       const outsideProfile = profileRef.current && !profileRef.current.contains(event.target);
@@ -149,11 +158,12 @@ const FarmerNavbar = ({ toggle }) => {
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)", boxSizing: "border-box", overflow: "hidden" 
       }}>
         
+        {/* Logo Section */}
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
-          <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "800", fontSize: "1.4rem", pointerEvents: "none" }}>
+          <div className="brand" style={{ ...linkStyle, fontWeight: "800", fontSize: "1.4rem" }}>
             <EthiopiaMapIcon />
             <span style={{ marginLeft: "6px" }}>Farmers</span>
-          </Link>
+          </div>
         </div>
 
         <div className="nav-links" style={{ 
@@ -191,6 +201,7 @@ const FarmerNavbar = ({ toggle }) => {
         </div>
       </nav>
 
+      {/* Promotion Page Overlay */}
       {showLogoPage && (
         <div style={{ 
           position: "fixed", top: "78px", left: 0, width: "100%", height: "calc(100vh - 78px)", 
