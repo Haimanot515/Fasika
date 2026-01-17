@@ -94,6 +94,7 @@ exports.registerUser = async (req, res) => {
 
     // 3️⃣ Send Verification Link (after commit)
    // 3️⃣ Elite Transactional Email with Image (Admin: Haimanot)
+// 3️⃣ Elite Transactional Email with AAU Credits (Admin: Haimanot)
 try {
   const method = preferred_method?.toUpperCase();
 
@@ -104,8 +105,7 @@ try {
       const frontendUrl = process.env.FRONTEND_URL || 'https://fasika-frontend.onrender.com';
       const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
-      // Placeholder image URL - REPLACE WITH YOUR OWN HOSTED IMAGE IF PREFERRED
-      const heroImageUrl = 'https://images.unsplash.com/photo-1579603833075-f933441a7b8e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+      const heroImageUrl = 'https://images.unsplash.com/photo-1579603833075-f933441a7b8e?auto=format&fit=crop&w=1200&q=80';
 
       const htmlContent = `
         <!DOCTYPE html>
@@ -113,44 +113,30 @@ try {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Verify Fasika Account</title>
           <style>
-            /* Reset for Email Clients */
-            body { margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #020617; font-family: 'Inter', -apple-system, sans-serif; }
-            img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; max-width: 100%; } /* Added display: block and max-width */
-            table { border-collapse: collapse !important; }
-            
-            /* Extra-Level Styles */
+            body { margin: 0; padding: 0; width: 100% !important; background-color: #020617; font-family: 'Inter', Helvetica, sans-serif; }
             .email-wrapper { background-color: #020617; padding: 40px 20px; }
-            .content-box { max-width: 600px; margin: 0 auto; background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-            .header-accent { background: linear-gradient(90deg, #064e3b 0%, #10b981 100%); height: 6px; width: 100%; }
-            .inner-padding { padding: 48px; }
-            .logo-text { color: #10b981; font-size: 24px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 32px; text-align: center; }
-            .hero-title { color: #f8fafc; font-size: 32px; font-weight: 800; text-align: center; letter-spacing: -1px; margin-bottom: 16px; line-height: 1.2; }
-            .description { color: #94a3b8; font-size: 16px; line-height: 1.6; text-align: center; margin-bottom: 40px; }
+            .content-box { max-width: 600px; margin: 0 auto; background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; }
+            .header-accent { background: linear-gradient(90deg, #064e3b 0%, #10b981 100%); height: 8px; width: 100%; }
+            .inner-padding { padding: 40px; }
+            .logo-text { color: #10b981; font-size: 22px; font-weight: 800; letter-spacing: 5px; text-align: center; margin-bottom: 25px; }
+            .hero-image { width: 100%; height: auto; border-radius: 12px; margin-bottom: 30px; display: block; border: 1px solid #334155; }
+            .hero-title { color: #f8fafc; font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 15px; }
+            .description { color: #94a3b8; font-size: 15px; line-height: 1.6; text-align: center; margin-bottom: 35px; }
             
-            /* CTA Button */
-            .cta-container { text-align: center; margin-bottom: 40px; }
-            .btn-elite { background-color: #10b981; color: #020617 !important; padding: 18px 42px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; display: inline-block; transition: transform 0.2s ease; }
-            
-            /* Image specific styles */
-            .hero-image-container { text-align: center; margin-bottom: 40px; }
-            .hero-image { width: 100%; height: auto; border-radius: 8px; display: block; }
-            
-            /* Security Section */
-            .security-notice { background-color: #1e293b; padding: 24px; border-radius: 12px; margin-top: 10px; }
-            .security-text { color: #64748b; font-size: 13px; line-height: 1.5; margin: 0; }
-            
-            .footer { padding: 32px; text-align: center; color: #475569; font-size: 12px; letter-spacing: 1px; }
-            .highlight { color: #10b981; text-decoration: none; }
-
-            /* Responsive adjustments */
-            @media only screen and (max-width: 620px) {
-              .inner-padding { padding: 24px; }
-              .hero-title { font-size: 26px; }
-              .logo-text { font-size: 20px; letter-spacing: 4px; }
-              .btn-elite { padding: 14px 30px; font-size: 15px; }
+            /* AAU Credit Style */
+            .aau-credit { 
+              background: rgba(16, 185, 129, 0.1); 
+              border: 1px solid rgba(16, 185, 129, 0.2);
+              padding: 20px; 
+              border-radius: 12px; 
+              margin-bottom: 35px; 
+              text-align: center;
             }
+            .aau-text { color: #10b981; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0; }
+
+            .btn-elite { background-color: #10b981; color: #020617 !important; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; }
+            .footer { padding: 30px; text-align: center; color: #475569; font-size: 11px; border-top: 1px solid #1e293b; }
           </style>
         </head>
         <body>
@@ -160,26 +146,25 @@ try {
               <div class="inner-padding">
                 <div class="logo-text">🌿 FASIKA</div>
                 
-                <div class="hero-image-container">
-                    <img class="hero-image" src="${heroImageUrl}" alt="Fasika Agricultural Dashboard Overview" />
+                <img class="hero-image" src="${heroImageUrl}" alt="Fasika Hub" />
+
+                <div class="aau-credit">
+                  <p class="aau-text">🚀 DEVELOPED BY ADDIS ABABA UNIVERSITY SOFTWARE ENGINEERS</p>
+                  <p style="color: #64748b; font-size: 12px; margin-top: 8px; font-weight: 500;">Solving societal problems through technological innovation.</p>
                 </div>
 
-                <h1 class="hero-title">Identity Verification</h1>
+                <h1 class="hero-title">Verify Your Node</h1>
                 <p class="description">
-                  Haimanot, a new account has been initiated on the Fasika Farmers Connect platform. To secure the agricultural telemetry node, please authorize this email address.
+                  Haimanot, welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
                 </p>
-                <div class="cta-container">
-                  <a href="${verificationLink}" class="btn-elite">Activate Node</a>
-                </div>
-                <div class="security-notice">
-                  <p class="security-text">
-                    <strong>Security Alert:</strong> This link expires in 24 hours. If you did not request this, please ignore this email or contact the Fasika Security Team.
-                  </p>
+
+                <div style="text-align: center;">
+                  <a href="${verificationLink}" class="btn-elite">ACTIVATE ACCOUNT</a>
                 </div>
               </div>
               <div class="footer">
-                CORE PROTOCOL v2.0 // ADDIS ABABA // 2026<br>
-                <a href="${frontendUrl}" class="highlight">Go to Dashboard</a>
+                FASIKA HUB // ADDIS ABABA UNIVERSITY // 2026<br>
+                Empowering Ethiopian Agriculture through Software Excellence.
               </div>
             </div>
           </div>
@@ -187,17 +172,12 @@ try {
         </html>
       `;
 
-      await sendEmail(
-        email, 
-        '🔒 Action Required: Verify Your Fasika Node', 
-        htmlContent
-      );
-      
-      console.log(`🚀 ELITE WITH IMAGE: Verification dispatched for ${email}`);
+      await sendEmail(email, '🔒 Account Verification: Fasika x AAU', htmlContent);
+      console.log(`✅ Success! Verification email with AAU credits sent to ${email}`);
     }
   }
 } catch (e) {
-  console.error('📧 [SYSTEM ERROR] Dispatch Failure:', e);
+  console.error('📧 Email Error:', e);
 }
 
     // 4️⃣ SUCCESS RESPONSE
