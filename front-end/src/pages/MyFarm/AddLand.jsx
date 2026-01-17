@@ -4,7 +4,7 @@ import {
   Plus, Activity, Search, 
   MapPin, Loader2, TreePine, 
   CloudSun, Sprout, 
-  Navigation, Trash
+  Navigation, Trash, Map
 } from 'lucide-react';
 
 const AddLand = () => {
@@ -25,6 +25,83 @@ const AddLand = () => {
     const [tempAnimal, setTempAnimal] = useState("");
 
     const LAND_PATH = '/farmer/farm/land';
+
+    const theme = {
+        container: { 
+            marginTop: "80px", 
+            minHeight: "calc(100vh - 80px)", 
+            background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)", 
+            padding: "40px 20px", 
+            display: "flex", 
+            flexDirection: "column",
+            alignItems: "center",
+            fontFamily: "'Inter', sans-serif" 
+        },
+        glassCard: { 
+            width: "100%", 
+            maxWidth: "900px", 
+            background: "rgba(255, 255, 255, 0.95)", 
+            backdropFilter: "blur(10px)", 
+            borderRadius: "24px", 
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)", 
+            overflow: "hidden",
+            marginBottom: "40px"
+        },
+        header: { 
+            background: "#166534", 
+            padding: "30px", 
+            color: "white", 
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+        },
+        inputField: { 
+            width: "100%", 
+            padding: "14px 16px", 
+            borderRadius: "12px", 
+            border: "2px solid #e2e8f0", 
+            fontSize: "16px", 
+            outline: "none", 
+            boxSizing: "border-box", 
+            backgroundColor: "#fff",
+            transition: "0.3s"
+        },
+        label: { 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "8px", 
+            fontSize: "14px", 
+            fontWeight: "600", 
+            color: "#14532d", 
+            marginBottom: "8px" 
+        },
+        submitBtn: { 
+            width: "100%", 
+            padding: "18px", 
+            background: "#15803d", 
+            color: "white", 
+            border: "none", 
+            borderRadius: "14px", 
+            fontSize: "18px", 
+            fontWeight: "bold", 
+            cursor: "pointer", 
+            marginTop: "20px", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            gap: "10px" 
+        },
+        listItem: { 
+            padding: "10px 15px", 
+            background: "#f0fdf4", 
+            borderRadius: "10px", 
+            fontSize: "15px", 
+            color: "#166534", 
+            fontWeight: "500",
+            borderLeft: "4px solid #22c55e"
+        }
+    };
 
     useEffect(() => {
         setTimeout(() => setWeather({ temp: '28', condition: 'Optimal' }), 2000);
@@ -70,7 +147,7 @@ const AddLand = () => {
     };
 
     const handleDropLand = async (id) => {
-        if (window.confirm("Are you sure you want to DROP this asset from the registry?")) {
+        if (window.confirm("DROP this asset from the registry?")) {
             try {
                 await api.delete(`${LAND_PATH}/${id}`);
                 fetchLands();
@@ -79,144 +156,138 @@ const AddLand = () => {
     };
 
     return (
-        <div style={styles.container}>
-            {/* LEFT PANEL: SMART REGISTRATION */}
-            <div style={styles.leftPanel}>
-                <div style={styles.brandSection}>
-                    <div style={styles.badge}><Sprout size={16} /> ECO-SYSTEM SYNC</div>
-                    <h1 style={styles.mainTitle}>ASSET <br /><span style={styles.normalTitle}>Registry</span></h1>
-                    <p style={styles.subtitle}>Securely DROP your land assets into the database.</p>
+        <div style={theme.container}>
+            <div style={theme.glassCard}>
+                <div style={theme.header}>
+                    <Sprout size={40} />
+                    <h1 style={{ margin: "10px 0 5px 0", fontSize: "28px", fontWeight: "800" }}>
+                        ASSET <span style={{ fontWeight: "400" }}>Registry</span>
+                    </h1>
+                    <p style={{ opacity: 0.9, fontSize: "14px" }}>Register your land plot and biological assets</p>
                 </div>
 
-                <form onSubmit={handleAddLand} style={styles.form}>
-                    <div style={styles.inputWrapper}>
-                        <label style={styles.label}>Plot Identity</label>
-                        <div style={styles.inputBox}>
-                            <MapPin style={styles.inputIcon} size={18} />
+                <form onSubmit={handleAddLand} style={{ padding: "40px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "25px", marginBottom: "25px" }}>
+                        <div>
+                            <label style={theme.label}><MapPin size={16}/> Plot Identity</label>
                             <input 
-                                style={styles.input} 
+                                style={theme.inputField} 
                                 value={formData.plot_name}
                                 onChange={(e) => setFormData({...formData, plot_name: e.target.value})}
-                                placeholder="Plot name (e.g. South Sector)" required 
+                                placeholder="e.g. Sector-7 Delta" required 
                             />
                         </div>
-                    </div>
-
-                    <div style={styles.row}>
-                        <div style={{flex: 1.5}}>
-                            <label style={styles.label}>Area Size (Ha)</label>
+                        <div>
+                            <label style={theme.label}><Map size={16}/> Area Size (Hectares)</label>
                             <input 
-                                style={styles.input} 
+                                style={theme.inputField} 
                                 type="number" 
                                 value={formData.area_size}
                                 onChange={(e) => setFormData({...formData, area_size: e.target.value})}
                                 placeholder="0.00" required 
                             />
                         </div>
-                        <div style={{flex: 1}}>
-                            <label style={styles.label}>GPS Sync</label>
-                            <div style={styles.gpsStatus}>
-                                <Navigation size={14} /> LIVE
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "25px" }}>
+                        {/* CROPS SECTION */}
+                        <div>
+                            <label style={theme.label}>Add Crops ({formData.crops.length})</label>
+                            <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+                                <input 
+                                    style={theme.inputField} 
+                                    value={tempCrop}
+                                    onChange={(e) => setTempCrop(e.target.value)}
+                                    placeholder="Crop name..."
+                                />
+                                <button type="button" onClick={addCropToForm} style={{ ...theme.submitBtn, marginTop: 0, width: "60px" }}>
+                                    <Plus size={24} />
+                                </button>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                {formData.crops.map((c, i) => (
+                                    <div key={i} style={theme.listItem}>{c}</div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* ANIMALS SECTION */}
+                        <div>
+                            <label style={theme.label}>Add Livestock ({formData.animals.length})</label>
+                            <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+                                <input 
+                                    style={theme.inputField} 
+                                    value={tempAnimal}
+                                    onChange={(e) => setTempAnimal(e.target.value)}
+                                    placeholder="Animal species..."
+                                />
+                                <button type="button" onClick={addAnimalToForm} style={{ ...theme.submitBtn, marginTop: 0, width: "60px", background: "#166534" }}>
+                                    <Plus size={24} />
+                                </button>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                {formData.animals.map((a, i) => (
+                                    <div key={i} style={{ ...theme.listItem, background: "#f0f9ff", color: "#0369a1", borderLeft: "4px solid #0ea5e9" }}>{a}</div>
+                                ))}
                             </div>
                         </div>
                     </div>
 
-                    {/* CROP LIST - NEW LINE FORMAT */}
-                    <div style={styles.sectionDivider}>
-                        <label style={styles.label}>Biology: Crops ({formData.crops.length})</label>
-                        <div style={styles.tagInputRow}>
-                            <input 
-                                style={styles.tagInput} 
-                                value={tempCrop}
-                                onChange={(e) => setTempCrop(e.target.value)}
-                                placeholder="Add crop name..."
-                            />
-                            <button type="button" onClick={addCropToForm} style={styles.addTagBtn}><Plus size={18}/></button>
-                        </div>
-                        <div style={styles.listContainer}>
-                            {formData.crops.map((c, i) => (
-                                <div key={i} style={styles.listItem}>{c}</div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* ANIMAL LIST - NEW LINE FORMAT */}
-                    <div style={styles.sectionDivider}>
-                        <label style={styles.label}>Biology: Livestock ({formData.animals.length})</label>
-                        <div style={styles.tagInputRow}>
-                            <input 
-                                style={styles.tagInput} 
-                                value={tempAnimal}
-                                onChange={(e) => setTempAnimal(e.target.value)}
-                                placeholder="Add animal name..."
-                            />
-                            <button type="button" onClick={addAnimalToForm} style={styles.addTagBtn}><Plus size={18}/></button>
-                        </div>
-                        <div style={styles.listContainer}>
-                            {formData.animals.map((a, i) => (
-                                <div key={i} style={{...styles.listItem, color: '#0369a1', borderLeft: '3px solid #0369a1'}}>{a}</div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <button type="submit" style={styles.submitBtn}>
-                        <Activity size={20} /> DROP INTO REGISTRY
+                    <button type="submit" style={theme.submitBtn}>
+                        <Activity size={22} /> DROP INTO REGISTRY
                     </button>
                 </form>
             </div>
 
-            {/* RIGHT PANEL: EXPLORER */}
-            <div style={styles.rightPanel}>
-                <div style={styles.headerRow}>
-                    <div style={styles.searchSection}>
-                        <h2 style={styles.sectionLabel}>Registry Explorer</h2>
-                        <div style={styles.searchContainer}>
-                            <Search style={styles.searchIcon} size={20} />
+            {/* EXPLORER SECTION */}
+            <div style={{ width: "100%", maxWidth: "900px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "20px" }}>
+                    <div>
+                        <h2 style={{ color: "#166534", margin: 0 }}>Registry Explorer</h2>
+                        <div style={{ position: "relative", marginTop: "10px" }}>
+                            <Search style={{ position: "absolute", left: "12px", top: "12px", color: "#64748b" }} size={20} />
                             <input 
-                                style={styles.searchInput}
-                                placeholder="Filter active assets..."
+                                style={{ ...theme.inputField, paddingLeft: "45px", width: "300px" }}
+                                placeholder="Filter assets..."
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                     </div>
-                    
-                    <div style={styles.weatherBox}>
-                        <div style={styles.weatherIcon}><CloudSun size={24} /></div>
-                        <div>
-                            <p style={styles.statusLabel}>Environment</p>
-                            <p style={styles.statusValue}>{weather.temp}°C • {weather.condition}</p>
-                        </div>
+                    <div style={{ background: "#fff", padding: "10px 20px", borderRadius: "15px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", gap: "10px" }}>
+                        <CloudSun color="#f59e0b" />
+                        <span style={{ fontWeight: "700", color: "#1e293b" }}>{weather.temp}°C • {weather.condition}</span>
                     </div>
                 </div>
 
-                <div style={styles.grid}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
                     {loading ? (
-                        <div style={styles.centerBlock}><Loader2 style={styles.spinner} size={48} /></div>
+                        <Loader2 style={{ animation: "spin 2s linear infinite", color: "#15803d" }} size={40} />
                     ) : lands.filter(l => l.plot_name?.toLowerCase().includes(searchTerm.toLowerCase())).map((plot) => (
-                        <div key={plot.id} style={styles.card}>
-                            <div style={styles.cardHeader}>
-                                <div style={styles.iconBox}><TreePine size={28} /></div>
+                        <div key={plot.id} style={{ background: "#fff", padding: "20px", borderRadius: "20px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}>
+                            <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+                                <div style={{ background: "#f0fdf4", padding: "12px", borderRadius: "12px", color: "#15803d" }}>
+                                    <TreePine size={24} />
+                                </div>
                                 <div>
-                                    <h3 style={styles.cardTitle}>{plot.plot_name}</h3>
-                                    <span style={styles.areaBadge}>{plot.area_size} Hectares Managed</span>
+                                    <h4 style={{ margin: 0, fontSize: "18px", color: "#1e293b" }}>{plot.plot_name}</h4>
+                                    <span style={{ fontSize: "13px", color: "#64748b" }}>{plot.area_size} Hectares</span>
                                 </div>
                             </div>
-                            
-                            <div style={styles.cardContent}>
-                                <div style={styles.miniTags}>
-                                    <div style={styles.statBox}>
-                                        <span style={styles.statVal}>{plot.crops?.length || 0}</span>
-                                        <span style={styles.statLab}>Crops</span>
-                                    </div>
-                                    <div style={styles.statBox}>
-                                        <span style={styles.statVal}>{plot.animals?.length || 0}</span>
-                                        <span style={styles.statLab}>Animals</span>
-                                    </div>
+                            <div style={{ display: "flex", gap: "10px" }}>
+                                <div style={{ flex: 1, background: "#f8fafc", padding: "10px", borderRadius: "10px", textAlign: "center" }}>
+                                    <div style={{ fontSize: "18px", fontWeight: "800", color: "#15803d" }}>{plot.crops?.length || 0}</div>
+                                    <div style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase" }}>Crops</div>
+                                </div>
+                                <div style={{ flex: 1, background: "#f8fafc", padding: "10px", borderRadius: "10px", textAlign: "center" }}>
+                                    <div style={{ fontSize: "18px", fontWeight: "800", color: "#0369a1" }}>{plot.animals?.length || 0}</div>
+                                    <div style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase" }}>Livestock</div>
                                 </div>
                             </div>
-
-                            <button onClick={() => handleDropLand(plot.id)} style={styles.dropBtn}>
-                                <Trash size={16} /> DROP ASSET
+                            <button 
+                                onClick={() => handleDropLand(plot.id)} 
+                                style={{ width: "100%", marginTop: "15px", padding: "10px", border: "1px solid #fee2e2", background: "none", color: "#ef4444", borderRadius: "10px", cursor: "pointer", fontWeight: "600", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}
+                            >
+                                <Trash size={14} /> DROP ASSET
                             </button>
                         </div>
                     ))}
@@ -224,56 +295,6 @@ const AddLand = () => {
             </div>
         </div>
     );
-};
-
-const styles = {
-    container: { display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f0', fontFamily: '"Inter", sans-serif', color: '#1a2e1a', paddingTop: '90px' },
-    leftPanel: { width: '400px', backgroundColor: '#ffffff', borderRight: '1px solid #d1dbd1', padding: '40px', display: 'flex', flexDirection: 'column', boxShadow: '10px 0 30px rgba(0,0,0,0.02)', zIndex: 10 },
-    brandSection: { marginBottom: '35px' },
-    badge: { display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', fontWeight: 'bold', fontSize: '12px', letterSpacing: '1px', marginBottom: '12px' },
-    mainTitle: { fontSize: '48px', fontWeight: '900', color: '#064e3b', lineHeight: '0.9', margin: 0 },
-    normalTitle: { color: '#10b981', fontWeight: '700', fontStyle: 'normal' },
-    subtitle: { color: '#6b7280', fontSize: '14px', marginTop: '10px' },
-    form: { display: 'flex', flexDirection: 'column', gap: '24px' },
-    label: { fontSize: '12px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', marginBottom: '8px', display: 'block' },
-    inputBox: { position: 'relative', display: 'flex', alignItems: 'center' },
-    inputIcon: { position: 'absolute', left: '15px', color: '#059669' },
-    input: { width: '100%', padding: '14px 15px 14px 45px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', fontWeight: '600', fontSize: '15px', outlineColor: '#10b981' },
-    row: { display: 'flex', gap: '15px', alignItems: 'flex-end' },
-    gpsStatus: { padding: '14px', background: '#ecfdf5', color: '#059669', borderRadius: '12px', fontSize: '13px', fontWeight: '800', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', border: '1px solid #d1fae5', width: '100%' },
-    sectionDivider: { borderTop: '1px solid #f3f4f6', paddingTop: '10px' },
-    tagInputRow: { display: 'flex', gap: '8px' },
-    tagInput: { flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e5e7eb', backgroundColor: '#fff' },
-    addTagBtn: { width: '45px', height: '42px', borderRadius: '10px', border: 'none', backgroundColor: '#064e3b', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    
-    // NEW LIST STYLES (NO ICONS, NEW LINES)
-    listContainer: { display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' },
-    listItem: { padding: '8px 15px', backgroundColor: '#f8faf8', color: '#166534', borderRadius: '8px', fontSize: '14px', fontWeight: '600', borderLeft: '3px solid #10b981' },
-    
-    submitBtn: { padding: '18px', backgroundColor: '#059669', color: '#fff', border: 'none', borderRadius: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '10px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)' },
-    rightPanel: { flex: 1, padding: '40px 60px', overflowY: 'auto' },
-    headerRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' },
-    sectionLabel: { fontSize: '24px', fontWeight: '800', color: '#064e3b', margin: '0 0 15px 0' },
-    searchContainer: { position: 'relative', width: '400px' },
-    searchIcon: { position: 'absolute', left: '18px', top: '15px', color: '#9ca3af' },
-    searchInput: { width: '100%', padding: '15px 15px 15px 50px', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', fontWeight: '500', outlineColor: '#10b981' },
-    weatherBox: { display: 'flex', alignItems: 'center', gap: '15px', backgroundColor: '#fff', padding: '12px 25px', borderRadius: '18px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' },
-    weatherIcon: { color: '#f59e0b' },
-    statusLabel: { margin: 0, fontSize: '11px', fontWeight: '700', color: '#9ca3af', textTransform: 'uppercase' },
-    statusValue: { margin: 0, fontSize: '15px', fontWeight: '700', color: '#1f2937' },
-    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '25px' },
-    card: { backgroundColor: '#ffffff', padding: '24px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.04)', border: '1px solid #e5e7eb' },
-    cardHeader: { display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '20px' },
-    iconBox: { width: '56px', height: '56px', backgroundColor: '#f0fdf4', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' },
-    cardTitle: { fontSize: '20px', fontWeight: '800', margin: 0, color: '#111827' },
-    areaBadge: { fontSize: '13px', color: '#6b7280', fontWeight: '500' },
-    miniTags: { display: 'flex', gap: '12px' },
-    statBox: { flex: 1, padding: '12px', background: '#f9fafb', borderRadius: '12px', textAlign: 'center' },
-    statVal: { display: 'block', fontSize: '18px', fontWeight: '800', color: '#059669' },
-    statLab: { fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', fontWeight: '700' },
-    dropBtn: { width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #fee2e2', backgroundColor: '#fff', color: '#ef4444', fontWeight: '700', cursor: 'pointer', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' },
-    centerBlock: { gridColumn: '1/-1', display: 'flex', justifyContent: 'center', padding: '50px' },
-    spinner: { animation: 'spin 2s linear infinite', color: '#059669' }
 };
 
 export default AddLand;
