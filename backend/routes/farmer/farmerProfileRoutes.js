@@ -10,13 +10,16 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } 
 });
 
-// CREATE: POST /api/farmers/profile
+// All paths are '/profile' because server.js adds the '/api/farmers' prefix
+// Combined, the URL is: https://your-api.com/api/farmers/profile
+
+// CREATE
 router.post('/profile', authenticate, upload.single('photo'), farmerCtrl.createFarmerProfile);
 
-// GET: GET /api/farmers/profile
+// GET
 router.get('/profile', authenticate, farmerCtrl.getFarmerProfile);
 
-// UPDATE: PUT /api/farmers/profile
+// UPDATE
 router.put('/profile', authenticate, upload.single('photo'), farmerCtrl.updateFarmerProfile);
 
 module.exports = router;
