@@ -66,13 +66,13 @@ const FarmerProfile = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1500382017468-9049fee74a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80")',
+      // ✅ BACKGROUND NOW MATCHES UPDATE PAGE IDENTICALLY
+      backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
       padding: '60px 20px'
     },
-    // ✅ WIDTH INCREASED TO 850PX
     container: { 
       maxWidth: '850px', 
       width: '100%',
@@ -82,7 +82,6 @@ const FarmerProfile = () => {
       borderRadius: '24px', 
       boxShadow: '0 20px 45px rgba(0,0,0,0.3)' 
     },
-    // ✅ FONT SIZES INCREASED
     title: { 
       textAlign: 'center', 
       color: '#1b4332', 
