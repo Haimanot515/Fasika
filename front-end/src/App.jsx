@@ -22,7 +22,7 @@ import AdminUpdateLivestock from './pages/admin/AdminUpdateLivstoke';
 
 // --- FARM MANAGEMENT (MY FARM) ---
 import FarmerRegistrationForm from "./pages/FarmerProfile";
-import FarmerUpdateUpdateForm from "./pages/FarmerProfile";
+import FarmerUpdateForm from "./pages/FarmerUpdateProfile";
 
 import ViewLand from "./pages/MyFarm/ViewLand";
 import AddLand from "./pages/MyFarm/AddLand";
