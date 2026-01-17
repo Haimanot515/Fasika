@@ -21,34 +21,32 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
 
     const theme = {
         wrapper: {
-            position: 'fixed',
+            position: 'absolute', // Changed to absolute for better natural scrolling
             top: 0,
             left: 0,
             width: '100%',
-            height: '100vh',
+            minHeight: '100vh',
             background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
-            paddingTop: "160px", 
-            // Ensures vertical scrolling is enabled
-            overflowY: "scroll", 
+            paddingTop: "120px", // Ensures it starts below your navbar
+            paddingBottom: "80px", // Extra space at bottom for scrolling
             zIndex: 999, 
             fontFamily: "'Inter', sans-serif",
-            boxSizing: "border-box"
+            display: "flex",
+            justifyContent: "center"
         },
         glassCard: { 
-            width: "95%", 
-            maxWidth: "800px", 
+            width: "95%", // Full width look with small side margins
+            maxWidth: "1200px", // Larger max width for "Full Width" feel
             background: "rgba(255, 255, 255, 0.98)", 
             backdropFilter: "blur(10px)", 
             borderRadius: "24px", 
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.2)", 
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)", 
             overflow: "hidden",
-            // Centering the card in block mode
-            margin: "0 auto 100px auto", 
-            height: "auto"
+            height: "fit-content"
         },
         header: { 
             background: "#166534", 
-            padding: "25px 30px", 
+            padding: "30px", 
             color: "white", 
             display: "flex", 
             justifyContent: "space-between", 
@@ -56,7 +54,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
         },
         inputField: { 
             width: "100%", 
-            padding: "14px 16px", 
+            padding: "16px", 
             borderRadius: "12px", 
             border: "2px solid #e2e8f0", 
             fontSize: "16px", 
@@ -74,18 +72,18 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             marginBottom: "8px" 
         },
         listItem: { 
-            padding: "10px 15px", 
+            padding: "12px 20px", 
             background: "#f0fdf4", 
             borderRadius: "10px", 
-            fontSize: "14px", 
+            fontSize: "15px", 
             color: "#166534", 
             fontWeight: "600",
-            borderLeft: "4px solid #22c55e",
-            marginBottom: "6px"
+            borderLeft: "5px solid #22c55e",
+            marginBottom: "8px"
         },
         saveBtn: { 
             flex: 2, 
-            padding: "18px", 
+            padding: "20px", 
             background: "#15803d", 
             color: "white", 
             border: "none", 
@@ -121,6 +119,8 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             }
         };
         fetchCurrentPlot();
+        // Force scroll to top when opening
+        window.scrollTo(0, 0);
     }, [plotId]);
 
     const handleUpdate = async (e) => {
@@ -130,7 +130,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             alert("Success! Registry node updated.");
             onUpdateSuccess();
         } catch (err) {
-            alert("DROP update failed. Check node connection.");
+            alert("DROP update failed. Check connection.");
         }
     };
 
@@ -139,9 +139,9 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
 
     if (loading) return (
         <div style={theme.wrapper}>
-            <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <div style={{ textAlign: 'center' }}>
                 <Loader2 style={{ animation: "spin 2s linear infinite", color: "#15803d" }} size={40} />
-                <p style={{ color: "#166534", fontWeight: "600" }}>Syncing Registry Node...</p>
+                <p style={{ color: "#166534", fontWeight: "600" }}>Syncing Registry...</p>
             </div>
         </div>
     );
@@ -151,56 +151,43 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             <div style={theme.glassCard}>
                 <div style={theme.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <Sprout size={28} />
+                        <Sprout size={32} />
                         <div>
-                            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800" }}>Update <span style={{fontWeight: "400"}}>Registry</span></h2>
-                            <p style={{ margin: 0, fontSize: "11px", opacity: 0.8 }}>NODE ID: {plotId}</p>
+                            <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "800" }}>Update <span style={{fontWeight: "400"}}>Registry</span></h2>
+                            <p style={{ margin: 0, fontSize: "12px", opacity: 0.8 }}>NODE IDENTIFIER: {plotId}</p>
                         </div>
                     </div>
-                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X /></button>
+                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={30}/></button>
                 </div>
 
-                <form onSubmit={handleUpdate} style={{ padding: "30px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+                <form onSubmit={handleUpdate} style={{ padding: "40px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px", marginBottom: "30px" }}>
                         <div>
-                            <label style={theme.label}><MapPin size={16}/> Identity Name</label>
-                            <input 
-                                style={theme.inputField}
-                                value={formData.plot_name}
-                                onChange={(e) => setFormData({...formData, plot_name: e.target.value})}
-                            />
+                            <label style={theme.label}><MapPin size={18}/> Identity Name</label>
+                            <input style={theme.inputField} value={formData.plot_name} onChange={(e) => setFormData({...formData, plot_name: e.target.value})} />
                         </div>
                         <div>
-                            <label style={theme.label}><Maximize size={16}/> Area (Ha)</label>
-                            <input 
-                                style={theme.inputField}
-                                type="number"
-                                value={formData.area_size}
-                                onChange={(e) => setFormData({...formData, area_size: e.target.value})}
-                            />
+                            <label style={theme.label}><Maximize size={18}/> Area (Ha)</label>
+                            <input style={theme.inputField} type="number" value={formData.area_size} onChange={(e) => setFormData({...formData, area_size: e.target.value})} />
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: "25px" }}>
-                        <label style={theme.label}>Node Status</label>
-                        <select 
-                            style={theme.inputField}
-                            value={formData.land_status}
-                            onChange={(e) => setFormData({...formData, land_status: e.target.value})}
-                        >
+                    <div style={{ marginBottom: "30px" }}>
+                        <label style={theme.label}>Node Production Status</label>
+                        <select style={theme.inputField} value={formData.land_status} onChange={(e) => setFormData({...formData, land_status: e.target.value})}>
                             <option value="Active">Active Production</option>
                             <option value="Fallow">Fallow (Resting)</option>
                             <option value="Maintenance">Maintenance</option>
                         </select>
                     </div>
 
-                    {/* BIOLOGY SECTIONS */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "25px", marginBottom: "25px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", marginBottom: "30px" }}>
+                        {/* CROPS */}
                         <div>
-                            <label style={theme.label}>Crops ({formData.crops.length})</label>
-                            <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
-                                <input style={theme.inputField} value={tempCrop} onChange={(e) => setTempCrop(e.target.value)} placeholder="Add..."/>
-                                <button type="button" onClick={addCrop} style={{ padding: "10px", background: "#15803d", color: "white", border: "none", borderRadius: "10px" }}><Plus size={20}/></button>
+                            <label style={theme.label}>Biological Assets: Crops ({formData.crops.length})</label>
+                            <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+                                <input style={theme.inputField} value={tempCrop} onChange={(e) => setTempCrop(e.target.value)} placeholder="Add crop..."/>
+                                <button type="button" onClick={addCrop} style={{ padding: "0 20px", background: "#15803d", color: "white", border: "none", borderRadius: "12px" }}><Plus /></button>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column" }}>
                                 {formData.crops.map((c, i) => (
@@ -209,30 +196,31 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                             </div>
                         </div>
 
+                        {/* ANIMALS */}
                         <div>
-                            <label style={theme.label}>Livestock ({formData.animals.length})</label>
-                            <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
-                                <input style={theme.inputField} value={tempAnimal} onChange={(e) => setTempAnimal(e.target.value)} placeholder="Add..."/>
-                                <button type="button" onClick={addAnimal} style={{ padding: "10px", background: "#0369a1", color: "white", border: "none", borderRadius: "10px" }}><Plus size={20}/></button>
+                            <label style={theme.label}>Biological Assets: Livestock ({formData.animals.length})</label>
+                            <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+                                <input style={theme.inputField} value={tempAnimal} onChange={(e) => setTempAnimal(e.target.value)} placeholder="Add animal..."/>
+                                <button type="button" onClick={addAnimal} style={{ padding: "0 20px", background: "#0369a1", color: "white", border: "none", borderRadius: "12px" }}><Plus /></button>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column" }}>
                                 {formData.animals.map((a, i) => (
-                                    <div key={i} style={{...theme.listItem, background: "#f0f9ff", color: "#0369a1", borderLeft: "4px solid #0ea5e9"}}>{a}</div>
+                                    <div key={i} style={{...theme.listItem, background: "#f0f9ff", color: "#0369a1", borderLeft: "5px solid #0ea5e9"}}>{a}</div>
                                 ))}
                             </div>
                         </div>
                     </div>
 
-                    <div style={{ display: "flex", gap: "12px", padding: "15px", backgroundColor: "#f0fdf4", borderRadius: "12px", marginBottom: "20px" }}>
-                        <Info size={18} color="#15803d" />
-                        <p style={{ fontSize: "12px", color: "#166534", margin: 0 }}>Updating this node will synchronize all biological assets across the registry.</p>
+                    <div style={{ display: "flex", gap: "15px", padding: "20px", backgroundColor: "#f0fdf4", borderRadius: "16px", marginBottom: "30px" }}>
+                        <Info size={24} color="#15803d" />
+                        <p style={{ fontSize: "14px", color: "#166534", margin: 0 }}>Updating this node will synchronize all assets. Click SAVE to DROP these changes into the registry.</p>
                     </div>
 
-                    <div style={{ display: "flex", gap: "15px" }}>
+                    <div style={{ display: "flex", gap: "20px" }}>
                         <button type="submit" style={theme.saveBtn}>
-                            <Activity size={20} /> SAVE UPDATES
+                            <Activity size={24} /> SAVE UPDATES
                         </button>
-                        <button type="button" onClick={onCancel} style={{ flex: 1, padding: "18px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "14px", fontWeight: "bold", cursor: "pointer" }}>
+                        <button type="button" onClick={onCancel} style={{ flex: 1, padding: "20px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "14px", fontWeight: "bold", cursor: "pointer", fontSize: "18px" }}>
                             CANCEL
                         </button>
                     </div>
