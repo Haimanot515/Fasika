@@ -31,19 +31,19 @@ const FarmerRegistrationForm = () => {
     label: { fontSize: '13px', marginBottom: '5px', fontWeight: '600', color: '#4a5568' },
     input: { padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e0', outline: 'none' },
     button: { width: '100%', padding: '16px', backgroundColor: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', marginTop: '20px' },
+    moreBtn: { marginTop: '15px', padding: '8px 15px', backgroundColor: '#e2e8f0', color: '#2d6a4f', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', width: 'fit-content' },
     alert: (isErr) => ({ padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center', backgroundColor: isErr ? '#fff5f5' : '#f0fff4', color: isErr ? '#c53030' : '#276749', border: `1px solid ${isErr ? '#feb2b2' : '#9ae6b4'}` }),
     photoPreview: { width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #2d6a4f', marginBottom: '10px' }
   };
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // Handle Photo Input
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, photo: reader.result }); // Base64 string
+        setFormData({ ...formData, photo: reader.result });
       };
       reader.readAsDataURL(file);
     }
@@ -86,22 +86,10 @@ const FarmerRegistrationForm = () => {
           <div style={s.section}>
             <div style={s.sectionTitle}>1. Account & Security (Users Table)</div>
             <div style={s.grid}>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Full Name</label>
-                <input style={s.input} name="full_name" required onChange={handleChange} />
-              </div>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Phone Number</label>
-                <input style={s.input} name="phone" required onChange={handleChange} />
-              </div>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Email Address</label>
-                <input style={s.input} type="email" name="email" onChange={handleChange} />
-              </div>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Password</label>
-                <input style={s.input} type="password" name="password" required onChange={handleChange} />
-              </div>
+              <div style={s.inputGroup}><label style={s.label}>Full Name</label><input style={s.input} name="full_name" required onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Phone Number</label><input style={s.input} name="phone" required onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Email Address</label><input style={s.input} type="email" name="email" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Password</label><input style={s.input} type="password" name="password" required onChange={handleChange} /></div>
             </div>
           </div>
 
@@ -109,10 +97,7 @@ const FarmerRegistrationForm = () => {
           <div style={s.section}>
             <div style={s.sectionTitle}>2. Farm Registry Details (Farmers Table)</div>
             <div style={s.grid}>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Farm Name</label>
-                <input style={s.input} name="farm_name" placeholder="My Farm" onChange={handleChange} />
-              </div>
+              <div style={s.inputGroup}><label style={s.label}>Farm Name</label><input style={s.input} name="farm_name" placeholder="My Farm" onChange={handleChange} /></div>
               <div style={s.inputGroup}>
                 <label style={s.label}>Farm Type</label>
                 <select style={s.input} name="farm_type" onChange={handleChange}>
@@ -122,41 +107,37 @@ const FarmerRegistrationForm = () => {
                   <option value="Mixed">Mixed Farming</option>
                 </select>
               </div>
-              <div style={{...s.inputGroup, gridColumn: 'span 2'}}>
-                <label style={s.label}>Public Farmer ID (Unique Identifier)</label>
-                <input style={s.input} name="public_farmer_id" placeholder="e.g. FARM-1002" onChange={handleChange} />
-              </div>
+              <div style={{...s.inputGroup, gridColumn: 'span 2'}}><label style={s.label}>Public Farmer ID (Unique Identifier)</label><input style={s.input} name="public_farmer_id" placeholder="e.g. FARM-1002" onChange={handleChange} /></div>
             </div>
+            <button type="button" style={s.moreBtn}>+ Add More Farms</button>
           </div>
 
           {/* SECTION 3: LAND & CROPS (LAND_PLOTS & CROPS TABLES) */}
           <div style={s.section}>
             <div style={s.sectionTitle}>3. Initial Land Plot & Crop</div>
             <div style={s.grid}>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Initial Plot Name</label>
-                <input style={s.input} name="plot_name" placeholder="e.g. North Field" required onChange={handleChange} />
-              </div>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Area Size (Ha)</label>
-                <input style={s.input} type="number" step="0.01" name="area_size" required onChange={handleChange} />
-              </div>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Crop to Plant</label>
-                <input style={s.input} name="crop_name" placeholder="e.g. Maize" onChange={handleChange} />
-              </div>
-              <div style={s.inputGroup}>
-                <label style={s.label}>Planting Date</label>
-                <input style={s.input} type="date" name="planting_date" onChange={handleChange} />
-              </div>
+              <div style={s.inputGroup}><label style={s.label}>Initial Plot Name</label><input style={s.input} name="plot_name" placeholder="e.g. North Field" required onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Area Size (Ha)</label><input style={s.input} type="number" step="0.01" name="area_size" required onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Crop to Plant</label><input style={s.input} name="crop_name" placeholder="Maize" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Planting Date</label><input style={s.input} type="date" name="planting_date" onChange={handleChange} /></div>
+            </div>
+            <div style={{display: 'flex', gap: '10px'}}>
+                <button type="button" style={s.moreBtn}>+ Add More Lands</button>
+                <button type="button" style={s.moreBtn}>+ Add More Crops</button>
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={loading} 
-            style={{...s.button, opacity: loading ? 0.7 : 1}}
-          >
+          {/* SECTION 4: ANIMALS (OPTIONAL ONBOARDING) */}
+          <div style={s.section}>
+            <div style={s.sectionTitle}>4. Livestock Details (Animals Table)</div>
+            <div style={s.grid}>
+              <div style={s.inputGroup}><label style={s.label}>Tag Number</label><input style={s.input} name="tag_number" placeholder="TAG-001" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Species</label><input style={s.input} name="species" placeholder="Cattle" onChange={handleChange} /></div>
+            </div>
+            <button type="button" style={s.moreBtn}>+ Add More Animals</button>
+          </div>
+
+          <button type="submit" disabled={loading} style={{...s.button, opacity: loading ? 0.7 : 1}}>
             {loading ? 'Creating Multi-Table Records...' : 'Submit Full Registration'}
           </button>
         </form>
