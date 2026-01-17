@@ -5,6 +5,6 @@ const registryController = require('../../controllers/farmer/farmerProfileContro
 const authenticate = require('../../middleware/authenticate'); // Your provided middleware
 
 // This route uses your middleware to ensure we have a valid User ID from the cookie
-router.post('/register-onboarding', authenticate, registryController.distributeOnboardingData);
+router.post('/register-onboarding', authenticate, registryController.farmerProfile);
 
 module.exports = router;
