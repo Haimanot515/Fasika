@@ -1,6 +1,6 @@
-const pool = require('../config/dbConfig');
+const pool = require('../../config/dbConfig');
 
-const distributeOnboardingData = async (req, res) => {
+const farmerProfile = async (req, res) => {
     // Master Key from your authenticate middleware
     const user_internal_id = req.user.id;
 
@@ -70,4 +70,4 @@ const distributeOnboardingData = async (req, res) => {
     }
 };
 
-module.exports = { distributeOnboardingData };
+module.exports = { farmerProfile};
