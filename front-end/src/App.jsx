@@ -22,6 +22,7 @@ import AdminUpdateLivestock from './pages/admin/AdminUpdateLivstoke';
 
 // --- FARM MANAGEMENT (MY FARM) ---
 import FarmerRegistrationForm from "./pages/FarmerProfile";
+import FarmerUpdateUpdateForm from "./pages/FarmerProfile";
 
 import ViewLand from "./pages/MyFarm/ViewLand";
 import AddLand from "./pages/MyFarm/AddLand";
@@ -94,7 +95,10 @@ function App() {
 
         
        
-    
+    <Route path="/profile/create-account" element={<FarmerRegistrationForm />} />
+  
+  {/* The form for editing existing info */}
+  <Route path="/profile/update-account" element={<FarmerUpdateProfileForm />} />
           {/* 🛒 MARKETPLACE OPERATIONS (Farmer) */}
           <Route path="/market/sales" element={<ViewFarmerListing />} />
           <Route path="/market/sales/add-listing" element={<AddFarmerListing />} />
