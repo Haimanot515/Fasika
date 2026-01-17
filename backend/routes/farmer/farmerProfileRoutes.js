@@ -1,10 +1,22 @@
-
 const express = require('express');
 const router = express.Router();
-const registryController = require('../../controllers/farmer/farmerProfileController');
-const authenticate = require('../../middleware/authMiddleware'); // Your provided middleware
+const multer = require('multer');
+const farmerCtrl = require('../controllers/farmerProfileController');
+const authenticate = require('../middleware/authenticate');
 
-// This route uses your middleware to ensure we have a valid User ID from the cookie
-router.post('/register-onboarding', authenticate, registryController.farmerProfile);
+// Multer setup for image memory storage
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } 
+});
+
+// CREATE: POST /api/farmers/profile
+router.post('/profile', authenticate, upload.single('photo'), farmerCtrl.createFarmerProfile);
+
+// GET: GET /api/farmers/profile
+router.get('/profile', authenticate, farmerCtrl.getFarmerProfile);
+
+// UPDATE: PUT /api/farmers/profile
+router.put('/profile', authenticate, upload.single('photo'), farmerCtrl.updateFarmerProfile);
 
 module.exports = router;
