@@ -83,28 +83,30 @@ const FarmerUpdateProfile = () => {
 
   const s = {
     pageWrapper: {
+      // ✅ FIX: Ensures the background covers the entire scrollable height
       minHeight: '100vh',
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+      backgroundColor: '#1b4332', // Fallback color
       backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
-      // No padding here so the container can touch the edges
-      padding: '0', 
+      backgroundAttachment: 'fixed', // This keeps image still while form scrolls
+      backgroundRepeat: 'no-repeat',
+      margin: 0,
+      padding: 0,
       boxSizing: 'border-box',
       overflowX: 'hidden'
     },
     container: { 
       maxWidth: '850px', 
       width: '100%',
-      minHeight: '100vh', // ✅ Ensures it stretches from top to bottom
+      minHeight: '100vh', 
       padding: 'clamp(25px, 5%, 60px)', 
       backgroundColor: 'rgba(255, 255, 255, 0.96)', 
       backdropFilter: 'blur(10px)',
-      // ✅ Removed border radius so it looks like a continuous page
       borderRadius: '0', 
       boxShadow: '0 0 50px rgba(0,0,0,0.5)',
       boxSizing: 'border-box',
