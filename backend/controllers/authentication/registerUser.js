@@ -152,9 +152,10 @@ exports.registerUser = async (req, res) => {
                     </div>
 
                     <h1 class="hero-title">Verify Your Node</h1>
-                    <p class="description">
-                      Dear ${full_name}, welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
-                    </p>
+                  <p class="description">
+  <span style="color: #10b981; font-weight: bold;">Dear ${full_name}</span>,<br/>
+  welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
+</p>
 
                     <div style="text-align: center;">
                       <a href="${verificationLink}" class="btn-elite">ACTIVATE ACCOUNT</a>
