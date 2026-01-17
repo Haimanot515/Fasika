@@ -20,7 +20,7 @@ const farmerSupportRoutes = require('./routes/farmer/farmerSupportRoutes');
 const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
-app.use('/api/farmers', farmerProfileRoutes);
+
 
 // 2️⃣ GLOBAL MIDDLEWARE
 app.use(express.json());
@@ -71,6 +71,7 @@ app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
 app.use("/api/farmer/advisory", advisoryRoutes);
 app.use('/api/farmer/support', farmerSupportRoutes);
 app.use("/api/farmer/notifications", notificationRoutes);
+app.use('/api/farmers', farmerProfileRoutes);
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
