@@ -44,7 +44,7 @@ const FarmerProfile = () => {
   const s = {
     pageWrapper: {
       minHeight: '100vh',
-      width: '100vw', // Ensures it stays within viewport width
+      width: '100%', // Changed from 100vw to 100% to stop scrollbar
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -52,26 +52,31 @@ const FarmerProfile = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
-      padding: '40px 15px',
-      boxSizing: 'border-box', // Crucial to prevent horizontal scroll
-      overflowX: 'hidden'      // Safety block
+      padding: '80px 20px', // Extra top padding for Navbar clearance
+      boxSizing: 'border-box',
+      overflowX: 'hidden',
+      position: 'relative'
     },
     container: { 
       maxWidth: '850px', 
       width: '100%',
-      padding: 'clamp(20px, 5vw, 50px)', // Responsive padding
+      margin: '0 auto', // Keeps it centered
+      padding: 'clamp(25px, 5%, 50px)', 
       backgroundColor: 'rgba(255, 255, 255, 0.95)', 
       backdropFilter: 'blur(10px)',
       borderRadius: '24px', 
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      boxShadow: '0 20px 45px rgba(0,0,0,0.3)',
+      position: 'relative',
+      zIndex: 2
     },
-    title: { textAlign: 'center', color: '#1b4332', fontSize: '2.5rem', fontWeight: '900', marginBottom: '10px' },
-    subtitle: { textAlign: 'center', color: '#40916c', marginBottom: '40px', fontSize: '1.2rem' },
+    title: { textAlign: 'center', color: '#1b4332', fontSize: '2.5rem', fontWeight: '900', marginBottom: '10px', margin: '0' },
+    subtitle: { textAlign: 'center', color: '#40916c', marginBottom: '40px', fontSize: '1.2rem', fontWeight: '500' },
     sectionTitle: { display: 'flex', alignItems: 'center', gap: '10px', color: '#2d6a4f', fontSize: '1.4rem', fontWeight: '800', marginTop: '30px', borderBottom: '2px solid #d8f3dc', paddingBottom: '8px' },
     group: { marginBottom: '20px' },
     label: { display: 'block', marginBottom: '10px', fontWeight: '700', color: '#1b4332', fontSize: '1.05rem' },
-    input: { width: '100%', padding: '14px 18px', borderRadius: '12px', border: '2px solid #d8f3dc', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box' },
-    button: { width: '100%', padding: '18px', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '1.3rem', marginTop: '30px' },
+    input: { width: '100%', padding: '14px 18px', borderRadius: '12px', border: '2px solid #d8f3dc', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box', backgroundColor: '#f8fdf9' },
+    button: { width: '100%', padding: '18px', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '1.3rem', marginTop: '30px', transition: '0.3s' },
     photoUpload: { width: '140px', height: '140px', margin: '0 auto 30px', borderRadius: '50%', border: '4px solid #b7e4c7', overflow: 'hidden', cursor: 'pointer', backgroundColor: '#e9f5ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }
   };
 
@@ -87,7 +92,7 @@ const FarmerProfile = () => {
           </div>
         )}
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <div style={{ textAlign: 'center' }}>
             <label style={s.photoUpload}>
               {preview ? <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 
@@ -99,13 +104,13 @@ const FarmerProfile = () => {
           <div style={s.sectionTitle}><MdAgriculture size={28}/> Farm Details</div>
           <div style={s.group}><label style={s.label}>Farm Name</label><input style={s.input} name="farm_name" onChange={handleChange} placeholder="Green Valley Estate" required /></div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '25px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
             <div style={s.group}><label style={s.label}>Farm Type</label><input style={s.input} name="farm_type" onChange={handleChange} /></div>
             <div style={s.group}><label style={s.label}>Public ID</label><input style={s.input} name="public_farmer_id" onChange={handleChange} /></div>
           </div>
 
           <div style={s.sectionTitle}><MdLocationOn size={28}/> Land Assets</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '25px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
             <div style={s.group}><label style={s.label}>Plot Name</label><input style={s.input} name="plot_name" onChange={handleChange} required /></div>
             <div style={s.group}><label style={s.label}>Area (Ha)</label><input style={s.input} type="number" step="0.1" name="area_size" onChange={handleChange} required /></div>
           </div>
