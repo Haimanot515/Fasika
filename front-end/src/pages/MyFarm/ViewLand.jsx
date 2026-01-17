@@ -3,7 +3,8 @@ import api from "../../api/axios";
 import UpdateLand from "./UpdateLand";
 import { 
   FaPlus, FaShieldAlt, FaSearch, FaEllipsisV, 
-  FaEdit, FaTrash, FaMapMarkedAlt, FaStar, FaVectorSquare 
+  FaEdit, FaTrash, FaMapMarkedAlt, FaStar, FaVectorSquare,
+  FaSprout, FaPaw, FaChartLine
 } from "react-icons/fa";
 
 const ViewLand = () => {
@@ -85,7 +86,6 @@ const ViewLand = () => {
         .search-input { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
         .search-button { background: #febd69; border: none; width: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         
-        /* TWO CARDS PER ROW LOGIC */
         .land-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -99,7 +99,7 @@ const ViewLand = () => {
         .alibaba-card { 
             font-family: 'Roboto', Helvetica, Arial, sans-serif; 
             background: #ffffff; 
-            height: 480px; 
+            height: 540px; 
             cursor: pointer; 
             overflow: hidden; 
             transition: all 0.3s ease; 
@@ -110,9 +110,8 @@ const ViewLand = () => {
             position: relative; 
         }
 
-        /* LAND BACKGROUND IMAGE SECTION */
         .image-half { 
-            flex: 0 0 240px; 
+            flex: 0 0 220px; 
             width: 100%; 
             position: relative; 
             background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
@@ -128,12 +127,26 @@ const ViewLand = () => {
             justify-content: center;
         }
 
+        /* ASSET QUICK BUTTONS */
+        .asset-btn-row { display: flex; gap: 8px; margin: 15px 0; }
+        .asset-btn { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 8px; 
+            background: #f8f9fa; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: 0.2s;
+            color: #475569;
+        }
+        .asset-btn:hover { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+        .asset-btn span { font-size: 11px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
+
         .alibaba-card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.18); transform: translateY(-2px); }
-        
         .options-btn { position: absolute; top: 15px; right: 15px; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 5; color: #333; border: none; cursor: pointer; }
-        .dropdown-menu { position: absolute; top: 55px; right: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); z-index: 100; width: 170px; padding: 6px 0; }
-        .menu-item { padding: 12px 18px; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #333; transition: background 0.2s; cursor: pointer; }
-        .menu-item:hover { background: #f8f9fa; }
       `}</style>
       
       <div style={premiumStyles.scrollLayer}>
@@ -148,10 +161,7 @@ const ViewLand = () => {
             />
             <button className="search-button"><FaSearch size={18} /></button>
           </div>
-          <button 
-            onClick={() => window.location.href='/farmer/farm/add-land'} 
-            style={premiumStyles.headerAddBtn}
-          >
+          <button onClick={() => window.location.href='/farmer/farm/add-land'} style={premiumStyles.headerAddBtn}>
             <FaPlus /> Add Land
           </button>
         </div>
@@ -170,11 +180,11 @@ const ViewLand = () => {
               </button>
 
               {showMenuId === plot.id && (
-                <div className="dropdown-menu" ref={menuRef}>
-                  <div className="menu-item" onClick={() => setEditingPlotId(plot.id)}>
+                <div style={premiumStyles.dropdownMenu} ref={menuRef}>
+                  <div style={premiumStyles.menuItem} onClick={() => setEditingPlotId(plot.id)}>
                     <FaEdit color="#007185"/> Edit Asset
                   </div>
-                  <div className="menu-item" onClick={() => handleDrop(plot.id)} style={{color: '#d32f2f', fontWeight: 'bold'}}>
+                  <div style={{...premiumStyles.menuItem, color: '#d32f2f', fontWeight: 'bold'}} onClick={() => handleDrop(plot.id)}>
                     <FaTrash /> DROP Node
                   </div>
                 </div>
@@ -187,31 +197,41 @@ const ViewLand = () => {
                 <div style={premiumStyles.verifiedTag}><FaShieldAlt size={12} color="#15803d"/> Verified Plot</div>
               </div>
 
-              <div className="text-half">
+              <div className="text-half" style={{ padding: "15px" }}>
                 <h2 style={premiumStyles.productTitle}>{plot.plot_name}</h2>
                 <div style={premiumStyles.idLabel}>REGISTRY TOKEN: 0x{plot.id.toString().padStart(6, '0')}</div>
                 
                 <div style={premiumStyles.priceRow}>
                   <span style={premiumStyles.priceMain}>{plot.area_size}</span>
                   <span style={premiumStyles.unit}>Hectares (Ha)</span>
+                  <span style={{...premiumStyles.statusBadge, 
+                    backgroundColor: plot.land_status === 'Active' ? '#dcfce7' : '#fee2e2',
+                    color: plot.land_status === 'Active' ? '#166534' : '#991b1b',
+                    marginLeft: 'auto'
+                  }}>{plot.land_status || "Active"}</span>
                 </div>
 
-                <div style={{ margin: "10px 0" }}>
-                   <span style={{
-                     ...premiumStyles.statusBadge, 
-                     backgroundColor: plot.land_status === 'Active' ? '#dcfce7' : '#fee2e2',
-                     color: plot.land_status === 'Active' ? '#166534' : '#991b1b',
-                     border: `1px solid ${plot.land_status === 'Active' ? '#bbf7d0' : '#fecaca'}`
-                   }}>
-                     {plot.land_status || "Active"}
-                   </span>
+                {/* --- NEW ASSET BUTTONS --- */}
+                <div className="asset-btn-row">
+                  <div className="asset-btn" onClick={() => alert(`Showing crops for ${plot.plot_name}`)}>
+                    <FaSprout size={18} color="#16a34a"/>
+                    <span>Crops</span>
+                  </div>
+                  <div className="asset-btn" onClick={() => alert(`Showing livestock for ${plot.plot_name}`)}>
+                    <FaPaw size={18} color="#92400e"/>
+                    <span>Animals</span>
+                  </div>
+                  <div className="asset-btn" onClick={() => alert(`Showing soil analysis for ${plot.plot_name}`)}>
+                    <FaChartLine size={18} color="#2563eb"/>
+                    <span>Health</span>
+                  </div>
                 </div>
 
                 <div style={premiumStyles.vendorName}>Secure Registry Node • Last Synced Today</div>
                 
                 <div style={premiumStyles.ratingRow}>
                   <FaStar color="#ff9900" size={12} />
-                  <span style={premiumStyles.ratingCount}>{plot.crop_count || 0} Assets Currently Linked to this Plot</span>
+                  <span style={premiumStyles.ratingCount}>{plot.crop_count || 0} Assets Linked</span>
                 </div>
               </div>
             </div>
@@ -225,17 +245,19 @@ const ViewLand = () => {
 const premiumStyles = {
   pageWrapper: { width: "100vw", minHeight: "100vh", background: "#f0f2f5", position: "relative", zIndex: 10005 },
   scrollLayer: { marginTop: "78px", width: "100%", paddingBottom: "60px" },
-  headerAddBtn: { background: "#ff9900", border: "1px solid #a88734", borderRadius: "4px", color: "#111", padding: "0 25px", height: "42px", cursor: "pointer", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" },
-  verifiedTag: { position: "absolute", top: "12px", left: "12px", background: "rgba(255,255,255,0.95)", padding: "4px 10px", fontSize: "12px", borderRadius: "4px", fontWeight: "800", boxShadow: "0 2px 4px rgba(0,0,0,0.2)", color: "#15803d", display: "flex", alignItems: "center", gap: "5px" },
-  productTitle: { fontSize: "20px", color: "#007185", fontWeight: "700", margin: "15px 0 5px 0" },
-  idLabel: { fontSize: "12px", color: "#777", letterSpacing: "1px", marginBottom: "10px" },
-  priceRow: { display: "flex", alignItems: "baseline", gap: "6px", margin: "5px 0" },
-  priceMain: { fontSize: "28px", fontWeight: "900", color: "#111" },
-  unit: { fontSize: "16px", color: "#444", fontWeight: "500" },
-  statusBadge: { padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "800", textTransform: "uppercase" },
-  vendorName: { fontSize: "13px", color: "#555", fontWeight: "500", marginTop: "auto", borderTop: "1px solid #eee", paddingTop: "10px" },
-  ratingRow: { display: "flex", alignItems: "center", paddingBottom: "15px", marginTop: "8px" },
+  headerAddBtn: { background: "#ff9900", border: "1px solid #a88734", borderRadius: "4px", color: "#111", padding: "0 25px", height: "42px", cursor: "pointer", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" },
+  verifiedTag: { position: "absolute", top: "12px", left: "12px", background: "white", padding: "4px 10px", fontSize: "12px", borderRadius: "4px", fontWeight: "800", color: "#15803d", display: "flex", alignItems: "center", gap: "5px" },
+  productTitle: { fontSize: "20px", color: "#007185", fontWeight: "700", margin: "0 0 5px 0" },
+  idLabel: { fontSize: "11px", color: "#777", letterSpacing: "1px", marginBottom: "8px" },
+  priceRow: { display: "flex", alignItems: "center", gap: "6px", margin: "5px 0" },
+  priceMain: { fontSize: "26px", fontWeight: "900", color: "#111" },
+  unit: { fontSize: "14px", color: "#444" },
+  statusBadge: { padding: "4px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "800", textTransform: "uppercase" },
+  vendorName: { fontSize: "12px", color: "#666", marginTop: "auto", borderTop: "1px solid #eee", paddingTop: "10px" },
+  ratingRow: { display: "flex", alignItems: "center", paddingBottom: "10px", marginTop: "5px" },
   ratingCount: { fontSize: "12px", color: "#15803d", marginLeft: "6px", fontWeight: "700" },
+  dropdownMenu: { position: "absolute", top: "55px", right: "15px", background: "white", border: "1px solid #ddd", borderRadius: "6px", boxShadow: "0 8px 16px rgba(0,0,0,0.15)", zIndex: 100, width: "170px", padding: "6px 0" },
+  menuItem: { padding: "12px 18px", display: "flex", alignItems: "center", gap: "12px", fontSize: "14px", cursor: "pointer" },
   loader: { textAlign: 'center', padding: '150px', fontSize: '20px', color: '#166534', fontWeight: 'bold' }
 };
 
