@@ -59,3 +59,6 @@ const handleSubmit = async (e) => {
     setUpdating(false);
   }
 };
+// ... existing code ...
+
+export default FarmerUpdateProfile; // <--- MAKE SURE THIS IS HERE
