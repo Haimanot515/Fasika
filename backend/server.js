@@ -22,6 +22,7 @@ const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes');
 const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
 
 
+
 // 2️⃣ GLOBAL MIDDLEWARE
 app.use(express.json());
 app.use(cookieParser());
