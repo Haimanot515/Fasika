@@ -93,92 +93,91 @@ exports.registerUser = async (req, res) => {
     await client.query('COMMIT');
 
     // 3️⃣ Send Verification Link (after commit)
-   // 3️⃣ Elite Transactional Email with Image (Admin: Haimanot)
-// 3️⃣ Elite Transactional Email with AAU Credits (Admin: Haimanot)
-try {
-  const method = preferred_method?.toUpperCase();
+    try {
+      const method = preferred_method?.toUpperCase();
 
-  if (method === 'EMAIL') {
-    if (!email) {
-      console.error('❌ Email sending skipped: email address is null');
-    } else {
-      const frontendUrl = process.env.FRONTEND_URL || 'https://fasika-frontend.onrender.com';
-      const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+      if (method === 'EMAIL') {
+        if (!email) {
+          console.error('❌ Email sending skipped: email address is null');
+        } else {
+          const frontendUrl = process.env.FRONTEND_URL || 'https://fasika-frontend.onrender.com';
+          const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
-      const heroImageUrl = 'https://images.unsplash.com/photo-1579603833075-f933441a7b8e?auto=format&fit=crop&w=1200&q=80';
+          const heroImageUrl = 'https://images.unsplash.com/photo-1579603833075-f933441a7b8e?auto=format&fit=crop&w=1200&q=80';
 
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body { margin: 0; padding: 0; width: 100% !important; background-color: #020617; font-family: 'Inter', Helvetica, sans-serif; }
-            .email-wrapper { background-color: #020617; padding: 40px 20px; }
-            .content-box { max-width: 600px; margin: 0 auto; background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; }
-            .header-accent { background: linear-gradient(90deg, #064e3b 0%, #10b981 100%); height: 8px; width: 100%; }
-            .inner-padding { padding: 40px; }
-            .logo-text { color: #10b981; font-size: 22px; font-weight: 800; letter-spacing: 5px; text-align: center; margin-bottom: 25px; }
-            .hero-image { width: 100%; height: auto; border-radius: 12px; margin-bottom: 30px; display: block; border: 1px solid #334155; }
-            .hero-title { color: #f8fafc; font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 15px; }
-            .description { color: #94a3b8; font-size: 15px; line-height: 1.6; text-align: center; margin-bottom: 35px; }
-            
-            /* AAU Credit Style */
-            .aau-credit { 
-              background: rgba(16, 185, 129, 0.1); 
-              border: 1px solid rgba(16, 185, 129, 0.2);
-              padding: 20px; 
-              border-radius: 12px; 
-              margin-bottom: 35px; 
-              text-align: center;
-            }
-            .aau-text { color: #10b981; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0; }
-
-            .btn-elite { background-color: #10b981; color: #020617 !important; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; }
-            .footer { padding: 30px; text-align: center; color: #475569; font-size: 11px; border-top: 1px solid #1e293b; }
-          </style>
-        </head>
-        <body>
-          <div class="email-wrapper">
-            <div class="content-box">
-              <div class="header-accent"></div>
-              <div class="inner-padding">
-                <div class="logo-text">🌿 FASIKA</div>
+          const htmlContent = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { margin: 0; padding: 0; width: 100% !important; background-color: #020617; font-family: 'Inter', Helvetica, sans-serif; }
+                .email-wrapper { background-color: #020617; padding: 40px 20px; }
+                .content-box { max-width: 600px; margin: 0 auto; background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; }
+                .header-accent { background: linear-gradient(90deg, #064e3b 0%, #10b981 100%); height: 8px; width: 100%; }
+                .inner-padding { padding: 40px; }
+                .logo-text { color: #10b981; font-size: 22px; font-weight: 800; letter-spacing: 5px; text-align: center; margin-bottom: 25px; }
+                .hero-image { width: 100%; height: auto; border-radius: 12px; margin-bottom: 30px; display: block; border: 1px solid #334155; }
+                .hero-title { color: #f8fafc; font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 15px; }
+                .description { color: #94a3b8; font-size: 15px; line-height: 1.6; text-align: center; margin-bottom: 35px; }
                 
-                <img class="hero-image" src="${heroImageUrl}" alt="Fasika Hub" />
+                /* AAU Credit Style */
+                .aau-credit { 
+                  background: rgba(16, 185, 129, 0.1); 
+                  border: 1px solid rgba(16, 185, 129, 0.2);
+                  padding: 20px; 
+                  border-radius: 12px; 
+                  margin-bottom: 35px; 
+                  text-align: center;
+                }
+                .aau-text { color: #10b981; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0; }
 
-                <div class="aau-credit">
-                  <p class="aau-text"> DEVELOPED BY ADDIS ABABA UNIVERSITY SOFTWARE ENGINEERING STUDENTS</p>
-                  <p style="color: #64748b; font-size: 12px; margin-top: 8px; font-weight: 500;">Solving societal problems through technological innovation.</p>
-                </div>
+                .btn-elite { background-color: #10b981; color: #020617 !important; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; }
+                .footer { padding: 30px; text-align: center; color: #475569; font-size: 11px; border-top: 1px solid #1e293b; }
+              </style>
+            </head>
+            <body>
+              <div class="email-wrapper">
+                <div class="content-box">
+                  <div class="header-accent"></div>
+                  <div class="inner-padding">
+                    <div class="logo-text">🌿 FASIKA</div>
+                    
+                    <img class="hero-image" src="${heroImageUrl}" alt="Fasika Hub" />
 
-                <h1 class="hero-title">Verify Your Node</h1>
-                <p class="description">
-                  , welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
-                </p>
+                    <div class="aau-credit">
+                      <p class="aau-text"> DEVELOPED BY ADDIS ABABA UNIVERSITY SOFTWARE ENGINEERING STUDENTS</p>
+                      <p style="color: #64748b; font-size: 12px; margin-top: 8px; font-weight: 500;">Solving societal problems through technological innovation.</p>
+                    </div>
 
-                <div style="text-align: center;">
-                  <a href="${verificationLink}" class="btn-elite">ACTIVATE ACCOUNT</a>
+                    <h1 class="hero-title">Verify Your Node</h1>
+                    <p class="description">
+                      Dear ${full_name}, welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
+                    </p>
+
+                    <div style="text-align: center;">
+                      <a href="${verificationLink}" class="btn-elite">ACTIVATE ACCOUNT</a>
+                    </div>
+                  </div>
+                  <div class="footer">
+                    FASIKA HUB // ADDIS ABABA UNIVERSITY // 2026
+
+                    Empowering Ethiopian Agriculture through Software Excellence.
+                  </div>
                 </div>
               </div>
-              <div class="footer">
-                FASIKA HUB // ADDIS ABABA UNIVERSITY // 2026<br>
-                Empowering Ethiopian Agriculture through Software Excellence.
-              </div>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
+            </body>
+            </html>
+          `;
 
-      await sendEmail(email, '🔒 Account Verification: Fasika Farmer Conect  x AAU', htmlContent);
-      console.log(`✅ Success! Verification email with AAU credits sent to ${email}`);
+          await sendEmail(email, '🔒 Account Verification: Fasika Farmer Conect x AAU', htmlContent);
+          console.log(`✅ Success! Verification email with AAU credits sent to ${email}`);
+        }
+      }
+    } catch (e) {
+      console.error('📧 Email Error:', e);
     }
-  }
-} catch (e) {
-  console.error('📧 Email Error:', e);
-}
 
     // 4️⃣ SUCCESS RESPONSE
     return res.status(201).json({
