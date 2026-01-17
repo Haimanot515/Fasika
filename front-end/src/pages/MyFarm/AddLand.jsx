@@ -3,8 +3,8 @@ import api from "../../api/axios";
 import { 
   Plus, Trash2, Map, Activity, Search, 
   MapPin, Loader2, Wheat, TreePine, 
-  Layers, CloudSun, Cow, X, Sprout, 
-  Navigation, Trash
+  Layers, CloudSun, X, Sprout, 
+  Navigation, Trash, Beef // Swapped Cow for Beef to fix build error
 } from 'lucide-react';
 
 const AddLand = () => {
@@ -80,7 +80,6 @@ const AddLand = () => {
 
     return (
         <div style={styles.container}>
-            {/* LEFT PANEL: SMART REGISTRATION */}
             <div style={styles.leftPanel}>
                 <div style={styles.brandSection}>
                     <div style={styles.badge}><Sprout size={16} /> ECO-SYSTEM SYNC</div>
@@ -121,7 +120,6 @@ const AddLand = () => {
                         </div>
                     </div>
 
-                    {/* UNLIMITED CROP TAGS */}
                     <div style={styles.sectionDivider}>
                         <label style={styles.label}>Biology: Crops</label>
                         <div style={styles.tagInputRow}>
@@ -140,7 +138,6 @@ const AddLand = () => {
                         </div>
                     </div>
 
-                    {/* UNLIMITED ANIMAL TAGS */}
                     <div style={styles.sectionDivider}>
                         <label style={styles.label}>Biology: Livestock</label>
                         <div style={styles.tagInputRow}>
@@ -154,7 +151,9 @@ const AddLand = () => {
                         </div>
                         <div style={styles.tagCloud}>
                             {formData.animals.map((a, i) => (
-                                <span key={i} style={{...styles.tag, background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd'}}><Cow size={12}/> {a}</span>
+                                <span key={i} style={{...styles.tag, background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd'}}>
+                                    <Beef size={12}/> {a}
+                                </span>
                             ))}
                         </div>
                     </div>
@@ -165,7 +164,6 @@ const AddLand = () => {
                 </form>
             </div>
 
-            {/* RIGHT PANEL: EXPLORER */}
             <div style={styles.rightPanel}>
                 <div style={styles.headerRow}>
                     <div style={styles.searchSection}>
@@ -192,7 +190,7 @@ const AddLand = () => {
                 <div style={styles.grid}>
                     {loading ? (
                         <div style={styles.centerBlock}><Loader2 style={styles.spinner} size={48} /></div>
-                    ) : lands.filter(l => l.plot_name.toLowerCase().includes(searchTerm.toLowerCase())).map((plot) => (
+                    ) : lands.filter(l => l.plot_name?.toLowerCase().includes(searchTerm.toLowerCase())).map((plot) => (
                         <div key={plot.id} style={styles.card}>
                             <div style={styles.cardHeader}>
                                 <div style={styles.iconBox}><TreePine size={28} /></div>
@@ -228,6 +226,7 @@ const AddLand = () => {
     );
 };
 
+// Styles remain the same (Green/Modern theme)
 const styles = {
     container: { display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f0', fontFamily: '"Inter", sans-serif', color: '#1a2e1a' },
     leftPanel: { width: '400px', backgroundColor: '#ffffff', borderRight: '1px solid #d1dbd1', padding: '40px', display: 'flex', flexDirection: 'column', boxShadow: '10px 0 30px rgba(0,0,0,0.02)', zIndex: 10 },
@@ -246,7 +245,7 @@ const styles = {
     sectionDivider: { borderTop: '1px solid #f3f4f6', paddingTop: '10px' },
     tagInputRow: { display: 'flex', gap: '8px' },
     tagInput: { flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e5e7eb', backgroundColor: '#fff' },
-    addTagBtn: { width: '45px', borderRadius: '10px', border: 'none', backgroundColor: '#064e3b', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    addTagBtn: { width: '45px', height: '42px', borderRadius: '10px', border: 'none', backgroundColor: '#064e3b', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
     tagCloud: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' },
     tag: { padding: '6px 12px', backgroundColor: '#f0fdf4', color: '#166534', borderRadius: '8px', fontSize: '12px', fontWeight: '600', border: '1px solid #dcfce7', display: 'flex', alignItems: 'center', gap: '4px' },
     submitBtn: { padding: '18px', backgroundColor: '#059669', color: '#fff', border: 'none', borderRadius: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '10px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)' },
@@ -261,7 +260,7 @@ const styles = {
     statusLabel: { margin: 0, fontSize: '11px', fontWeight: '700', color: '#9ca3af', textTransform: 'uppercase' },
     statusValue: { margin: 0, fontSize: '15px', fontWeight: '700', color: '#1f2937' },
     grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '25px' },
-    card: { backgroundColor: '#ffffff', padding: '24px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.04)', border: '1px solid #e5e7eb', transition: 'transform 0.2s' },
+    card: { backgroundColor: '#ffffff', padding: '24px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.04)', border: '1px solid #e5e7eb' },
     cardHeader: { display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '20px' },
     iconBox: { width: '56px', height: '56px', backgroundColor: '#f0fdf4', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' },
     cardTitle: { fontSize: '20px', fontWeight: '800', margin: 0, color: '#111827' },
@@ -270,7 +269,7 @@ const styles = {
     statBox: { flex: 1, padding: '12px', background: '#f9fafb', borderRadius: '12px', textAlign: 'center' },
     statVal: { display: 'block', fontSize: '18px', fontWeight: '800', color: '#059669' },
     statLab: { fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', fontWeight: '700' },
-    dropBtn: { width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #fee2e2', backgroundColor: '#fff', color: '#ef4444', fontWeight: '700', cursor: 'pointer', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' },
+    dropBtn: { width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #fee2e2', backgroundColor: '#fff', color: '#ef4444', fontWeight: '700', cursor: 'pointer', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' },
     centerBlock: { gridColumn: '1/-1', display: 'flex', justifyContent: 'center', padding: '50px' },
     spinner: { animation: 'spin 2s linear infinite', color: '#059669' }
 };
