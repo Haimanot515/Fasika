@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./navbar.css";
-import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import MyFarmSidebar from "../sidebars/MyFarmSidebar";
 import MarketSidebar from "../sidebars/MarketSidebar";
 import ProfileSidebar from "../sidebars/ProfileSidebar";
 import FarmerLogo from "../../pages/dashboard/FarmerLogo"; 
 import api from "../../api/axios";
 
-// --- STABLE TESTED ICONS ---
+// ICONS
 import { 
   MdCloudQueue, 
   MdDashboard, 
@@ -25,7 +25,7 @@ const FarmerNavbar = ({ toggle }) => {
   const [showLogoPage, setShowLogoPage] = useState(false); 
   
   const [farmerData, setFarmerData] = useState({ name: "", photo: null });
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const myFarmRef = useRef(null);
   const marketRef = useRef(null);
@@ -34,11 +34,15 @@ const FarmerNavbar = ({ toggle }) => {
   useEffect(() => {
     const fetchFarmerProfile = async () => {
       try {
-        const res = await api.get('/farmers/my-profile');
-        if (res.data) {
+        // ✅ FIXED: Endpoint changed from /my-profile to /profile
+        const res = await api.get('/farmers/profile');
+        
+        // ✅ FIXED: Accessing res.data.data because your controller returns { success: true, data: rows[0] }
+        if (res.data && res.data.success) {
+          const profile = res.data.data;
           setFarmerData({
-            name: res.data.full_name || res.data.farm_name || "User",
-            photo: res.data.photo || null
+            name: profile.full_name || profile.farm_name || "Farmer",
+            photo: profile.photo_url || null // Matches 'photo_url' in your DB/Controller
           });
         }
       } catch (err) {
@@ -58,17 +62,8 @@ const FarmerNavbar = ({ toggle }) => {
 
   const handleLogoClick = (e) => {
     e.preventDefault(); 
-    const targetState = !showLogoPage;
-    
-    // 1. Close other sidebars
-    setShowMyFarm(false);
-    setShowMarket(false);
-    setShowProfile(false);
-    
-    // 2. Toggle the promotion page
-    setShowLogoPage(targetState);
-
-    // 3. Always navigate to dashboard in the background
+    closeAll();
+    setShowLogoPage(!showLogoPage);
     navigate("/dashboard"); 
   };
 
@@ -102,7 +97,7 @@ const FarmerNavbar = ({ toggle }) => {
     transition: "all 0.3s ease",
     display: "flex",
     alignItems: "center",
-    gap: "6px",               
+    gap: "6px",                
     whiteSpace: "nowrap"
   });
 
@@ -111,7 +106,7 @@ const FarmerNavbar = ({ toggle }) => {
     textDecoration: "none",
     display: "flex",
     alignItems: "center",
-    gap: "6px",               
+    gap: "6px",                
     fontSize: "1.05rem",
     fontWeight: "700",
     whiteSpace: "nowrap"
@@ -138,13 +133,9 @@ const FarmerNavbar = ({ toggle }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const outsideMyFarm = myFarmRef.current && !myFarmRef.current.contains(event.target);
-      const outsideMarket = marketRef.current && !marketRef.current.contains(event.target);
-      const outsideProfile = profileRef.current && !profileRef.current.contains(event.target);
-
-      if (showMyFarm && outsideMyFarm) setShowMyFarm(false);
-      if (showMarket && outsideMarket) setShowMarket(false);
-      if (showProfile && outsideProfile) setShowProfile(false);
+      if (showMyFarm && myFarmRef.current && !myFarmRef.current.contains(event.target)) setShowMyFarm(false);
+      if (showMarket && marketRef.current && !marketRef.current.contains(event.target)) setShowMarket(false);
+      if (showProfile && profileRef.current && !profileRef.current.contains(event.target)) setShowProfile(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -158,7 +149,6 @@ const FarmerNavbar = ({ toggle }) => {
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)", boxSizing: "border-box", overflow: "hidden" 
       }}>
         
-        {/* Logo Section */}
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
           <div className="brand" style={{ ...linkStyle, fontWeight: "800", fontSize: "1.4rem" }}>
             <EthiopiaMapIcon />
@@ -168,8 +158,7 @@ const FarmerNavbar = ({ toggle }) => {
 
         <div className="nav-links" style={{ 
           display: "flex", justifyContent: "space-between", alignItems: "center", 
-          flex: 1, marginLeft: "40px", flexWrap: "nowrap", overflowX: "auto",
-          msOverflowStyle: "none", scrollbarWidth: "none"
+          flex: 1, marginLeft: "40px", flexWrap: "nowrap"
         }}>
           <div style={{ display: "flex", gap: "25px", flexShrink: 0 }}> 
             <Link to="/weather" style={linkStyle} onClick={closeAll}>Weather <MdCloudQueue size={22}/></Link>
@@ -188,6 +177,7 @@ const FarmerNavbar = ({ toggle }) => {
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
+              {/* Display first name only if available */}
               {farmerData.name ? `Hello, ${farmerData.name.split(' ')[0]}` : "Profile"} 
               <div style={avatarStyle}>
                 {farmerData.photo ? (
@@ -201,12 +191,9 @@ const FarmerNavbar = ({ toggle }) => {
         </div>
       </nav>
 
-      {/* Promotion Page Overlay */}
+      {/* Overlays and Sidebars */}
       {showLogoPage && (
-        <div style={{ 
-          position: "fixed", top: "78px", left: 0, width: "100%", height: "calc(100vh - 78px)", 
-          zIndex: 9990, overflowY: "auto", backgroundColor: "#0f172a" 
-        }}>
+        <div style={{ position: "fixed", top: "78px", left: 0, width: "100%", height: "calc(100vh - 78px)", zIndex: 9990, backgroundColor: "#0f172a" }}>
           <FarmerLogo />
         </div>
       )}
