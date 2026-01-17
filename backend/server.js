@@ -9,7 +9,27 @@ const app = express();
 /* ✅ REQUIRED FOR RENDER (SECURE COOKIES) */
 app.set('trust proxy', 1);
 
-// 1️⃣ IMPORT ROUTES
+// 1️⃣ CORS CONFIGURATION (MUST BE FIRST)
+// Moving this here ensures that even the logger and health check respond with correct headers
+app.use(cors({
+  origin: 'https://fasika-frontend.onrender.com', // No trailing slash
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// 2️⃣ GLOBAL MIDDLEWARE
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Added for better form-data handling
+app.use(cookieParser());
+
+// 🛰️ REQUEST LOGGER
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} request to ${req.originalUrl}`);
+  next();
+});
+
+// 3️⃣ IMPORT ROUTES
 const authRoutes = require('./routes/authentication/authRoutes'); 
 const adminUserRoutes = require('./routes/admin/adminUserRoutes');
 const adminFarmerRoutes = require('./routes/adminFarmerRoutes'); 
@@ -21,18 +41,6 @@ const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
 
-
-
-// 2️⃣ GLOBAL MIDDLEWARE
-app.use(express.json());
-app.use(cookieParser());
-
-// 🛰️ REQUEST LOGGER
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} request to ${req.originalUrl}`);
-  next();
-});
-
 // 🏠 ROOT HEALTH CHECK
 app.get('/', (req, res) => {
   res.status(200).json({
@@ -41,14 +49,6 @@ app.get('/', (req, res) => {
     environment: process.env.NODE_ENV || 'development'
   });
 });
-
-// 3️⃣ CORS CONFIGURATION (FIXED FOR COOKIES)
-app.use(cors({
-  origin: 'https://fasika-frontend.onrender.com',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 // 4️⃣ DATABASE CONNECTION
 pool.connect((err, client, release) => {
@@ -72,7 +72,7 @@ app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
 app.use("/api/farmer/advisory", advisoryRoutes);
 app.use('/api/farmer/support', farmerSupportRoutes);
 app.use("/api/farmer/notifications", notificationRoutes);
-app.use('/api/farmers', farmerProfileRoutes);
+app.use('/api/farmers', farmerProfileRoutes); // Note: frontend calls /api/farmers/profile
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
