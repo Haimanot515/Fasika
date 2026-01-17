@@ -132,10 +132,10 @@ const ProfileSidebar = ({ isOpen = true }) => {
                 </button>
                 {openL2.ACC_UPDATE && (
                   <div className="l3-container">
-                    <NavLink to="/profile/update-account" style={l3LinkStyle}>
+                    <NavLink to="/profile/create-account" style={l3LinkStyle}>
                         <FaUserCircle /> <span className="sentence-case">Create profile</span>
                     </NavLink>
-                    <NavLink to="/profile/update-phone" style={l3LinkStyle}>
+                    <NavLink to="/profile/update-account" style={l3LinkStyle}>
                         <FaIdCard /> <span className="sentence-case">Update profile</span>
                     </NavLink>
                   </div>
