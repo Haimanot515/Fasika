@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from "../../api/axios"; 
 import { 
-  Plus, Trash2, Map, Activity, Search, 
+  Plus, Activity, Search, 
   MapPin, Loader2, Wheat, TreePine, 
-  Layers, CloudSun, X, Sprout, 
-  Navigation, Trash, Beef // Swapped Cow for Beef to fix build error
+  CloudSun, Sprout, 
+  Navigation, Trash, Beef
 } from 'lucide-react';
 
 const AddLand = () => {
@@ -80,11 +80,12 @@ const AddLand = () => {
 
     return (
         <div style={styles.container}>
+            {/* LEFT PANEL: SMART REGISTRATION */}
             <div style={styles.leftPanel}>
                 <div style={styles.brandSection}>
                     <div style={styles.badge}><Sprout size={16} /> ECO-SYSTEM SYNC</div>
-                    <h1 style={styles.mainTitle}>ASSET <br /><span style={styles.italicTitle}>DROP</span></h1>
-                    <p style={styles.subtitle}>Register your plot into the secure farm registry.</p>
+                    <h1 style={styles.mainTitle}>ASSET <br /><span style={styles.normalTitle}>Registry</span></h1>
+                    <p style={styles.subtitle}>Securely DROP your land assets into the database.</p>
                 </div>
 
                 <form onSubmit={handleAddLand} style={styles.form}>
@@ -96,7 +97,7 @@ const AddLand = () => {
                                 style={styles.input} 
                                 value={formData.plot_name}
                                 onChange={(e) => setFormData({...formData, plot_name: e.target.value})}
-                                placeholder="Plot name (e.g. North Field)" required 
+                                placeholder="Plot name (e.g. South Sector)" required 
                             />
                         </div>
                     </div>
@@ -120,8 +121,9 @@ const AddLand = () => {
                         </div>
                     </div>
 
+                    {/* CROP TAGS WITH LIVE COUNT */}
                     <div style={styles.sectionDivider}>
-                        <label style={styles.label}>Biology: Crops</label>
+                        <label style={styles.label}>Biology: Crops ({formData.crops.length})</label>
                         <div style={styles.tagInputRow}>
                             <input 
                                 style={styles.tagInput} 
@@ -138,8 +140,9 @@ const AddLand = () => {
                         </div>
                     </div>
 
+                    {/* ANIMAL TAGS WITH LIVE COUNT */}
                     <div style={styles.sectionDivider}>
-                        <label style={styles.label}>Biology: Livestock</label>
+                        <label style={styles.label}>Biology: Livestock ({formData.animals.length})</label>
                         <div style={styles.tagInputRow}>
                             <input 
                                 style={styles.tagInput} 
@@ -164,6 +167,7 @@ const AddLand = () => {
                 </form>
             </div>
 
+            {/* RIGHT PANEL: EXPLORER */}
             <div style={styles.rightPanel}>
                 <div style={styles.headerRow}>
                     <div style={styles.searchSection}>
@@ -196,7 +200,7 @@ const AddLand = () => {
                                 <div style={styles.iconBox}><TreePine size={28} /></div>
                                 <div>
                                     <h3 style={styles.cardTitle}>{plot.plot_name}</h3>
-                                    <span style={styles.areaBadge}>{plot.area_size} Hectares Managed</span>
+                                    <span style={styles.areaBadge}>{plot.area_size} Hectares</span>
                                 </div>
                             </div>
                             
@@ -204,11 +208,11 @@ const AddLand = () => {
                                 <div style={styles.assetGroup}>
                                     <div style={styles.miniTags}>
                                         <div style={styles.statBox}>
-                                            <span style={styles.statVal}>{plot.crop_count || 0}</span>
+                                            <span style={styles.statVal}>{plot.crops?.length || 0}</span>
                                             <span style={styles.statLab}>Crops</span>
                                         </div>
                                         <div style={styles.statBox}>
-                                            <span style={styles.statVal}>{plot.animal_count || 0}</span>
+                                            <span style={styles.statVal}>{plot.animals?.length || 0}</span>
                                             <span style={styles.statLab}>Animals</span>
                                         </div>
                                     </div>
@@ -216,7 +220,7 @@ const AddLand = () => {
                             </div>
 
                             <button onClick={() => handleDropLand(plot.id)} style={styles.dropBtn}>
-                                <Trash size={16} /> DROP FROM REGISTRY
+                                <Trash size={16} /> DROP ASSET
                             </button>
                         </div>
                     ))}
@@ -226,14 +230,14 @@ const AddLand = () => {
     );
 };
 
-// Styles remain the same (Green/Modern theme)
 const styles = {
-    container: { display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f0', fontFamily: '"Inter", sans-serif', color: '#1a2e1a' },
+    // container now has paddingTop to stay clear of the navbar
+    container: { display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f0', fontFamily: '"Inter", sans-serif', color: '#1a2e1a', paddingTop: '80px' },
     leftPanel: { width: '400px', backgroundColor: '#ffffff', borderRight: '1px solid #d1dbd1', padding: '40px', display: 'flex', flexDirection: 'column', boxShadow: '10px 0 30px rgba(0,0,0,0.02)', zIndex: 10 },
     brandSection: { marginBottom: '35px' },
     badge: { display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', fontWeight: 'bold', fontSize: '12px', letterSpacing: '1px', marginBottom: '12px' },
     mainTitle: { fontSize: '48px', fontWeight: '900', color: '#064e3b', lineHeight: '0.9', margin: 0 },
-    italicTitle: { color: '#10b981', fontStyle: 'italic', fontWeight: '400' },
+    normalTitle: { color: '#10b981', fontWeight: '700', fontStyle: 'normal' }, // Removed italic
     subtitle: { color: '#6b7280', fontSize: '14px', marginTop: '10px' },
     form: { display: 'flex', flexDirection: 'column', gap: '24px' },
     label: { fontSize: '12px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', marginBottom: '8px', display: 'block' },
@@ -241,7 +245,7 @@ const styles = {
     inputIcon: { position: 'absolute', left: '15px', color: '#059669' },
     input: { width: '100%', padding: '14px 15px 14px 45px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', fontWeight: '600', fontSize: '15px', outlineColor: '#10b981' },
     row: { display: 'flex', gap: '15px', alignItems: 'flex-end' },
-    gpsStatus: { padding: '14px', background: '#ecfdf5', color: '#059669', borderRadius: '12px', fontSize: '13px', fontWeight: '800', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', border: '1px solid #d1fae5' },
+    gpsStatus: { padding: '14px', background: '#ecfdf5', color: '#059669', borderRadius: '12px', fontSize: '13px', fontWeight: '800', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', border: '1px solid #d1fae5', width: '100%' },
     sectionDivider: { borderTop: '1px solid #f3f4f6', paddingTop: '10px' },
     tagInputRow: { display: 'flex', gap: '8px' },
     tagInput: { flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e5e7eb', backgroundColor: '#fff' },
