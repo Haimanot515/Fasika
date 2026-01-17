@@ -21,6 +21,7 @@ import AdminUpdateLand from './pages/admin/AdminUpdateLand';
 import AdminUpdateLivestock from './pages/admin/AdminUpdateLivstoke'; 
 
 // --- FARM MANAGEMENT (MY FARM) ---
+import FarmerProfileRegistration from "./pages/farmerProfile";
 
 import ViewLand from "./pages/MyFarm/ViewLand";
 import AddLand from "./pages/MyFarm/AddLand";
