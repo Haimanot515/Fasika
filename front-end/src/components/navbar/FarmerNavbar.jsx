@@ -17,7 +17,6 @@ import {
   MdOutlineAccountCircle,
   MdAgriculture
 } from "react-icons/md"; 
-import { FaSeedling } from "react-icons/fa";
 
 const FarmerNavbar = ({ toggle }) => {
   const [showMyFarm, setShowMyFarm] = useState(false);
@@ -25,14 +24,12 @@ const FarmerNavbar = ({ toggle }) => {
   const [showProfile, setShowProfile] = useState(false);
   const [showLogoPage, setShowLogoPage] = useState(false); 
   
-  // State for User Data from DB
   const [farmerData, setFarmerData] = useState({ name: "", photo: null });
 
   const myFarmRef = useRef(null);
   const marketRef = useRef(null);
   const profileRef = useRef(null);
 
-  // Fetch farmer profile from database on mount
   useEffect(() => {
     const fetchFarmerProfile = async () => {
       try {
@@ -100,7 +97,6 @@ const FarmerNavbar = ({ toggle }) => {
     whiteSpace: "nowrap"
   };
 
-  // GitHub style avatar dimensions
   const avatarStyle = {
     width: "32px",
     height: "32px",
@@ -110,9 +106,16 @@ const FarmerNavbar = ({ toggle }) => {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.1)", // Background for default placeholder
+    backgroundColor: "rgba(255,255,255,0.1)",
     overflow: "hidden"
   };
+
+  // --- ETHIOPIAN MAP SVG LOGO ---
+  const EthiopiaMapIcon = () => (
+    <svg width="32" height="32" viewBox="0 0 512 512" fill="#2ecc71" xmlns="http://www.w3.org/2000/svg">
+      <path d="M418.5 119.8c-12.7-18.7-32.5-31.5-63.4-31.4-15.6.1-26.6 5.8-37.4 12.5-12 7.4-23.3 16.5-36 21.6-13.6 5.5-29 5.8-43.5 3.3-15-2.6-28.7-10.3-43.4-15-18.1-5.7-37.7-6-56.1.1-17.7 5.9-32.9 19.3-43.1 35.8-12.6 20.3-17.8 45.4-13.7 69.1 2.8 15.9 8.7 30.9 14.8 45.9 6.5 16 13.5 31.8 19.8 47.9 4.3 11.1 7.8 22.5 11.8 33.7 3.1 8.7 6.8 17.2 10.5 25.7 6.1 14 12.7 27.9 20.2 41.2 10.2 18.2 23.3 35.5 41.2 47.4 14.8 9.9 32.1 15.1 49.9 15.3 22.8.2 44.9-8.4 62.4-23 15.9-13.2 28.5-30.1 38.6-48.5 7.4-13.5 13.6-27.7 20-41.8 4.7-10.4 9.8-20.7 15.2-30.8 7.3-13.7 15.1-27.1 23-40.4 8.7-14.7 17.7-29.3 25.1-44.8 8.9-18.6 14.2-39.1 14.1-59.8-.1-21.7-6.2-42.8-17.9-61.1z" />
+    </svg>
+  );
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -127,37 +130,23 @@ const FarmerNavbar = ({ toggle }) => {
   return (
     <div className="navbar-container" style={{ width: "100%", overflowX: "hidden" }}>
       <nav className="farmer-navbar" style={{ 
-        position: "fixed", 
-        top: 0, 
-        left: 0, 
-        width: "100%", 
-        zIndex: 9999,
-        display: "flex", 
-        alignItems: "center", 
-        padding: "0 30px",
-        height: "78px", 
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        boxSizing: "border-box",
-        overflow: "hidden" 
+        position: "fixed", top: 0, left: 0, width: "100%", zIndex: 9999,
+        display: "flex", alignItems: "center", padding: "0 30px", height: "78px", 
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)", boxSizing: "border-box", overflow: "hidden" 
       }}>
         
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
           <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "800", fontSize: "1.4rem", pointerEvents: "none" }}>
-            <FaSeedling size={30} color="#2ecc71" /> 
+            {/* UPDATED: Map Icon instead of FaSeedling */}
+            <EthiopiaMapIcon />
             <span style={{ marginLeft: "6px" }}>Farmers</span>
           </Link>
         </div>
 
         <div className="nav-links" style={{ 
-          display: "flex", 
-          justifyContent: "space-between",
-          alignItems: "center", 
-          flex: 1,
-          marginLeft: "40px",
-          flexWrap: "nowrap",
-          overflowX: "auto",
-          msOverflowStyle: "none",
-          scrollbarWidth: "none"
+          display: "flex", justifyContent: "space-between", alignItems: "center", 
+          flex: 1, marginLeft: "40px", flexWrap: "nowrap", overflowX: "auto",
+          msOverflowStyle: "none", scrollbarWidth: "none"
         }}>
           
           <div style={{ display: "flex", gap: "25px", flexShrink: 0 }}> 
@@ -177,11 +166,7 @@ const FarmerNavbar = ({ toggle }) => {
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
-              
-              {/* Display "Hello, Name" */}
               {farmerData.name ? `Hello, ${farmerData.name.split(' ')[0]}` : "Profile"} 
-
-              {/* Display Photo or Circular Placeholder with Icon */}
               <div style={avatarStyle}>
                 {farmerData.photo ? (
                   <img src={farmerData.photo} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -196,14 +181,8 @@ const FarmerNavbar = ({ toggle }) => {
 
       {showLogoPage && (
         <div style={{ 
-          position: "fixed", 
-          top: "78px", 
-          left: 0, 
-          width: "100%", 
-          height: "calc(100vh - 78px)", 
-          zIndex: 9990, 
-          overflowY: "auto",
-          backgroundColor: "#0f172a" 
+          position: "fixed", top: "78px", left: 0, width: "100%", height: "calc(100vh - 78px)", 
+          zIndex: 9990, overflowY: "auto", backgroundColor: "#0f172a" 
         }}>
           <FarmerLogo />
         </div>
