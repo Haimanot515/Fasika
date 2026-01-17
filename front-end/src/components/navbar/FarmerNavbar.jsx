@@ -5,7 +5,7 @@ import MyFarmSidebar from "../sidebars/MyFarmSidebar";
 import MarketSidebar from "../sidebars/MarketSidebar";
 import ProfileSidebar from "../sidebars/ProfileSidebar";
 import FarmerLogo from "../../pages/dashboard/FarmerLogo"; 
-import api from "../../api/axios"; // Added to fetch from database
+import api from "../api/axios";
 
 // --- STABLE TESTED ICONS ---
 import { 
@@ -24,25 +24,30 @@ const FarmerNavbar = ({ toggle }) => {
   const [showMarket, setShowMarket] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showLogoPage, setShowLogoPage] = useState(false); 
-  const [profilePhoto, setProfilePhoto] = useState(null); // State for DB photo
+  
+  // State for User Data from DB
+  const [farmerData, setFarmerData] = useState({ name: "", photo: null });
 
   const myFarmRef = useRef(null);
   const marketRef = useRef(null);
   const profileRef = useRef(null);
 
-  // Fetch profile photo from database on mount
+  // Fetch farmer profile from database on mount
   useEffect(() => {
-    const fetchPhoto = async () => {
+    const fetchFarmerProfile = async () => {
       try {
         const res = await api.get('/farmers/my-profile');
-        if (res.data && res.data.photo) {
-          setProfilePhoto(res.data.photo);
+        if (res.data) {
+          setFarmerData({
+            name: res.data.full_name || res.data.farm_name || "User",
+            photo: res.data.photo || null
+          });
         }
       } catch (err) {
-        console.error("Could not load nav photo", err);
+        console.error("Could not load nav profile data", err);
       }
     };
-    fetchPhoto();
+    fetchFarmerProfile();
   }, []);
 
   const handleLogoClick = (e) => {
@@ -101,7 +106,12 @@ const FarmerNavbar = ({ toggle }) => {
     height: "32px",
     borderRadius: "50%",
     objectFit: "cover",
-    border: "1px solid rgba(255,255,255,0.2)"
+    border: "1px solid rgba(255,255,255,0.3)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.1)", // Background for default placeholder
+    overflow: "hidden"
   };
 
   useEffect(() => {
@@ -167,12 +177,18 @@ const FarmerNavbar = ({ toggle }) => {
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
-              Profile 
-              {profilePhoto ? (
-                <img src={profilePhoto} alt="User" style={avatarStyle} />
-              ) : (
-                <MdOutlineAccountCircle size={24}/>
-              )}
+              
+              {/* Display "Hello, Name" */}
+              {farmerData.name ? `Hello, ${farmerData.name.split(' ')[0]}` : "Profile"} 
+
+              {/* Display Photo or Circular Placeholder with Icon */}
+              <div style={avatarStyle}>
+                {farmerData.photo ? (
+                  <img src={farmerData.photo} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <MdOutlineAccountCircle size={28} color="white" />
+                )}
+              </div>
             </button>
           </div>
         </div>
