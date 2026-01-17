@@ -149,13 +149,13 @@ try {
                 <img class="hero-image" src="${heroImageUrl}" alt="Fasika Hub" />
 
                 <div class="aau-credit">
-                  <p class="aau-text">🚀 DEVELOPED BY ADDIS ABABA UNIVERSITY SOFTWARE ENGINEERS</p>
+                  <p class="aau-text"> DEVELOPED BY ADDIS ABABA UNIVERSITY SOFTWARE ENGINEERING STUDENTS</p>
                   <p style="color: #64748b; font-size: 12px; margin-top: 8px; font-weight: 500;">Solving societal problems through technological innovation.</p>
                 </div>
 
                 <h1 class="hero-title">Verify Your Node</h1>
                 <p class="description">
-                  Haimanot, welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
+                  , welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
                 </p>
 
                 <div style="text-align: center;">
@@ -172,7 +172,7 @@ try {
         </html>
       `;
 
-      await sendEmail(email, '🔒 Account Verification: Fasika x AAU', htmlContent);
+      await sendEmail(email, '🔒 Account Verification: Fasika Farmer Conect  x AAU', htmlContent);
       console.log(`✅ Success! Verification email with AAU credits sent to ${email}`);
     }
   }
