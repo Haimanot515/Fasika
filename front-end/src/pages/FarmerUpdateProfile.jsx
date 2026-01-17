@@ -86,43 +86,45 @@ const FarmerUpdateProfile = () => {
       minHeight: '100vh',
       width: '100%',
       display: 'flex',
-      flexDirection: 'column', // Changed to column to allow bottom stretch
+      flexDirection: 'column',
       alignItems: 'center',
       backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
-      paddingTop: '80px', // Space for Navbar
-      paddingBottom: '0px', // ✅ REMOVED bottom padding
+      // No padding here so the container can touch the edges
+      padding: '0', 
       boxSizing: 'border-box',
       overflowX: 'hidden'
     },
     container: { 
       maxWidth: '850px', 
       width: '100%',
-      flex: 1, // ✅ Makes container fill all available vertical space
-      padding: 'clamp(25px, 5%, 50px)', 
-      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+      minHeight: '100vh', // ✅ Ensures it stretches from top to bottom
+      padding: 'clamp(25px, 5%, 60px)', 
+      backgroundColor: 'rgba(255, 255, 255, 0.96)', 
       backdropFilter: 'blur(10px)',
-      borderRadius: '24px 24px 0 0', // ✅ Round only top corners
-      boxShadow: '0 20px 45px rgba(0,0,0,0.3)',
+      // ✅ Removed border radius so it looks like a continuous page
+      borderRadius: '0', 
+      boxShadow: '0 0 50px rgba(0,0,0,0.5)',
       boxSizing: 'border-box',
-      marginTop: '20px' // Initial gap from top
+      display: 'flex',
+      flexDirection: 'column'
     },
-    title: { textAlign: 'center', color: '#1b4332', fontSize: '2.5rem', fontWeight: '900', marginBottom: '10px' },
-    subtitle: { textAlign: 'center', color: '#40916c', marginBottom: '40px', fontSize: '1.2rem', fontWeight: '500' },
-    sectionTitle: { display: 'flex', alignItems: 'center', gap: '10px', color: '#2d6a4f', fontSize: '1.4rem', fontWeight: '800', marginTop: '30px', borderBottom: '2px solid #d8f3dc', paddingBottom: '8px' },
-    group: { marginBottom: '20px' },
-    label: { display: 'block', marginBottom: '10px', fontWeight: '700', color: '#1b4332', fontSize: '1.05rem' },
-    input: { width: '100%', padding: '14px 18px', borderRadius: '12px', border: '2px solid #d8f3dc', backgroundColor: '#f8fdf9', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box' },
-    button: { width: '100%', padding: '22px', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '1.4rem', marginTop: '40px', marginBottom: '40px', boxShadow: '0 6px 20px rgba(45, 106, 79, 0.4)' },
-    photoUpload: { width: '140px', height: '140px', margin: '0 auto 30px', borderRadius: '50%', border: '4px solid #b7e4c7', overflow: 'hidden', cursor: 'pointer', backgroundColor: '#e9f5ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+    title: { textAlign: 'center', color: '#1b4332', fontSize: '2.8rem', fontWeight: '900', marginBottom: '10px', marginTop: '40px' },
+    subtitle: { textAlign: 'center', color: '#40916c', marginBottom: '50px', fontSize: '1.3rem', fontWeight: '500' },
+    sectionTitle: { display: 'flex', alignItems: 'center', gap: '12px', color: '#2d6a4f', fontSize: '1.5rem', fontWeight: '800', marginTop: '40px', borderBottom: '2px solid #d8f3dc', paddingBottom: '10px' },
+    group: { marginBottom: '25px' },
+    label: { display: 'block', marginBottom: '12px', fontWeight: '700', color: '#1b4332', fontSize: '1.1rem' },
+    input: { width: '100%', padding: '16px 20px', borderRadius: '12px', border: '2px solid #d8f3dc', backgroundColor: '#f8fdf9', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box' },
+    button: { width: '100%', padding: '22px', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '1.5rem', marginTop: '50px', marginBottom: '60px', boxShadow: '0 6px 20px rgba(45, 106, 79, 0.4)' },
+    photoUpload: { width: '160px', height: '160px', margin: '0 auto 40px', borderRadius: '50%', border: '5px solid #b7e4c7', overflow: 'hidden', cursor: 'pointer', backgroundColor: '#e9f5ee', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }
   };
 
   if (loading) return (
     <div style={s.pageWrapper}>
-      <div style={{...s.container, borderRadius: '24px', flex: 'none', marginTop: '100px', textAlign: 'center', color: '#2d6a4f', fontSize: '1.5rem', fontWeight: 'bold'}}>
-        Syncing with Farm Registry...
+      <div style={{...s.container, justifyContent: 'center', textAlign: 'center', color: '#2d6a4f', fontSize: '1.5rem', fontWeight: 'bold'}}>
+        Synchronizing Profile Data...
       </div>
     </div>
   );
@@ -130,11 +132,11 @@ const FarmerUpdateProfile = () => {
   return (
     <div style={s.pageWrapper}>
       <div style={s.container}>
-        <h2 style={s.title}>Update Profile</h2>
-        <p style={s.subtitle}>Modify your farm and personal records</p>
+        <h2 style={s.title}>Farmer Profile</h2>
+        <p style={s.subtitle}>Update your registered agricultural information</p>
         
         {status.msg && (
-          <div style={{ backgroundColor: status.isError ? '#ffe5ec' : '#d8f3dc', color: status.isError ? '#d00000' : '#1b4332', padding: '15px', borderRadius: '12px', textAlign: 'center', marginBottom: '25px', fontWeight: '700', fontSize: '1.1rem' }}>
+          <div style={{ backgroundColor: status.isError ? '#ffe5ec' : '#d8f3dc', color: status.isError ? '#d00000' : '#1b4332', padding: '20px', borderRadius: '12px', textAlign: 'center', marginBottom: '30px', fontWeight: '700', fontSize: '1.2rem' }}>
             {status.msg}
           </div>
         )}
@@ -144,48 +146,48 @@ const FarmerUpdateProfile = () => {
             <label style={s.photoUpload}>
               {preview ? <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
                 <div style={{ textAlign: 'center', color: '#74c69d' }}>
-                  <MdCameraAlt size={50} />
-                  <div style={{ fontSize: '0.8rem', fontWeight: '800' }}>CHANGE</div>
+                  <MdCameraAlt size={60} />
+                  <div style={{ fontSize: '0.9rem', fontWeight: '900' }}>PHOTO</div>
                 </div>
               )}
               <input type="file" onChange={handlePhotoChange} style={{ display: 'none' }} accept="image/*" />
             </label>
           </div>
 
-          <div style={s.sectionTitle}><MdPerson size={28}/> Personal Information</div>
+          <div style={s.sectionTitle}><MdPerson size={30}/> Personal Information</div>
           <div style={s.group}>
             <label style={s.label}>Full Name</label>
             <input style={s.input} name="full_name" value={formData.full_name} onChange={handleChange} />
           </div>
 
-          <div style={s.sectionTitle}><MdLocationOn size={28}/> Location Details</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
+          <div style={s.sectionTitle}><MdLocationOn size={30}/> Location Details</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
             <div style={s.group}><label style={s.label}>Region</label><input style={s.input} name="region" value={formData.region} onChange={handleChange} /></div>
             <div style={s.group}><label style={s.label}>Zone</label><input style={s.input} name="zone" value={formData.zone} onChange={handleChange} /></div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
             <div style={s.group}><label style={s.label}>Woreda</label><input style={s.input} name="woreda" value={formData.woreda} onChange={handleChange} /></div>
             <div style={s.group}><label style={s.label}>Kebele</label><input style={s.input} name="kebele" value={formData.kebele} onChange={handleChange} /></div>
           </div>
 
-          <div style={s.sectionTitle}><MdAgriculture size={28}/> Farm & Plot Asset</div>
+          <div style={s.sectionTitle}><MdAgriculture size={30}/> Farm Assets</div>
           <div style={s.group}>
             <label style={s.label}>Farm Name</label>
             <input style={s.input} name="farm_name" value={formData.farm_name} onChange={handleChange} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
             <div style={s.group}><label style={s.label}>Plot Name</label><input style={s.input} name="plot_name" value={formData.plot_name} onChange={handleChange} /></div>
             <div style={s.group}><label style={s.label}>Area (Ha)</label><input style={s.input} name="area_size" value={formData.area_size} onChange={handleChange} /></div>
           </div>
 
-          <div style={s.sectionTitle}><MdPets size={28}/> Livestock Information</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px' }}>
+          <div style={s.sectionTitle}><MdPets size={30}/> Livestock Records</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
             <div style={s.group}><label style={s.label}>Tag Number</label><input style={s.input} name="tag_number" value={formData.tag_number} onChange={handleChange} /></div>
             <div style={s.group}><label style={s.label}>Species</label><input style={s.input} name="species" value={formData.species} onChange={handleChange} /></div>
           </div>
 
           <button type="submit" disabled={updating} style={{...s.button, opacity: updating ? 0.7 : 1}}>
-            {updating ? 'Saving Changes...' : 'Sync Registry Changes'}
+            {updating ? 'Saving...' : 'Sync Registry Changes'}
           </button>
         </form>
       </div>
