@@ -11,7 +11,9 @@ const FarmerRegistrationForm = () => {
     // 3. Land Plots Table Info
     plot_name: '', area_size: '',
     // 4. Crops Table Info
-    crop_name: '', planting_date: ''
+    crop_name: '', planting_date: '',
+    // Photo Info
+    photo: '' 
   });
 
   const [loading, setLoading] = useState(false);
@@ -29,10 +31,23 @@ const FarmerRegistrationForm = () => {
     label: { fontSize: '13px', marginBottom: '5px', fontWeight: '600', color: '#4a5568' },
     input: { padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e0', outline: 'none' },
     button: { width: '100%', padding: '16px', backgroundColor: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', marginTop: '20px' },
-    alert: (isErr) => ({ padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center', backgroundColor: isErr ? '#fff5f5' : '#f0fff4', color: isErr ? '#c53030' : '#276749', border: `1px solid ${isErr ? '#feb2b2' : '#9ae6b4'}` })
+    alert: (isErr) => ({ padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center', backgroundColor: isErr ? '#fff5f5' : '#f0fff4', color: isErr ? '#c53030' : '#276749', border: `1px solid ${isErr ? '#feb2b2' : '#9ae6b4'}` }),
+    photoPreview: { width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #2d6a4f', marginBottom: '10px' }
   };
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  // Handle Photo Input
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, photo: reader.result }); // Base64 string
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +55,6 @@ const FarmerRegistrationForm = () => {
     setStatus({ msg: '', isError: false });
 
     try {
-      // This sends all section data to your backend for a single atomic transaction
       await api.post('/farmers/register-complete', formData);
       setStatus({ msg: 'Success! Your account and farm registry are now synchronized.', isError: false });
     } catch (err) {
@@ -59,6 +73,15 @@ const FarmerRegistrationForm = () => {
 
         <form onSubmit={handleSubmit}>
           
+          {/* SECTION 0: PROFILE PHOTO */}
+          <div style={{...s.section, textAlign: 'center'}}>
+            <div style={s.sectionTitle}>Profile Photo</div>
+            {formData.photo && <img src={formData.photo} alt="Preview" style={s.photoPreview} />}
+            <div style={s.inputGroup}>
+              <input type="file" accept="image/*" onChange={handlePhotoChange} style={{...s.input, border: 'none'}} />
+            </div>
+          </div>
+
           {/* SECTION 1: ACCOUNT (USERS TABLE) */}
           <div style={s.section}>
             <div style={s.sectionTitle}>1. Account & Security (Users Table)</div>
