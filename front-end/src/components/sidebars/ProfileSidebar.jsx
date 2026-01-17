@@ -4,16 +4,38 @@ import {
   FaUserCircle, FaIdCard, FaDoorOpen, FaChevronRight, FaChevronDown 
 } from "react-icons/fa";
 import { MdOutlineClose } from "react-icons/md";
+import api from "../../api/axios"; // Added to fetch database data
 
 const ProfileSidebar = ({ isOpen = true }) => {
   const [collapsed, setCollapsed] = useState(!isOpen);
   const sidebarRef = useRef(null);
+
+  // New State for Farmer Profile Data
+  const [farmerData, setFarmerData] = useState({ name: "", photo: null });
 
   // Accordion state
   const [openL1, setOpenL1] = useState({ ACCOUNT: true });
   const [openL2, setOpenL2] = useState({ ACC_UPDATE: true });
 
   const toggleSidebar = () => setCollapsed(prev => !prev);
+
+  // Fetch data from database on mount
+  useEffect(() => {
+    const fetchSidebarProfile = async () => {
+      try {
+        const res = await api.get('/farmers/my-profile');
+        if (res.data) {
+          setFarmerData({
+            name: res.data.full_name || res.data.farm_name || "User",
+            photo: res.data.photo || null
+          });
+        }
+      } catch (err) {
+        console.error("Sidebar data fetch failed", err);
+      }
+    };
+    fetchSidebarProfile();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -49,6 +71,25 @@ const ProfileSidebar = ({ isOpen = true }) => {
     overflowX: "hidden",
     paddingBottom: "80px",
     boxShadow: collapsed ? "none" : "-10px 0 15px -5px rgba(0,0,0,0.05)"
+  };
+
+  const githubProfileHeader = {
+    padding: "20px",
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    borderBottom: "1px solid #f0f0f0",
+    marginBottom: "10px",
+    overflow: "hidden"
+  };
+
+  const avatarStyle = {
+    width: collapsed ? "35px" : "60px",
+    height: collapsed ? "35px" : "60px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "2px solid #27ae60",
+    transition: "all 0.3s ease"
   };
 
   const l1Header = {
@@ -97,6 +138,24 @@ const ProfileSidebar = ({ isOpen = true }) => {
       </style>
 
       <aside ref={sidebarRef} style={sidebarStyle} className="farmer-sidebar-scroll">
+        
+        {/* --- GITHUB STYLE PROFILE HEADER --- */}
+        <div style={githubProfileHeader}>
+          {farmerData.photo ? (
+            <img src={farmerData.photo} alt="Profile" style={avatarStyle} />
+          ) : (
+            <FaUserCircle size={collapsed ? 35 : 60} color="#bdc3c7" />
+          )}
+          {!collapsed && (
+            <div style={{ textAlign: "left" }}>
+              <div style={{ fontWeight: "800", color: "#2c3e50", fontSize: "16px" }}>
+                {farmerData.name}
+              </div>
+              <div style={{ fontSize: "12px", color: "#7f8c8d" }}>Farmer Account</div>
+            </div>
+          )}
+        </div>
+
         <div style={{ padding: collapsed ? "15px 10px" : "15px 20px", textAlign: "center" }}>
           <button 
             className="hamburger-btn has-tooltip"
