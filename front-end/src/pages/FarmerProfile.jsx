@@ -42,22 +42,34 @@ const FarmerProfile = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus({ msg: '', isError: false });
 
+    // 1. Prepare FormData (Required for Image + Text)
     const data = new FormData();
     if (photoFile) data.append('photo', photoFile);
+    
+    // 2. Append all text fields
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
 
     try {
+      // ✅ ADJUSTED URL: Changed to match the Backend '/api/farmers' + '/profile'
       await api.post('/farmers/profile', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      
       setStatus({ msg: 'Success! Your account and farm registry are now synchronized.', isError: false });
+      
+      // Optional: Redirect to dashboard after 2 seconds
+      // setTimeout(() => navigate('/dashboard'), 2000);
+
     } catch (err) {
-      setStatus({ msg: 'Registration Failed: ' + (err.response?.data?.error || 'Server error'), isError: true });
+      setStatus({ 
+        msg: 'Registration Failed: ' + (err.response?.data?.error || 'Server error'), 
+        isError: true 
+      });
     } finally {
       setLoading(false);
     }
