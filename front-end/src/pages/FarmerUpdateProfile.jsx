@@ -6,7 +6,8 @@ const FarmerUpdateProfile = () => {
     farm_name: '', farm_type: '', public_farmer_id: '',
     plot_name: '', area_size: '',
     crop_name: '', planting_date: '',
-    tag_number: '', species: ''
+    tag_number: '', species: '',
+    photo: '' // Added for Profile Photo
   });
 
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ const FarmerUpdateProfile = () => {
     const fetchProfile = async () => {
       try {
         const res = await api.get('/farmers/my-profile');
-        // Pre-fill form with existing data from the split tables
+        // Pre-fill form with existing data including the photo
         setFormData({
           farm_name: res.data.farm_name || '',
           farm_type: res.data.farm_type || '',
@@ -28,7 +29,8 @@ const FarmerUpdateProfile = () => {
           crop_name: res.data.crops?.[0]?.crop_name || '',
           planting_date: res.data.crops?.[0]?.planting_date?.split('T')[0] || '',
           tag_number: res.data.animals?.[0]?.tag_number || '',
-          species: res.data.animals?.[0]?.species || ''
+          species: res.data.animals?.[0]?.species || '',
+          photo: res.data.photo || '' // Fetching existing photo string
         });
       } catch (err) {
         setStatus({ msg: 'Failed to load profile data', isError: true });
@@ -41,11 +43,22 @@ const FarmerUpdateProfile = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // Handle Photo Update/Preview
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, photo: reader.result }); // Base64 preview
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
     try {
-      // Sends data back to be distributed into correct tables
       await api.put('/farmers/update-profile', formData);
       setStatus({ msg: 'Profile updated successfully!', isError: false });
     } catch (err) {
@@ -55,7 +68,7 @@ const FarmerUpdateProfile = () => {
     }
   };
 
-  // --- Inline Styles (Matching your Registration Form) ---
+  // --- Inline Styles ---
   const s = {
     wrapper: { maxWidth: '850px', margin: '40px auto', padding: '20px', backgroundColor: '#f4f7f6', borderRadius: '15px' },
     card: { backgroundColor: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', fontFamily: 'Arial, sans-serif' },
@@ -65,7 +78,9 @@ const FarmerUpdateProfile = () => {
     grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' },
     label: { fontSize: '13px', marginBottom: '5px', fontWeight: '600', color: '#4a5568' },
     input: { padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e0', width: '100%', boxSizing: 'border-box' },
-    button: { width: '100%', padding: '16px', backgroundColor: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }
+    button: { width: '100%', padding: '16px', backgroundColor: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
+    photoContainer: { textAlign: 'center', marginBottom: '20px' },
+    photoPreview: { width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #2d6a4f', marginBottom: '10px' }
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Loading Registry Data...</div>;
@@ -82,6 +97,16 @@ const FarmerUpdateProfile = () => {
         )}
 
         <form onSubmit={handleSubmit}>
+          
+          {/* SECTION 0: PHOTO UPDATE */}
+          <div style={s.section}>
+             <div style={s.sectionTitle}>Profile Photo</div>
+             <div style={s.photoContainer}>
+                {formData.photo && <img src={formData.photo} alt="Profile" style={s.photoPreview} />}
+                <input type="file" accept="image/*" onChange={handlePhotoChange} style={{...s.input, border: 'none'}} />
+             </div>
+          </div>
+
           {/* SECTION 1: FARM REGISTRY */}
           <div style={s.section}>
             <div style={s.sectionTitle}>1. Farm Details (Farmers Table)</div>
