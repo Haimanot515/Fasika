@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from "../../api/axios"; 
 import { 
-  Plus, X, Save, Map, MapPin, Maximize, 
+  Plus, X, Save, MapPin, Maximize, 
   Activity, Info, Loader2, Sprout
 } from 'lucide-react';
 
@@ -20,15 +20,34 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
     const LAND_PATH = `/farmer/farm/land/${plotId}`;
 
     const theme = {
+        wrapper: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100vh',
+            background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
+            // Increased padding significantly to force it below any navbar
+            paddingTop: "160px", 
+            overflowY: "auto",
+            // Lower z-index than a typical navbar (usually 1000+) but high enough to cover content
+            zIndex: 999, 
+            display: "flex", 
+            justifyContent: "center",
+            fontFamily: "'Inter', sans-serif"
+        },
         glassCard: { 
             width: "100%", 
             maxWidth: "800px", 
             background: "rgba(255, 255, 255, 0.98)", 
             backdropFilter: "blur(10px)", 
             borderRadius: "24px", 
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)", 
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.2)", 
             overflow: "hidden",
-            margin: "20px auto"
+            height: "fit-content",
+            // Extra margin to ensure it never touches the top
+            marginTop: "20px",
+            marginBottom: "100px" 
         },
         header: { 
             background: "#166534", 
@@ -65,9 +84,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             color: "#166534", 
             fontWeight: "600",
             borderLeft: "4px solid #22c55e",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
+            marginBottom: "4px"
         },
         saveBtn: { 
             flex: 2, 
@@ -124,103 +141,107 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
     const addAnimal = () => { if(tempAnimal) { setFormData({...formData, animals: [...formData.animals, tempAnimal]}); setTempAnimal(""); } };
 
     if (loading) return (
-        <div style={{ textAlign: 'center', padding: '50px' }}>
-            <Loader2 style={{ animation: "spin 2s linear infinite", color: "#15803d" }} size={40} />
-            <p style={{ color: "#166534", fontWeight: "600", marginTop: "10px" }}>Syncing Registry Node...</p>
+        <div style={theme.wrapper}>
+            <div style={{ textAlign: 'center' }}>
+                <Loader2 style={{ animation: "spin 2s linear infinite", color: "#15803d" }} size={40} />
+                <p style={{ color: "#166534", fontWeight: "600" }}>Syncing Node...</p>
+            </div>
         </div>
     );
 
     return (
-        <div style={theme.glassCard}>
-            <div style={theme.header}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <Sprout size={28} />
-                    <div>
-                        <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800" }}>Update <span style={{fontWeight: "400"}}>Registry</span></h2>
-                        <p style={{ margin: 0, fontSize: "11px", opacity: 0.8 }}>NODE ID: {plotId}</p>
+        <div style={theme.wrapper}>
+            <div style={theme.glassCard}>
+                <div style={theme.header}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <Sprout size={28} />
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800" }}>Update <span style={{fontWeight: "400"}}>Registry</span></h2>
+                            <p style={{ margin: 0, fontSize: "11px", opacity: 0.8 }}>NODE ID: {plotId}</p>
+                        </div>
                     </div>
+                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X /></button>
                 </div>
-                <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X /></button>
+
+                <form onSubmit={handleUpdate} style={{ padding: "30px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+                        <div>
+                            <label style={theme.label}><MapPin size={16}/> Identity Name</label>
+                            <input 
+                                style={theme.inputField}
+                                value={formData.plot_name}
+                                onChange={(e) => setFormData({...formData, plot_name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label style={theme.label}><Maximize size={16}/> Area (Ha)</label>
+                            <input 
+                                style={theme.inputField}
+                                type="number"
+                                value={formData.area_size}
+                                onChange={(e) => setFormData({...formData, area_size: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: "25px" }}>
+                        <label style={theme.label}>Node Status</label>
+                        <select 
+                            style={theme.inputField}
+                            value={formData.land_status}
+                            onChange={(e) => setFormData({...formData, land_status: e.target.value})}
+                        >
+                            <option value="Active">Active Production</option>
+                            <option value="Fallow">Fallow (Resting)</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "25px", marginBottom: "25px" }}>
+                        {/* VERTICAL CROP LIST */}
+                        <div>
+                            <label style={theme.label}>Crops ({formData.crops.length})</label>
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
+                                <input style={theme.inputField} value={tempCrop} onChange={(e) => setTempCrop(e.target.value)} placeholder="Add..."/>
+                                <button type="button" onClick={addCrop} style={{ padding: "10px", background: "#15803d", color: "white", border: "none", borderRadius: "10px" }}><Plus size={20}/></button>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                {formData.crops.map((c, i) => (
+                                    <div key={i} style={theme.listItem}>{c}</div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* VERTICAL ANIMAL LIST */}
+                        <div>
+                            <label style={theme.label}>Livestock ({formData.animals.length})</label>
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
+                                <input style={theme.inputField} value={tempAnimal} onChange={(e) => setTempAnimal(e.target.value)} placeholder="Add..."/>
+                                <button type="button" onClick={addAnimal} style={{ padding: "10px", background: "#0369a1", color: "white", border: "none", borderRadius: "10px" }}><Plus size={20}/></button>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                {formData.animals.map((a, i) => (
+                                    <div key={i} style={{...theme.listItem, background: "#f0f9ff", color: "#0369a1", borderLeft: "4px solid #0ea5e9"}}>{a}</div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "12px", padding: "15px", backgroundColor: "#f0fdf4", borderRadius: "12px", marginBottom: "20px" }}>
+                        <Info size={18} color="#15803d" />
+                        <p style={{ fontSize: "12px", color: "#166534", margin: 0 }}>Updating this node will synchronize all biological assets across the registry.</p>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "15px" }}>
+                        <button type="submit" style={theme.saveBtn}>
+                            <Activity size={20} /> SAVE UPDATES
+                        </button>
+                        <button type="button" onClick={onCancel} style={{ flex: 1, padding: "18px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "14px", fontWeight: "bold", cursor: "pointer" }}>
+                            CANCEL
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <form onSubmit={handleUpdate} style={{ padding: "30px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
-                    <div>
-                        <label style={theme.label}><MapPin size={16}/> Identity Name</label>
-                        <input 
-                            style={theme.inputField}
-                            value={formData.plot_name}
-                            onChange={(e) => setFormData({...formData, plot_name: e.target.value})}
-                        />
-                    </div>
-                    <div>
-                        <label style={theme.label}><Maximize size={16}/> Area (Ha)</label>
-                        <input 
-                            style={theme.inputField}
-                            type="number"
-                            value={formData.area_size}
-                            onChange={(e) => setFormData({...formData, area_size: e.target.value})}
-                        />
-                    </div>
-                </div>
-
-                <div style={{ marginBottom: "20px" }}>
-                    <label style={theme.label}>Node Status</label>
-                    <select 
-                        style={theme.inputField}
-                        value={formData.land_status}
-                        onChange={(e) => setFormData({...formData, land_status: e.target.value})}
-                    >
-                        <option value="Active">Active Production</option>
-                        <option value="Fallow">Fallow (Resting)</option>
-                        <option value="Maintenance">Maintenance</option>
-                    </select>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "25px", marginBottom: "20px" }}>
-                    {/* CROP LIST - NEW LINES, NO ICONS */}
-                    <div>
-                        <label style={theme.label}>Crops ({formData.crops.length})</label>
-                        <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
-                            <input style={theme.inputField} value={tempCrop} onChange={(e) => setTempCrop(e.target.value)} placeholder="Add crop..."/>
-                            <button type="button" onClick={addCrop} style={{ padding: "10px", background: "#15803d", color: "white", border: "none", borderRadius: "10px", cursor: "pointer" }}><Plus size={20}/></button>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                            {formData.crops.map((c, i) => (
-                                <div key={i} style={theme.listItem}>{c}</div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* ANIMAL LIST - NEW LINES, NO ICONS */}
-                    <div>
-                        <label style={theme.label}>Livestock ({formData.animals.length})</label>
-                        <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
-                            <input style={theme.inputField} value={tempAnimal} onChange={(e) => setTempAnimal(e.target.value)} placeholder="Add livestock..."/>
-                            <button type="button" onClick={addAnimal} style={{ padding: "10px", background: "#0369a1", color: "white", border: "none", borderRadius: "10px", cursor: "pointer" }}><Plus size={20}/></button>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                            {formData.animals.map((a, i) => (
-                                <div key={i} style={{...theme.listItem, background: "#f0f9ff", color: "#0369a1", borderLeft: "4px solid #0ea5e9"}}>{a}</div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "12px", padding: "15px", backgroundColor: "#f0fdf4", borderRadius: "12px", marginBottom: "20px" }}>
-                    <Info size={18} color="#15803d" />
-                    <p style={{ fontSize: "12px", color: "#166534", margin: 0 }}>Updating this node will synchronize all biological assets across the registry.</p>
-                </div>
-
-                <div style={{ display: "flex", gap: "15px" }}>
-                    <button type="submit" style={theme.saveBtn}>
-                        <Save size={20} /> SAVE UPDATES
-                    </button>
-                    <button type="button" onClick={onCancel} style={{ flex: 1, padding: "18px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "14px", fontWeight: "bold", cursor: "pointer" }}>
-                        CANCEL
-                    </button>
-                </div>
-            </form>
         </div>
     );
 };
