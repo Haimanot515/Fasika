@@ -60,13 +60,18 @@ exports.addLand = async (req, res) => {
 };
 
 /* ───── 🔄 UPDATE LAND (SYNCED) ───── */
+/* ───── 🔄 UPDATE LAND (SYNCED) ───── */
 exports.updateLand = async (req, res) => {
+  const client = await pool.connect();
   try {
     const farmerId = await getInternalFarmerId(req.user.id);
-    const { plot_name, area_size, land_status } = req.body;
+    const { plot_name, area_size, land_status, crops, animals } = req.body;
     const { id } = req.params;
 
-    const { rows } = await pool.query(
+    await client.query('BEGIN'); // Start DROP Transaction
+
+    // 1. Update Core Land Details
+    const { rows } = await client.query(
       `UPDATE land_plots
        SET plot_name = $1, area_size = $2, land_status = $3
        WHERE id = $4 AND farmer_id = $5
@@ -75,12 +80,36 @@ exports.updateLand = async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Asset node not found in registry" });
+      await client.query('ROLLBACK');
+      return res.status(404).json({ success: false, message: "Asset node not found" });
     }
 
-    res.json({ success: true, message: "Registry node UPDATED", data: rows[0] });
+    // 2. Sync Crops (DROP old ones and re-add to keep it simple)
+    if (crops) {
+      await client.query('DELETE FROM crops WHERE land_plot_id = $1', [id]);
+      if (crops.length > 0) {
+        for (const cropName of crops) {
+          await client.query(
+            `INSERT INTO crops (land_plot_id, crop_name, current_stage) VALUES ($1, $2, 'Planted')`,
+            [id, cropName]
+          );
+        }
+      }
+    }
+
+    // 3. Sync Animals (Optional: if your animals are linked to land or user)
+    // Note: Your current animals table uses user_internal_id, not land_plot_id
+    // If you want to sync animals here, add logic similar to crops above.
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: "Registry node UPDATED and SYNCED", data: rows[0] });
+
   } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("UPDATE ERROR:", err.message);
     res.status(500).json({ success: false, error: err.message });
+  } finally {
+    client.release();
   }
 };
 
