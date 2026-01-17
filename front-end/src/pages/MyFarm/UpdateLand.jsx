@@ -27,27 +27,24 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             width: '100%',
             height: '100vh',
             background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
-            // Increased padding significantly to force it below any navbar
             paddingTop: "160px", 
-            overflowY: "auto",
-            // Lower z-index than a typical navbar (usually 1000+) but high enough to cover content
+            // Ensures vertical scrolling is enabled
+            overflowY: "scroll", 
             zIndex: 999, 
-            display: "flex", 
-            justifyContent: "center",
-            fontFamily: "'Inter', sans-serif"
+            fontFamily: "'Inter', sans-serif",
+            boxSizing: "border-box"
         },
         glassCard: { 
-            width: "100%", 
+            width: "95%", 
             maxWidth: "800px", 
             background: "rgba(255, 255, 255, 0.98)", 
             backdropFilter: "blur(10px)", 
             borderRadius: "24px", 
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.2)", 
             overflow: "hidden",
-            height: "fit-content",
-            // Extra margin to ensure it never touches the top
-            marginTop: "20px",
-            marginBottom: "100px" 
+            // Centering the card in block mode
+            margin: "0 auto 100px auto", 
+            height: "auto"
         },
         header: { 
             background: "#166534", 
@@ -84,7 +81,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             color: "#166534", 
             fontWeight: "600",
             borderLeft: "4px solid #22c55e",
-            marginBottom: "4px"
+            marginBottom: "6px"
         },
         saveBtn: { 
             flex: 2, 
@@ -142,9 +139,9 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
 
     if (loading) return (
         <div style={theme.wrapper}>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center', marginTop: '50px' }}>
                 <Loader2 style={{ animation: "spin 2s linear infinite", color: "#15803d" }} size={40} />
-                <p style={{ color: "#166534", fontWeight: "600" }}>Syncing Node...</p>
+                <p style={{ color: "#166534", fontWeight: "600" }}>Syncing Registry Node...</p>
             </div>
         </div>
     );
@@ -197,8 +194,8 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                         </select>
                     </div>
 
+                    {/* BIOLOGY SECTIONS */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "25px", marginBottom: "25px" }}>
-                        {/* VERTICAL CROP LIST */}
                         <div>
                             <label style={theme.label}>Crops ({formData.crops.length})</label>
                             <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
@@ -212,7 +209,6 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                             </div>
                         </div>
 
-                        {/* VERTICAL ANIMAL LIST */}
                         <div>
                             <label style={theme.label}>Livestock ({formData.animals.length})</label>
                             <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
