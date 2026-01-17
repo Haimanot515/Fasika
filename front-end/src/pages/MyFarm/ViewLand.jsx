@@ -1,177 +1,200 @@
-import React, { useState, useEffect } from 'react';
-import api from "../../api/axios"; 
-import UpdateLand from "./UpdateLand"; // The component we just created
+import React, { useEffect, useState, useRef } from "react";
+import api from "../../api/axios";
+import UpdateLand from "./UpdateLand";
 import { 
-  Trash2, Edit3, Map, Maximize, Activity, 
-  Layers, Loader2, Search, AlertCircle, Plus 
-} from 'lucide-react';
+  FaPlus, FaShieldAlt, FaSearch, FaCaretDown, 
+  FaEllipsisV, FaEdit, FaTrash, FaMapMarkedAlt, FaExpand 
+} from "react-icons/fa";
 
 const ViewLand = () => {
-    const [lands, setLands] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [editingPlotId, setEditingPlotId] = useState(null); // Track which plot is being edited
+  const [lands, setLands] = useState([]);
+  const [filteredLands, setFilteredLands] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [showMenuId, setShowMenuId] = useState(null);
+  const [editingPlotId, setEditingPlotId] = useState(null);
+  
+  const menuRef = useRef(null);
 
-    const fetchLands = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get('/farmer/farm/land');
-            setLands(res.data.data || []);
-            setLoading(false);
-        } catch (err) {
-            console.error("Registry Sync Error:", err);
-            setLoading(false);
-        }
+  // Close meatball menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenuId(null);
+      }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMenuId]);
 
-    const handleDrop = async (id) => {
-        if (window.confirm("CRITICAL: Are you sure you want to DROP this asset from the registry?")) {
-            try {
-                await api.delete(`/farmer/farm/land/${id}`);
-                setLands(lands.filter(plot => plot.id !== id));
-            } catch (err) {
-                alert("DROP failed. Registry node unreachable.");
-            }
-        }
-    };
-
-    useEffect(() => { fetchLands(); }, []);
-
-    // If a user clicks 'Edit', show the UpdateLand component instead of the list
-    if (editingPlotId) {
-        return (
-            <div style={styles.modalOverlay}>
-                <div style={styles.modalContent}>
-                    <UpdateLand 
-                        plotId={editingPlotId} 
-                        onUpdateSuccess={() => {
-                            setEditingPlotId(null);
-                            fetchLands();
-                        }} 
-                        onCancel={() => setEditingPlotId(null)} 
-                    />
-                </div>
-            </div>
-        );
+  const fetchLands = async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get("/farmer/farm/land");
+      setLands(data.data || []);
+      setFilteredLands(data.data || []);
+    } catch (err) { 
+      console.error("Registry Sync Error:", err); 
+    } finally { 
+      setLoading(false); 
     }
+  };
 
-    return (
-        <div style={styles.container}>
-            {/* Header Row */}
-            <div style={styles.headerRow}>
-                <div>
-                    <div style={styles.badge}><Layers size={14} /> SMART FARM OS</div>
-                    <h1 style={styles.mainTitle}>Land <span style={styles.italicTitle}>Registry</span></h1>
-                </div>
-                
-                <div style={styles.statsBox}>
-                    <div style={styles.statItem}>
-                        <span style={styles.statLabel}>NODES</span>
-                        <span style={styles.statValue}>{lands.length}</span>
-                    </div>
-                </div>
-            </div>
+  useEffect(() => { fetchLands(); }, []);
 
-            {/* Search Bar */}
-            <div style={styles.searchBar}>
-                <Search style={styles.searchIcon} size={20} />
-                <input 
-                    style={styles.searchInput}
-                    placeholder="Search registry by plot name..."
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-
-            {loading ? (
-                <div style={styles.centerBlock}>
-                    <Loader2 style={styles.spinner} size={50} />
-                    <p style={styles.loadingText}>SYNCHRONIZING REGISTRY...</p>
-                </div>
-            ) : (
-                <div style={styles.grid}>
-                    {lands.filter(p => p.plot_name.toLowerCase().includes(searchTerm.toLowerCase())).map((plot) => (
-                        <div key={plot.id} style={styles.card}>
-                            <div style={styles.cardHeader}>
-                                <div style={styles.cardIcon}><Map size={24} /></div>
-                                <div>
-                                    <h3 style={styles.cardTitle}>{plot.plot_name}</h3>
-                                    <p style={styles.cardSubtitle}>ID: 0x{plot.id.toString().padStart(4, '0')}</p>
-                                </div>
-                            </div>
-
-                            <div style={styles.cardBody}>
-                                <div style={styles.dataRow}>
-                                    <div style={styles.dataIcon}><Maximize size={16} /></div>
-                                    <span style={styles.dataLabel}>Area:</span>
-                                    <span style={styles.dataValue}>{plot.area_size} Ha</span>
-                                </div>
-                                <div style={styles.dataRow}>
-                                    <div style={styles.dataIcon}><Activity size={16} /></div>
-                                    <span style={styles.dataLabel}>Status:</span>
-                                    <span style={{
-                                        ...styles.statusTag, 
-                                        backgroundColor: plot.land_status === 'Active' ? '#ecfdf5' : '#f1f5f9',
-                                        color: plot.land_status === 'Active' ? '#10b981' : '#64748b'
-                                    }}>
-                                        {plot.land_status}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div style={styles.cardActions}>
-                                <button 
-                                    onClick={() => setEditingPlotId(plot.id)}
-                                    style={styles.editBtn}
-                                >
-                                    <Edit3 size={18} /> EDIT
-                                </button>
-                                <button 
-                                    onClick={() => handleDrop(plot.id)}
-                                    style={styles.dropBtn}
-                                >
-                                    <Trash2 size={18} /> DROP
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
+  useEffect(() => {
+    const results = lands.filter(item =>
+      item.plot_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    setFilteredLands(results);
+  }, [searchTerm, lands]);
+
+  const handleDrop = async (id) => {
+    if (window.confirm("CRITICAL: Are you sure you want to DROP this asset from the registry?")) {
+      try {
+        await api.delete(`/farmer/farm/land/${id}`);
+        setLands(prev => prev.filter(item => item.id !== id));
+        setShowMenuId(null);
+      } catch (err) { 
+        alert("DROP failed. Registry node unreachable."); 
+      }
+    }
+  };
+
+  if (loading) return <div style={premiumStyles.loader}>🌾 Synchronizing Registry Nodes...</div>;
+
+  // If editing, show the UpdateLand component
+  if (editingPlotId) {
+    return (
+      <UpdateLand 
+        plotId={editingPlotId} 
+        onUpdateSuccess={() => {
+          setEditingPlotId(null);
+          fetchLands();
+        }} 
+        onCancel={() => setEditingPlotId(null)} 
+      />
+    );
+  }
+
+  return (
+    <div style={premiumStyles.pageWrapper} onClick={() => setShowMenuId(null)}>
+      <style>{`
+        body, html { margin: 0; padding: 0; overflow-x: hidden; }
+        .amazon-search-row { display: flex; justify-content: center; align-items: center; padding: 20px 0px; width: 100%; gap: 15px; }
+        .search-wrapper { display: flex; width: 700px; height: 42px; border-radius: 4px; border: 1px solid #888; overflow: hidden; background: #fff; transition: border-color 0.2s; }
+        .search-wrapper:focus-within { border-color: #e77600; box-shadow: 0 0 3px 2px rgba(228, 121, 17, 0.5); }
+        .category-dropdown { background: #f3f3f3; border-right: 1px solid #bbb; padding: 0 15px; display: flex; align-items: center; font-size: 13px; color: #555; cursor: pointer; }
+        .search-input { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
+        .search-button { background: #febd69; border: none; width: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .alibaba-card { font-family: 'Roboto', Helvetica, Arial, sans-serif; background: #ffffff; height: 380px; cursor: pointer; overflow: hidden; transition: all 0.3s ease; border: 1px solid #eee; display: flex; flex-direction: column; border-radius: 8px; position: relative; }
+        .image-half { flex: 0 0 180px; width: 100%; overflow: hidden; position: relative; background: #f0fdf4; display: flex; align-items: center; justify-content: center; color: #166534; }
+        .text-half { flex: 1; width: 100%; padding: 0 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .alibaba-card:hover { box-shadow: 0 10px 25px 0 rgba(0,0,0,0.15); }
+        .options-btn { position: absolute; top: 10px; right: 10px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 5; color: #555; border: none; cursor: pointer; }
+        .dropdown-menu { position: absolute; top: 45px; right: 10px; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; width: 160px; padding: 5px 0; }
+        .menu-item { padding: 10px 15px; display: flex; align-items: center; gap: 10px; font-size: 14px; color: #333; transition: background 0.2s; cursor: pointer; }
+        .menu-item:hover { background: #f1f1f1; }
+      `}</style>
+      
+      <div style={premiumStyles.scrollLayer}>
+        <div className="amazon-search-row">
+          <div className="search-wrapper">
+            <div className="category-dropdown">Land Registry <FaCaretDown style={{marginLeft: '5px'}} /></div>
+            <input 
+              type="text" 
+              className="search-input" 
+              placeholder="Search by plot name..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button className="search-button"><FaSearch size={18} /></button>
+          </div>
+          <button onClick={() => window.location.href='/farmer/farm/add-land'} style={premiumStyles.headerAddBtn}>
+            <FaPlus /> DROP New
+          </button>
+        </div>
+
+        <div style={premiumStyles.fullViewportGrid}>
+          {filteredLands.map((plot) => (
+            <div key={plot.id} className="alibaba-card" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className="options-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenuId(showMenuId === plot.id ? null : plot.id);
+                }}
+              >
+                <FaEllipsisV />
+              </button>
+
+              {showMenuId === plot.id && (
+                <div className="dropdown-menu" ref={menuRef}>
+                  <div className="menu-item" onClick={() => setEditingPlotId(plot.id)}>
+                    <FaEdit color="#007185"/> Edit Asset
+                  </div>
+                  <div className="menu-item" onClick={() => handleDrop(plot.id)} style={{color: 'red'}}>
+                    <FaTrash /> DROP Node
+                  </div>
+                </div>
+              )}
+
+              <div className="image-half">
+                <FaMapMarkedAlt size={60} opacity={0.2} />
+                <div style={premiumStyles.verifiedTag}><FaShieldAlt size={10} color="#15803d"/> Secure Node</div>
+              </div>
+
+              <div className="text-half">
+                <h2 style={premiumStyles.productTitle}>{plot.plot_name}</h2>
+                <div style={premiumStyles.idLabel}>REGISTRY ID: 0x{plot.id.toString().padStart(4, '0')}</div>
+                
+                <div style={premiumStyles.priceRow}>
+                  <FaExpand size={14} style={{marginRight: '5px', color: '#666'}}/>
+                  <span style={premiumStyles.priceMain}>{plot.area_size}</span>
+                  <span style={premiumStyles.unit}>Ha</span>
+                </div>
+
+                <div style={premiumStyles.statusRow}>
+                   <span style={{
+                     ...premiumStyles.statusBadge, 
+                     backgroundColor: plot.land_status === 'Active' ? '#dcfce7' : '#f1f5f9',
+                     color: plot.land_status === 'Active' ? '#166534' : '#64748b'
+                   }}>
+                     {plot.land_status || "Active"}
+                   </span>
+                </div>
+
+                <div style={premiumStyles.vendorName}>Last Updated: {new Date(plot.created_at).toLocaleDateString()}</div>
+                
+                <div style={premiumStyles.ratingRow}>
+                  <span style={premiumStyles.ratingCount}>{plot.crop_count || 0} Biological Assets Linked</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
-const styles = {
-    container: { padding: '60px', backgroundColor: '#fcfcfc', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
-    headerRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' },
-    badge: { display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontWeight: '800', fontSize: '11px', letterSpacing: '2px', marginBottom: '10px' },
-    mainTitle: { fontSize: '40px', fontWeight: '900', color: '#0f172a', margin: 0 },
-    italicTitle: { color: '#10b981', fontWeight: '300', fontStyle: 'italic' },
-    statsBox: { backgroundColor: '#fff', padding: '15px 30px', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' },
-    statLabel: { fontSize: '10px', fontWeight: '900', color: '#94a3b8' },
-    statValue: { fontSize: '24px', fontWeight: '900', color: '#10b981', marginLeft: '10px' },
-    searchBar: { position: 'relative', marginBottom: '40px', maxWidth: '500px' },
-    searchIcon: { position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#cbd5e1' },
-    searchInput: { width: '100%', padding: '18px 18px 18px 55px', borderRadius: '18px', border: '1px solid #e2e8f0', outline: 'none', fontWeight: '600', fontSize: '16px' },
-    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' },
-    card: { backgroundColor: '#fff', borderRadius: '28px', border: '1px solid #f1f5f9', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.02)' },
-    cardHeader: { padding: '25px', display: 'flex', gap: '15px', alignItems: 'center', borderBottom: '1px solid #f8fafc' },
-    cardIcon: { padding: '12px', backgroundColor: '#f0fdf4', color: '#10b981', borderRadius: '14px' },
-    cardTitle: { margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a' },
-    cardSubtitle: { margin: 0, fontSize: '11px', color: '#94a3b8', fontWeight: '700' },
-    cardBody: { padding: '25px' },
-    dataRow: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' },
-    dataIcon: { color: '#cbd5e1' },
-    dataLabel: { fontSize: '13px', color: '#64748b', fontWeight: '500' },
-    dataValue: { fontSize: '14px', fontWeight: '700', color: '#0f172a' },
-    statusTag: { padding: '4px 10px', borderRadius: '8px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' },
-    cardActions: { padding: '20px 25px', backgroundColor: '#f8fafc', display: 'flex', gap: '10px' },
-    editBtn: { flex: 1, padding: '12px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '12px', fontWeight: '800', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' },
-    dropBtn: { flex: 1, padding: '12px', backgroundColor: '#fff1f2', border: 'none', borderRadius: '12px', fontSize: '12px', fontWeight: '800', color: '#f43f5e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' },
-    modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' },
-    modalContent: { width: '100%', maxWidth: '600px', padding: '20px' },
-    centerBlock: { textAlign: 'center', padding: '100px 0' },
-    spinner: { color: '#10b981', animation: 'spin 2s linear infinite' },
-    loadingText: { marginTop: '20px', fontSize: '12px', fontWeight: '900', color: '#cbd5e1', letterSpacing: '2px' }
+const premiumStyles = {
+  pageWrapper: { width: "100vw", minHeight: "100vh", background: "#e8eaef", position: "relative", zIndex: 1000 },
+  scrollLayer: { marginTop: "78px", width: "100%", paddingBottom: "50px" },
+  fullViewportGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", width: "100%", padding: "0 20px", columnGap: "15px", rowGap: "20px" },
+  headerAddBtn: { background: "#febd69", border: "1px solid #a88734", borderRadius: "4px", color: "#111", padding: "0 20px", height: "42px", cursor: "pointer", fontWeight: "600", display: "flex", alignItems: "center", gap: "5px" },
+  verifiedTag: { position: "absolute", top: "8px", left: "8px", background: "white", padding: "2px 6px", fontSize: "11px", borderRadius: "2px", fontWeight: "700", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", color: "#15803d" },
+  productTitle: { fontSize: "18px", color: "#007185", fontWeight: "700", margin: "12px 0 2px 0" },
+  idLabel: { fontSize: "11px", color: "#888", fontWeight: "bold", marginBottom: "8px" },
+  priceRow: { display: "flex", alignItems: "center", margin: "5px 0" },
+  priceMain: { fontSize: "22px", fontWeight: "800", color: "#333" },
+  unit: { fontSize: "14px", color: "#333", marginLeft: "4px", fontWeight: "600" },
+  statusRow: { marginTop: "5px" },
+  statusBadge: { padding: "3px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", textTransform: "uppercase" },
+  vendorName: { fontSize: "11px", color: "#666", marginTop: "auto", paddingBottom: "5px" },
+  ratingRow: { display: "flex", alignItems: "center", borderTop: "1px solid #eee", paddingTop: "8px", paddingBottom: "10px" },
+  ratingCount: { fontSize: "12px", color: "#15803d", fontWeight: "700" },
+  loader: { textAlign: 'center', padding: '150px', fontSize: "18px", fontWeight: "bold", color: "#166534" }
 };
 
 export default ViewLand;
