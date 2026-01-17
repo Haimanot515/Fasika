@@ -1,60 +1,64 @@
-const pool = require('../../config/dbConfig');
-const { uploadToSupabase } = require('../../middleware/upload');
+const db = require('../../config/dbConfig');
 
-// 1. Create Profile
-exports.createFarmerProfile = async (req, res) => {
+/**
+ * MASTER DATA DISTRIBUTION CONTROLLER
+ * Distributes form data into Farmers, Land Plots, Crops, and Animals tables.
+ */
+const distributeFarmerData = async (req, res) => {
+    // user_internal_id comes from your decoded cookie/auth logic
+    const { 
+        user_internal_id, 
+        farm_name, farm_type, public_farmer_id,
+        plot_name, area_size,
+        crop_name, planting_date,
+        animal_tag, animal_species 
+    } = req.body;
+
+    const client = await db.connect();
+
     try {
-        const userId = req.user.userId;
-        const { full_name, farm_name, location } = req.body;
-        const result = await pool.query(
-            "INSERT INTO farmer_profiles (user_id, full_name, farm_name, location) VALUES ($1, $2, $3, $4) RETURNING *",
-            [userId, full_name, farm_name, location]
+        await client.query('BEGIN'); // Start Transaction
+
+        // 1. Store in FARMERS
+        const farmerRes = await client.query(
+            `INSERT INTO farmers (user_internal_id, farm_name, farm_type, public_farmer_id) 
+             VALUES ($1, $2, $3, $4) RETURNING id`,
+            [user_internal_id, farm_name, farm_type, public_farmer_id]
         );
-        res.status(201).json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+        const farmerId = farmerRes.rows[0].id;
 
-// 2. Get Profile
-exports.getFarmerProfile = async (req, res) => {
-    try {
-        const result = await pool.query("SELECT * FROM farmer_profiles WHERE user_id = $1", [req.user.userId]);
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// 3. Update Profile
-exports.updateFarmerProfile = async (req, res) => {
-    try {
-        const { full_name, farm_name, location } = req.body;
-        const result = await pool.query(
-            "UPDATE farmer_profiles SET full_name = $1, farm_name = $2, location = $3 WHERE user_id = $4 RETURNING *",
-            [full_name, farm_name, location, req.user.userId]
+        // 2. Store in LAND_PLOTS
+        const plotRes = await client.query(
+            `INSERT INTO land_plots (farmer_id, plot_name, area_size) 
+             VALUES ($1, $2, $3) RETURNING id`,
+            [farmerId, plot_name, area_size]
         );
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+        const plotId = plotRes.rows[0].id;
 
-// 4. Upload Profile Image (This fixes the Line 25 crash)
-exports.uploadFarmerProfileImage = async (req, res) => {
-    try {
-        if (!req.file) return res.status(400).json({ message: 'No image provided' });
+        // 3. Store in CROPS
+        if (crop_name) {
+            await client.query(
+                `INSERT INTO crops (land_plot_id, crop_name, planting_date) VALUES ($1, $2, $3)`,
+                [plotId, crop_name, planting_date]
+            );
+        }
 
-        // Use our Supabase helper
-        const imageUrl = await uploadToSupabase(req.file, 'farmer-assets', 'profiles');
+        // 4. Store in ANIMALS
+        if (animal_tag) {
+            await client.query(
+                `INSERT INTO animals (user_internal_id, current_land_plot_id, tag_number, species) 
+                 VALUES ($1, $2, $3, $4)`,
+                [user_internal_id, plotId, animal_tag, animal_species]
+            );
+        }
 
-        await pool.query(
-            "UPDATE farmer_profiles SET profile_image_url = $1 WHERE user_id = $2",
-            [imageUrl, req.user.userId]
-        );
+        await client.query('COMMIT');
+        res.status(201).json({ success: true, message: "Data distributed to all tables successfully." });
 
-        res.json({ success: true, profile_image_url: imageUrl });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        res.status(500).json({ success: false, error: error.message });
+    } finally {
+        client.release();
     }
 };
