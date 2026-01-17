@@ -20,14 +20,12 @@ import AdminPostLand from './pages/admin/AdminPostLand';
 import AdminUpdateLand from './pages/admin/AdminUpdateLand';
 import AdminUpdateLivestock from './pages/admin/AdminUpdateLivstoke'; 
 
-// --- FARM MANAGEMENT (MY FARM) ---
-import FarmerRegistrationForm from "./pages/FarmerProfile";
-import FarmerUpdateProfile from "./pages/FarmerUpdateProfile";
-
+// --- FARM MANAGEMENT & REGISTRY ---
+import FarmerRegistrationForm from "./pages/FarmerProfile";   // For initial setup
+import FarmerUpdateProfile from "./pages/FarmerUpdateProfile"; // For editing existing data
 import ViewLand from "./pages/MyFarm/ViewLand";
 import AddLand from "./pages/MyFarm/AddLand";
-import UpdateLand from "./pages/MyFarm/UpdateLand"; // Fixed unique import
-
+import UpdateLand from "./pages/MyFarm/UpdateLand"; 
 
 // --- MARKETPLACE SECTION ---
 import AddFarmerListing from "./pages/market/AddFarmerListing";
@@ -84,7 +82,6 @@ function App() {
           {/* Main Dashboard Hub */}
           <Route path="/dashboard/*" element={<DynamicDashboard role={role} />} />
 
-
           {/* 🗺️ LAND MANAGEMENT (Farmer) */}
           <Route path="/my-farm/land/view" element={<ViewLand />} />
           <Route path="/my-farm/land/add" element={<AddLand />} />
@@ -93,12 +90,13 @@ function App() {
           <Route path="/support" element={<SupportPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
 
-        
-       
-    <Route path="/profile/create-account" element={<FarmerRegistrationForm />} />
-  
-  {/* The form for editing existing info */}
-  <Route path="/profile/update-account" element={<FarmerUpdateProfile />} />
+          {/* 📋 FARMER ACCOUNT REGISTRY (The Sectioned Forms) */}
+          {/* Use this to insert into farmers, land_plots, crops, animals for the first time */}
+          <Route path="/profile/create-account" element={<FarmerRegistrationForm />} />
+          
+          {/* Use this to update existing rows using the user_id as selector */}
+          <Route path="/profile/update-account" element={<FarmerUpdateProfile />} />
+
           {/* 🛒 MARKETPLACE OPERATIONS (Farmer) */}
           <Route path="/market/sales" element={<ViewFarmerListing />} />
           <Route path="/market/sales/add-listing" element={<AddFarmerListing />} />
