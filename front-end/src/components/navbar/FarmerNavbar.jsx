@@ -5,7 +5,7 @@ import MyFarmSidebar from "../sidebars/MyFarmSidebar";
 import MarketSidebar from "../sidebars/MarketSidebar";
 import ProfileSidebar from "../sidebars/ProfileSidebar";
 import FarmerLogo from "../../pages/dashboard/FarmerLogo"; 
-import api from "../api/axios";
+import api from "../../api/axios";
 
 // --- STABLE TESTED ICONS ---
 import { 
