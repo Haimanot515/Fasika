@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import Footer from "./components/common/Footer";
 
 // --- AUTH & PUBLIC PAGES ---
 import Landing from "./pages/auth/Landing";
@@ -21,8 +22,8 @@ import AdminUpdateLand from './pages/admin/AdminUpdateLand';
 import AdminUpdateLivestock from './pages/admin/AdminUpdateLivstoke'; 
 
 // --- FARM MANAGEMENT & REGISTRY ---
-import FarmerRegistrationForm from "./pages/FarmerProfile";   // For initial setup
-import FarmerUpdateProfile from "./pages/FarmerUpdateProfile"; // For editing existing data
+import FarmerRegistrationForm from "./pages/FarmerProfile";   
+import FarmerUpdateProfile from "./pages/FarmerUpdateProfile"; 
 import ViewLand from "./pages/MyFarm/ViewLand";
 import AddLand from "./pages/MyFarm/AddLand";
 import UpdateLand from "./pages/MyFarm/UpdateLand"; 
@@ -39,7 +40,6 @@ import DynamicDashboard from "./pages/dashboard/DynamicDashboard";
 import WeatherPage from "./pages/WeatherPage";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 
-// --- LOADING SPINNER ---
 const Spinner = () => (
   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontSize: "24px", color: "#065f46", fontWeight: "bold", fontFamily: "sans-serif" }}>
     🌾 Loading Farm Systems...
@@ -67,7 +67,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* 🌍 PUBLIC ROUTES */}
+        {/* 🌍 PUBLIC ROUTES (No Footer) */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<LoginForm onLogin={setRole} />} />
         <Route path="/register" element={<RegisterForm />} />
@@ -75,49 +75,36 @@ function App() {
         <Route path="/verify-OTP" element={<VerifyOTP />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/marketplace" element={<BuyerMarketplace />} />
 
-        {/* 🔐 PROTECTED ROUTES (Farmer & Admin) */}
-        <Route element={<ProtectedLayout role={role} />}>
-          
-          {/* Main Dashboard Hub */}
+        {/* 🔐 PROTECTED ROUTES (Footer only shown here) */}
+        <Route element={
+          <>
+            <ProtectedLayout role={role} />
+            <Footer />
+          </>
+        }>
           <Route path="/dashboard/*" element={<DynamicDashboard role={role} />} />
-
-          {/* 🗺️ LAND MANAGEMENT (Farmer) */}
           <Route path="/my-farm/land/view" element={<ViewLand />} />
           <Route path="/my-farm/land/add" element={<AddLand />} />
           <Route path="/my-farm/land/update/:id" element={<UpdateLand />} />
           <Route path="/advisory" element={<AdvisoryBoard />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
-
-          {/* 📋 FARMER ACCOUNT REGISTRY (The Sectioned Forms) */}
-          {/* Use this to insert into farmers, land_plots, crops, animals for the first time */}
           <Route path="/profile/create-account" element={<FarmerRegistrationForm />} />
-          
-          {/* Use this to update existing rows using the user_id as selector */}
           <Route path="/profile/update-account" element={<FarmerUpdateProfile />} />
-
-          {/* 🛒 MARKETPLACE OPERATIONS (Farmer) */}
           <Route path="/market/sales" element={<ViewFarmerListing />} />
           <Route path="/market/sales/add-listing" element={<AddFarmerListing />} />
           <Route path="/market/sales/edit-listing/:listing_id" element={<EditFarmerListing />} />
-          
-          {/* 🛡️ ADMIN SPECIFIC ROUTES */}
           <Route path="/admin/users/list" element={<AdminUsersPage/>}/>
           <Route path="/admin/farmers/dashboard" element={<AdminFarmerStatsDashboard />} />
           <Route path="/admin/farmers/market/view" element={<AdminMarketDashboard />} />
           <Route path="/admin/farmers/land/post" element={<AdminPostLand />} />
           <Route path="/admin/farmers/land/update/:id" element={<AdminUpdateLand />} />
           <Route path="/admin/farmers/livestock/update/:id" element={<AdminUpdateLivestock />} />
-
-          {/* 🌤️ SERVICES */}
           <Route path="/weather" element={<WeatherPage />} />
         </Route>
 
-        {/* PUBLIC MARKETPLACE */}
-        <Route path="/marketplace" element={<BuyerMarketplace />} />
-
-        {/* 🌐 GLOBAL FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
