@@ -5,6 +5,7 @@ import MyFarmSidebar from "../sidebars/MyFarmSidebar";
 import MarketSidebar from "../sidebars/MarketSidebar";
 import ProfileSidebar from "../sidebars/ProfileSidebar";
 import FarmerLogo from "../../pages/dashboard/FarmerLogo"; 
+import api from "../api/axios"; // Added to fetch from database
 
 // --- STABLE TESTED ICONS ---
 import { 
@@ -23,10 +24,26 @@ const FarmerNavbar = ({ toggle }) => {
   const [showMarket, setShowMarket] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showLogoPage, setShowLogoPage] = useState(false); 
+  const [profilePhoto, setProfilePhoto] = useState(null); // State for DB photo
 
   const myFarmRef = useRef(null);
   const marketRef = useRef(null);
   const profileRef = useRef(null);
+
+  // Fetch profile photo from database on mount
+  useEffect(() => {
+    const fetchPhoto = async () => {
+      try {
+        const res = await api.get('/farmers/my-profile');
+        if (res.data && res.data.photo) {
+          setProfilePhoto(res.data.photo);
+        }
+      } catch (err) {
+        console.error("Could not load nav photo", err);
+      }
+    };
+    fetchPhoto();
+  }, []);
 
   const handleLogoClick = (e) => {
     e.preventDefault(); 
@@ -56,8 +73,8 @@ const FarmerNavbar = ({ toggle }) => {
     border: "none",
     borderBottom: isActive ? "3px solid white" : "3px solid transparent",
     color: "white",
-    fontSize: "1.05rem",      // Increased font size
-    fontWeight: "700",        // Bold weight for standard
+    fontSize: "1.05rem",
+    fontWeight: "700",
     cursor: "pointer",
     padding: "10px 5px", 
     transition: "all 0.3s ease",
@@ -73,9 +90,18 @@ const FarmerNavbar = ({ toggle }) => {
     display: "flex",
     alignItems: "center",
     gap: "6px",               
-    fontSize: "1.05rem",      // Increased font size
-    fontWeight: "700",        // Bold weight for standard
+    fontSize: "1.05rem",
+    fontWeight: "700",
     whiteSpace: "nowrap"
+  };
+
+  // GitHub style avatar dimensions
+  const avatarStyle = {
+    width: "32px",
+    height: "32px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "1px solid rgba(255,255,255,0.2)"
   };
 
   useEffect(() => {
@@ -98,7 +124,7 @@ const FarmerNavbar = ({ toggle }) => {
         zIndex: 9999,
         display: "flex", 
         alignItems: "center", 
-        padding: "0 30px",    // Increased side padding for balance
+        padding: "0 30px",
         height: "78px", 
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
         boxSizing: "border-box",
@@ -114,10 +140,10 @@ const FarmerNavbar = ({ toggle }) => {
 
         <div className="nav-links" style={{ 
           display: "flex", 
-          justifyContent: "space-between", // Ensures equal spacing across nav
+          justifyContent: "space-between",
           alignItems: "center", 
           flex: 1,
-          marginLeft: "40px",              // Gap from logo
+          marginLeft: "40px",
           flexWrap: "nowrap",
           overflowX: "auto",
           msOverflowStyle: "none",
@@ -141,7 +167,12 @@ const FarmerNavbar = ({ toggle }) => {
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
-              Profile <MdOutlineAccountCircle size={24}/>
+              Profile 
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="User" style={avatarStyle} />
+              ) : (
+                <MdOutlineAccountCircle size={24}/>
+              )}
             </button>
           </div>
         </div>
