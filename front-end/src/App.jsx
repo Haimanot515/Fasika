@@ -98,7 +98,7 @@ function App() {
     <Route path="/profile/create-account" element={<FarmerRegistrationForm />} />
   
   {/* The form for editing existing info */}
-  <Route path="/profile/update-account" element={<FarmerUpdateProfileForm />} />
+  <Route path="/profile/update-account" element={<FarmerUpdateProfile />} />
           {/* 🛒 MARKETPLACE OPERATIONS (Farmer) */}
           <Route path="/market/sales" element={<ViewFarmerListing />} />
           <Route path="/market/sales/add-listing" element={<AddFarmerListing />} />
