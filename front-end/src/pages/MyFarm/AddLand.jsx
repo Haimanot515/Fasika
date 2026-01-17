@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import api from "../../api/axios"; 
 import { 
   Plus, Activity, Search, 
-  MapPin, Loader2, Wheat, TreePine, 
+  MapPin, Loader2, TreePine, 
   CloudSun, Sprout, 
-  Navigation, Trash, Beef
+  Navigation, Trash
 } from 'lucide-react';
 
 const AddLand = () => {
@@ -121,7 +121,7 @@ const AddLand = () => {
                         </div>
                     </div>
 
-                    {/* CROP TAGS WITH LIVE COUNT */}
+                    {/* CROP LIST - NEW LINE FORMAT */}
                     <div style={styles.sectionDivider}>
                         <label style={styles.label}>Biology: Crops ({formData.crops.length})</label>
                         <div style={styles.tagInputRow}>
@@ -129,18 +129,18 @@ const AddLand = () => {
                                 style={styles.tagInput} 
                                 value={tempCrop}
                                 onChange={(e) => setTempCrop(e.target.value)}
-                                placeholder="Add crop..."
+                                placeholder="Add crop name..."
                             />
                             <button type="button" onClick={addCropToForm} style={styles.addTagBtn}><Plus size={18}/></button>
                         </div>
-                        <div style={styles.tagCloud}>
+                        <div style={styles.listContainer}>
                             {formData.crops.map((c, i) => (
-                                <span key={i} style={styles.tag}><Wheat size={12}/> {c}</span>
+                                <div key={i} style={styles.listItem}>{c}</div>
                             ))}
                         </div>
                     </div>
 
-                    {/* ANIMAL TAGS WITH LIVE COUNT */}
+                    {/* ANIMAL LIST - NEW LINE FORMAT */}
                     <div style={styles.sectionDivider}>
                         <label style={styles.label}>Biology: Livestock ({formData.animals.length})</label>
                         <div style={styles.tagInputRow}>
@@ -148,15 +148,13 @@ const AddLand = () => {
                                 style={styles.tagInput} 
                                 value={tempAnimal}
                                 onChange={(e) => setTempAnimal(e.target.value)}
-                                placeholder="Add animal..."
+                                placeholder="Add animal name..."
                             />
                             <button type="button" onClick={addAnimalToForm} style={styles.addTagBtn}><Plus size={18}/></button>
                         </div>
-                        <div style={styles.tagCloud}>
+                        <div style={styles.listContainer}>
                             {formData.animals.map((a, i) => (
-                                <span key={i} style={{...styles.tag, background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd'}}>
-                                    <Beef size={12}/> {a}
-                                </span>
+                                <div key={i} style={{...styles.listItem, color: '#0369a1', borderLeft: '3px solid #0369a1'}}>{a}</div>
                             ))}
                         </div>
                     </div>
@@ -200,21 +198,19 @@ const AddLand = () => {
                                 <div style={styles.iconBox}><TreePine size={28} /></div>
                                 <div>
                                     <h3 style={styles.cardTitle}>{plot.plot_name}</h3>
-                                    <span style={styles.areaBadge}>{plot.area_size} Hectares</span>
+                                    <span style={styles.areaBadge}>{plot.area_size} Hectares Managed</span>
                                 </div>
                             </div>
                             
                             <div style={styles.cardContent}>
-                                <div style={styles.assetGroup}>
-                                    <div style={styles.miniTags}>
-                                        <div style={styles.statBox}>
-                                            <span style={styles.statVal}>{plot.crops?.length || 0}</span>
-                                            <span style={styles.statLab}>Crops</span>
-                                        </div>
-                                        <div style={styles.statBox}>
-                                            <span style={styles.statVal}>{plot.animals?.length || 0}</span>
-                                            <span style={styles.statLab}>Animals</span>
-                                        </div>
+                                <div style={styles.miniTags}>
+                                    <div style={styles.statBox}>
+                                        <span style={styles.statVal}>{plot.crops?.length || 0}</span>
+                                        <span style={styles.statLab}>Crops</span>
+                                    </div>
+                                    <div style={styles.statBox}>
+                                        <span style={styles.statVal}>{plot.animals?.length || 0}</span>
+                                        <span style={styles.statLab}>Animals</span>
                                     </div>
                                 </div>
                             </div>
@@ -231,13 +227,12 @@ const AddLand = () => {
 };
 
 const styles = {
-    // container now has paddingTop to stay clear of the navbar
-    container: { display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f0', fontFamily: '"Inter", sans-serif', color: '#1a2e1a', paddingTop: '80px' },
+    container: { display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f0', fontFamily: '"Inter", sans-serif', color: '#1a2e1a', paddingTop: '90px' },
     leftPanel: { width: '400px', backgroundColor: '#ffffff', borderRight: '1px solid #d1dbd1', padding: '40px', display: 'flex', flexDirection: 'column', boxShadow: '10px 0 30px rgba(0,0,0,0.02)', zIndex: 10 },
     brandSection: { marginBottom: '35px' },
     badge: { display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', fontWeight: 'bold', fontSize: '12px', letterSpacing: '1px', marginBottom: '12px' },
     mainTitle: { fontSize: '48px', fontWeight: '900', color: '#064e3b', lineHeight: '0.9', margin: 0 },
-    normalTitle: { color: '#10b981', fontWeight: '700', fontStyle: 'normal' }, // Removed italic
+    normalTitle: { color: '#10b981', fontWeight: '700', fontStyle: 'normal' },
     subtitle: { color: '#6b7280', fontSize: '14px', marginTop: '10px' },
     form: { display: 'flex', flexDirection: 'column', gap: '24px' },
     label: { fontSize: '12px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', marginBottom: '8px', display: 'block' },
@@ -250,8 +245,11 @@ const styles = {
     tagInputRow: { display: 'flex', gap: '8px' },
     tagInput: { flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e5e7eb', backgroundColor: '#fff' },
     addTagBtn: { width: '45px', height: '42px', borderRadius: '10px', border: 'none', backgroundColor: '#064e3b', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    tagCloud: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' },
-    tag: { padding: '6px 12px', backgroundColor: '#f0fdf4', color: '#166534', borderRadius: '8px', fontSize: '12px', fontWeight: '600', border: '1px solid #dcfce7', display: 'flex', alignItems: 'center', gap: '4px' },
+    
+    // NEW LIST STYLES (NO ICONS, NEW LINES)
+    listContainer: { display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' },
+    listItem: { padding: '8px 15px', backgroundColor: '#f8faf8', color: '#166534', borderRadius: '8px', fontSize: '14px', fontWeight: '600', borderLeft: '3px solid #10b981' },
+    
     submitBtn: { padding: '18px', backgroundColor: '#059669', color: '#fff', border: 'none', borderRadius: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '10px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)' },
     rightPanel: { flex: 1, padding: '40px 60px', overflowY: 'auto' },
     headerRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' },
