@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+// ✅ Split imports: Fa6 for specific new icons, Fa for standard ones
 import { 
   FaFacebook, FaTelegram, FaWhatsapp, FaYoutube, 
-  FaGlobe, FaArrowUp, FaSeedling, FaPhoneAlt, FaEnvelope,
-  FaUserShield, FaCow, FaWheatAwn, FaMapLocationDot
-} from 'react-icons/fa6'; // Using Fa6 for more variety
+  FaGlobe, FaArrowUp, FaSeedling, FaPhoneAlt, FaEnvelope 
+} from 'react-icons/fa'; 
+import { 
+  FaUserShield, FaCow, FaWheatAwn, FaMapLocationDot 
+} from 'react-icons/fa6'; 
 
 const Footer = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -24,7 +27,7 @@ const Footer = () => {
       width: '100%', 
       backgroundColor: '#2d6a4f', 
       color: '#FFFFFF',
-      padding: '25px 0', // ✅ Even bigger height
+      padding: '25px 0',
       textAlign: 'center',
       fontSize: '1.1rem',
       cursor: 'pointer',
@@ -35,9 +38,9 @@ const Footer = () => {
       textTransform: 'uppercase'
     },
     mainGrid: {
-      maxWidth: '1400px', // ✅ Wider container for more columns
+      maxWidth: '1400px',
       margin: '0 auto',
-      padding: '100px 20px', // ✅ Massive vertical height
+      padding: '100px 20px',
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
       gap: '40px'
@@ -75,7 +78,6 @@ const Footer = () => {
 
   return (
     <footer style={s.footerWrapper}>
-      {/* FULL WIDTH GREEN BAR */}
       <div 
         style={s.backToTop} 
         onClick={scrollToTop}
@@ -151,7 +153,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* BOTTOM LEGAL BAR */}
       <div style={s.bottomBar}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '30px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px', fontWeight: '900', color: '#1b4332', fontSize: '1.6rem' }}>
