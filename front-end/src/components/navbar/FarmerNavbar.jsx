@@ -93,7 +93,7 @@ const FarmerNavbar = ({ toggle }) => {
     transition: "all 0.3s ease",
     display: "flex",
     alignItems: "center",
-    gap: "6px",                
+    gap: "8px",                
     whiteSpace: "nowrap"
   });
 
@@ -102,24 +102,25 @@ const FarmerNavbar = ({ toggle }) => {
     textDecoration: "none",
     display: "flex",
     alignItems: "center",
-    gap: "6px",                
+    gap: "8px",                
     fontSize: "1.05rem",
     fontWeight: "700",
     whiteSpace: "nowrap"
   };
 
-  // ✅ INCREASED SIZE BY 2PX (from 32px to 34px)
+  // ✅ ADJUSTED TO STANDARD PROMINENT SIZE (38px)
   const avatarStyle = {
-    width: "34px",
-    height: "34px",
+    width: "38px",
+    height: "38px",
     borderRadius: "50%",
     objectFit: "cover",
-    border: "1px solid rgba(255,255,255,0.3)",
+    border: "2px solid rgba(255,255,255,0.4)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    overflow: "hidden"
+    backgroundColor: "rgba(255,255,255,0.15)",
+    overflow: "hidden",
+    marginLeft: "4px"
   };
 
   const EthiopiaMapIcon = () => (
@@ -174,13 +175,15 @@ const FarmerNavbar = ({ toggle }) => {
             <button style={getBtnStyle(showMarket)} onClick={handleMarketClick}>
               Market <MdOutlineShoppingBag size={22}/></button>
             <button style={getBtnStyle(showProfile)} onClick={handleProfileClick}>
-              {farmerData.name ? `Hello, ${farmerData.name.split(' ')[0]}` : "Profile"} 
+              <span style={{ fontSize: "1.1rem" }}>
+                {farmerData.name ? `Hello, ${farmerData.name.split(' ')[0]}` : "Profile"} 
+              </span>
               <div style={avatarStyle}>
                 {farmerData.photo ? (
                   <img src={farmerData.photo} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  // ✅ INCREASED ICON SIZE BY 2PX (from 28 to 30)
-                  <MdOutlineAccountCircle size={30} color="white" />
+                  // ✅ ICON INCREASED TO 34px FOR BETTER VISIBILITY
+                  <MdOutlineAccountCircle size={34} color="white" />
                 )}
               </div>
             </button>
