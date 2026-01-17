@@ -60,13 +60,21 @@ exports.addLand = async (req, res) => {
 };
 
 /* ───── 🔄 UPDATE LAND (SYNCED) ───── */
-/* ───── 🔄 UPDATE LAND (SYNCED) ───── */
 exports.updateLand = async (req, res) => {
   const client = await pool.connect();
   try {
-    const farmerId = await getInternalFarmerId(req.user.id);
-    const { plot_name, area_size, land_status, crops, animals } = req.body;
     const { id } = req.params;
+
+    // CRITICAL SAFETY CHECK: Prevent processing if ID is missing or invalid string
+    if (!id || id === 'undefined') {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid Node ID. DROP operation aborted." 
+      });
+    }
+
+    const farmerId = await getInternalFarmerId(req.user.id);
+    const { plot_name, area_size, land_status, crops } = req.body;
 
     await client.query('BEGIN'); // Start DROP Transaction
 
@@ -81,14 +89,16 @@ exports.updateLand = async (req, res) => {
 
     if (rows.length === 0) {
       await client.query('ROLLBACK');
-      return res.status(404).json({ success: false, message: "Asset node not found" });
+      return res.status(404).json({ success: false, message: "Asset node not found in registry" });
     }
 
-    // 2. Sync Crops (DROP old ones and re-add to keep it simple)
-    if (crops) {
+    // 2. Sync Crops (DROP old ones and re-add to maintain registry integrity)
+    // Only proceed if crops is actually an array
+    if (Array.isArray(crops)) {
       await client.query('DELETE FROM crops WHERE land_plot_id = $1', [id]);
-      if (crops.length > 0) {
-        for (const cropName of crops) {
+      
+      for (const cropName of crops) {
+        if (cropName.trim()) { // Only insert non-empty names
           await client.query(
             `INSERT INTO crops (land_plot_id, crop_name, current_stage) VALUES ($1, $2, 'Planted')`,
             [id, cropName]
@@ -97,22 +107,21 @@ exports.updateLand = async (req, res) => {
       }
     }
 
-    // 3. Sync Animals (Optional: if your animals are linked to land or user)
-    // Note: Your current animals table uses user_internal_id, not land_plot_id
-    // If you want to sync animals here, add logic similar to crops above.
-
     await client.query('COMMIT');
-    res.json({ success: true, message: "Registry node UPDATED and SYNCED", data: rows[0] });
+    res.json({ 
+      success: true, 
+      message: "Registry node UPDATED and SYNCED", 
+      data: rows[0] 
+    });
 
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error("UPDATE ERROR:", err.message);
+    console.error("REGISTRY UPDATE ERROR:", err.message);
     res.status(500).json({ success: false, error: err.message });
   } finally {
     client.release();
   }
 };
-
 /* ───── 🗑️ DROP LAND (DELETE) ───── */
 exports.deleteLand = async (req, res) => {
   const client = await pool.connect();
