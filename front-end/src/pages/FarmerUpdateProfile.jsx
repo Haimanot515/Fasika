@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react'; // ✅ Fixes useEffect error
+import React, { useState, useEffect } from 'react'; 
 import api from '../api/axios';
+import { useNavigate } from 'react-router-dom';
 
 const FarmerUpdateProfile = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     farm_name: '', farm_type: '', public_farmer_id: '',
-    plot_name: '', area_size: '', tag_number: '', species: '',
+    plot_name: '', area_size: '',
+    tag_number: '', species: '',
     photo_url: '' 
   });
 
@@ -14,13 +17,14 @@ const FarmerUpdateProfile = () => {
   const [updating, setUpdating] = useState(false);
   const [status, setStatus] = useState({ msg: '', isError: false });
 
-  // 1. Fetch data (Standardized to /profile)
+  // 1. Fetch data on mount
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // ✅ CORRECTED: No more /my-profile
+        // ✅ CORRECT PATH (Fixed from /my-profile)
         const res = await api.get('/farmers/profile'); 
         const data = res.data.data;
+        
         setFormData({
           farm_name: data.farm_name || '',
           farm_type: data.farm_type || '',
@@ -33,8 +37,10 @@ const FarmerUpdateProfile = () => {
         });
         setPreview(data.photo_url || '');
       } catch (err) {
-        setStatus({ msg: 'Failed to load profile', isError: true });
-      } finally { setLoading(false); }
+        setStatus({ msg: 'Failed to load profile data', isError: true });
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProfile();
   }, []);
@@ -52,37 +58,90 @@ const FarmerUpdateProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
+    setStatus({ msg: '', isError: false });
+
     const data = new FormData();
     if (photoFile) data.append('photo', photoFile);
-    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+
+    Object.keys(formData).forEach(key => {
+      data.append(key, formData[key]);
+    });
 
     try {
-      // ✅ CORRECTED: No more /update-profile
+      // ✅ CORRECT PATH (Fixed from /update-profile)
       await api.put('/farmers/profile', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setStatus({ msg: 'Update successful!', isError: false });
+      setStatus({ msg: 'Profile updated successfully!', isError: false });
     } catch (err) {
-      setStatus({ msg: 'Update failed', isError: true });
-    } finally { setUpdating(false); }
+      setStatus({ 
+        msg: 'Update failed: ' + (err.response?.data?.error || 'Server error'), 
+        isError: true 
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>;
+  const s = {
+    wrapper: { maxWidth: '850px', margin: '40px auto', padding: '20px', backgroundColor: '#f4f7f6', borderRadius: '15px' },
+    card: { backgroundColor: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', fontFamily: 'Arial, sans-serif' },
+    header: { color: '#2d6a4f', textAlign: 'center', marginBottom: '30px' },
+    section: { marginBottom: '30px', padding: '20px', border: '1px solid #e2e8f0', borderRadius: '10px' },
+    sectionTitle: { fontSize: '16px', fontWeight: 'bold', color: '#2d6a4f', marginBottom: '15px', borderBottom: '2px solid #d8f3dc' },
+    grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' },
+    label: { fontSize: '13px', marginBottom: '5px', fontWeight: '600', color: '#4a5568' },
+    input: { padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e0', width: '100%', boxSizing: 'border-box' },
+    button: { width: '100%', padding: '16px', backgroundColor: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
+    photoPreview: { width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #2d6a4f', marginBottom: '10px', display: 'block', marginLeft: 'auto', marginRight: 'auto' }
+  };
+
+  if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Loading Registry Data...</div>;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '40px auto', padding: '20px', backgroundColor: '#fff', borderRadius: '10px' }}>
-      <h1>Update Profile</h1>
-      {status.msg && <div style={{ color: status.isError ? 'red' : 'green' }}>{status.msg}</div>}
-      <form onSubmit={handleSubmit}>
-        {preview && <img src={preview} alt="Profile" style={{ width: '120px', height: '120px', borderRadius: '50%', display: 'block', margin: 'auto' }} />}
-        <input type="file" onChange={handlePhotoChange} style={{ margin: '10px auto', display: 'block' }} />
-        <input name="farm_name" value={formData.farm_name} onChange={handleChange} placeholder="Farm Name" style={{ width: '100%', padding: '10px', marginBottom: '10px' }} />
-        <button type="submit" style={{ width: '100%', padding: '15px', background: '#2d6a4f', color: '#fff', border: 'none' }}>
-          {updating ? 'Saving...' : 'Update Registry'}
-        </button>
-      </form>
+    <div style={s.wrapper}>
+      <div style={s.card}>
+        <h1 style={s.header}>Update Farmer Profile</h1>
+        {status.msg && (
+          <div style={{ padding: '15px', borderRadius: '8px', marginBottom: '20px', backgroundColor: status.isError ? '#fff5f5' : '#f0fff4', color: status.isError ? '#c53030' : '#276749', border: '1px solid' }}>
+            {status.msg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={s.section}>
+            <div style={s.sectionTitle}>Profile Photo</div>
+            <div style={{textAlign: 'center'}}>
+               {preview && <img src={preview} alt="Profile" style={s.photoPreview} />}
+               <input type="file" accept="image/*" onChange={handlePhotoChange} style={{...s.input, border: 'none'}} />
+            </div>
+          </div>
+
+          <div style={s.section}>
+            <div style={s.sectionTitle}>1. Farm Details</div>
+            <div style={s.grid}>
+              <div><label style={s.label}>Farm Name</label><input style={s.input} name="farm_name" value={formData.farm_name} onChange={handleChange} /></div>
+              <div><label style={s.label}>Public Farmer ID</label><input style={s.input} name="public_farmer_id" value={formData.public_farmer_id} onChange={handleChange} /></div>
+            </div>
+          </div>
+
+          <div style={s.section}>
+            <div style={s.sectionTitle}>2. Land & Assets</div>
+            <div style={s.grid}>
+              <div><label style={s.label}>Plot Name</label><input style={s.input} name="plot_name" value={formData.plot_name} onChange={handleChange} /></div>
+              <div><label style={s.label}>Area (Ha)</label><input style={s.input} type="number" name="area_size" value={formData.area_size} onChange={handleChange} /></div>
+              <div><label style={s.label}>Animal Tag</label><input style={s.input} name="tag_number" value={formData.tag_number} onChange={handleChange} /></div>
+              <div><label style={s.label}>Species</label><input style={s.input} name="species" value={formData.species} onChange={handleChange} /></div>
+            </div>
+          </div>
+
+          <button type="submit" disabled={updating} style={{...s.button, opacity: updating ? 0.7 : 1}}>
+            {updating ? 'Saving Changes...' : 'Update Farmer Registry'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default FarmerUpdateProfile; // ✅ Fixes Vite build error
+export default FarmerUpdateProfile;
