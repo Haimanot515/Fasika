@@ -5,11 +5,21 @@ import { useNavigate } from 'react-router-dom';
 const FarmerProfile = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    full_name: '', phone: '', email: '', password: '',
-    region: '', zone: '', woreda: '', kebele: '',
-    farm_name: 'My Farm', farm_type: '', public_farmer_id: '',
-    plot_name: '', area_size: '',
-    tag_number: '', species: '' 
+    full_name: '', 
+    phone: '', 
+    email: '', 
+    password: '',
+    region: '', 
+    zone: '', 
+    woreda: '', 
+    kebele: '',
+    farm_name: 'My Farm', 
+    farm_type: '', 
+    public_farmer_id: '',
+    plot_name: '', 
+    area_size: '',
+    tag_number: '', 
+    species: '' 
   });
 
   const [photoFile, setPhotoFile] = useState(null);
@@ -17,6 +27,7 @@ const FarmerProfile = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ msg: '', isError: false });
 
+  // Styles Object - Fully detailed as requested
   const s = {
     wrapper: { maxWidth: '850px', margin: '40px auto', padding: '20px', backgroundColor: '#f4f7f6', borderRadius: '15px' },
     card: { backgroundColor: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', fontFamily: 'Arial, sans-serif' },
@@ -48,18 +59,27 @@ const FarmerProfile = () => {
     setStatus({ msg: '', isError: false });
 
     const data = new FormData();
+    // Append the file if it exists
     if (photoFile) data.append('photo', photoFile);
+    
+    // Append all text fields from the registry
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
 
     try {
-      // ✅ Using corrected path
+      // ✅ Corrected Path to match your Backend logic
       await api.post('/farmers/profile', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      
       setStatus({ msg: 'Success! Your account and farm registry are now synchronized.', isError: false });
+      
+      // Redirect to login or dashboard after success
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setStatus({ msg: 'Registration Failed: ' + (err.response?.data?.error || 'Server error'), isError: true });
+      setStatus({ 
+        msg: 'Registration Failed: ' + (err.response?.data?.error || 'Server error - check Supabase Bucket'), 
+        isError: true 
+      });
     } finally {
       setLoading(false);
     }
@@ -69,56 +89,92 @@ const FarmerProfile = () => {
     <div style={s.wrapper}>
       <div style={s.card}>
         <h1 style={s.header}>Farmer Profile Onboarding</h1>
+        
         {status.msg && <div style={s.alert(status.isError)}>{status.msg}</div>}
 
         <form onSubmit={handleSubmit}>
+          {/* Profile Photo Section */}
           <div style={{...s.section, textAlign: 'center'}}>
             <div style={s.sectionTitle}>Profile Photo</div>
             {preview && <img src={preview} alt="Preview" style={s.photoPreview} />}
             <div style={s.inputGroup}>
               <input type="file" accept="image/*" onChange={handlePhotoChange} style={{...s.input, border: 'none'}} />
+              <p style={{fontSize: '11px', color: '#718096'}}>Upload a photo for your Farmer ID</p>
             </div>
           </div>
 
+          {/* Section 1: User Account */}
           <div style={s.section}>
             <div style={s.sectionTitle}>1. Account & Security</div>
             <div style={s.grid}>
-              <div style={s.inputGroup}><label style={s.label}>Full Name</label><input style={s.input} name="full_name" required onChange={handleChange} /></div>
-              <div style={s.inputGroup}><label style={s.label}>Phone</label><input style={s.input} name="phone" required onChange={handleChange} /></div>
-              <div style={s.inputGroup}><label style={s.label}>Email</label><input style={s.input} type="email" name="email" onChange={handleChange} /></div>
-              <div style={s.inputGroup}><label style={s.label}>Password</label><input style={s.input} type="password" name="password" required onChange={handleChange} /></div>
+              <div style={s.inputGroup}>
+                <label style={s.label}>Full Name</label>
+                <input style={s.input} name="full_name" required onChange={handleChange} placeholder="Enter full name" />
+              </div>
+              <div style={s.inputGroup}>
+                <label style={s.label}>Phone</label>
+                <input style={s.input} name="phone" required onChange={handleChange} placeholder="+251..." />
+              </div>
+              <div style={s.inputGroup}>
+                <label style={s.label}>Email (Optional)</label>
+                <input style={s.input} type="email" name="email" onChange={handleChange} placeholder="example@mail.com" />
+              </div>
+              <div style={s.inputGroup}>
+                <label style={s.label}>Password</label>
+                <input style={s.input} type="password" name="password" required onChange={handleChange} placeholder="Create password" />
+              </div>
             </div>
           </div>
 
+          {/* Section 2: Location Details */}
           <div style={s.section}>
-            <div style={s.sectionTitle}>2. Farm Details</div>
+            <div style={s.sectionTitle}>2. Location Details</div>
             <div style={s.grid}>
-              <div style={s.inputGroup}><label style={s.label}>Farm Name</label><input style={s.input} name="farm_name" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Region</label><input style={s.input} name="region" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Zone</label><input style={s.input} name="zone" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Woreda</label><input style={s.input} name="woreda" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Kebele</label><input style={s.input} name="kebele" onChange={handleChange} /></div>
+            </div>
+          </div>
+
+          {/* Section 3: Farm & Registry */}
+          <div style={s.section}>
+            <div style={s.sectionTitle}>3. Farm Details</div>
+            <div style={s.grid}>
+              <div style={s.inputGroup}><label style={s.label}>Farm Name</label><input style={s.input} name="farm_name" value={formData.farm_name} onChange={handleChange} /></div>
               <div style={s.inputGroup}>
                 <label style={s.label}>Farm Type</label>
                 <select style={s.input} name="farm_type" onChange={handleChange}>
                   <option value="">Select Type</option>
-                  <option value="Crop">Crop</option>
+                  <option value="Crop">Crop Production</option>
                   <option value="Livestock">Livestock</option>
-                  <option value="Mixed">Mixed</option>
+                  <option value="Mixed">Mixed Farming</option>
                 </select>
               </div>
-              <div style={{...s.inputGroup, gridColumn: 'span 2'}}><label style={s.label}>Public Farmer ID</label><input style={s.input} name="public_farmer_id" placeholder="FARM-001" onChange={handleChange} /></div>
+              <div style={{...s.inputGroup, gridColumn: 'span 2'}}>
+                <label style={s.label}>Public Farmer ID</label>
+                <input style={s.input} name="public_farmer_id" placeholder="Official ID if available" onChange={handleChange} />
+              </div>
             </div>
           </div>
 
+          {/* Section 4: Land & Livestock Assets */}
           <div style={s.section}>
-            <div style={s.sectionTitle}>3. Land & Assets</div>
+            <div style={s.sectionTitle}>4. Land & Assets</div>
             <div style={s.grid}>
-              <div style={s.inputGroup}><label style={s.label}>Plot Name</label><input style={s.input} name="plot_name" required onChange={handleChange} /></div>
-              <div style={s.inputGroup}><label style={s.label}>Area (Ha)</label><input style={s.input} type="number" step="0.01" name="area_size" required onChange={handleChange} /></div>
-              <div style={s.inputGroup}><label style={s.label}>Tag Number</label><input style={s.input} name="tag_number" onChange={handleChange} /></div>
-              <div style={s.inputGroup}><label style={s.label}>Species</label><input style={s.input} name="species" onChange={handleChange} /></div>
+              <div style={s.inputGroup}><label style={s.label}>Plot Name</label><input style={s.input} name="plot_name" required onChange={handleChange} placeholder="e.g. North Field" /></div>
+              <div style={s.inputGroup}><label style={s.label}>Area (Ha)</label><input style={s.input} type="number" step="0.01" name="area_size" required onChange={handleChange} placeholder="0.00" /></div>
+              <div style={s.inputGroup}><label style={s.label}>Tag Number (Livestock)</label><input style={s.input} name="tag_number" onChange={handleChange} placeholder="Tag ID" /></div>
+              <div style={s.inputGroup}><label style={s.label}>Species</label><input style={s.input} name="species" onChange={handleChange} placeholder="e.g. Cattle / Sheep" /></div>
             </div>
           </div>
 
-          <button type="submit" disabled={loading} style={{...s.button, opacity: loading ? 0.7 : 1}}>
-            {loading ? 'Creating Records...' : 'Submit Full Registration'}
+          <button 
+            type="submit" 
+            disabled={loading} 
+            style={{...s.button, opacity: loading ? 0.7 : 1}}
+          >
+            {loading ? 'Processing Registry...' : 'Submit Full Registration'}
           </button>
         </form>
       </div>
