@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react'; // <--- THIS LINE IS THE FIX
+import React, { useState, useEffect } from 'react'; // ✅ Fixes useEffect error
 import api from '../api/axios';
-import { useNavigate } from 'react-router-dom';
 
 const FarmerUpdateProfile = () => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     farm_name: '', farm_type: '', public_farmer_id: '',
-    plot_name: '', area_size: '',
-    tag_number: '', species: '',
+    plot_name: '', area_size: '', tag_number: '', species: '',
     photo_url: '' 
   });
 
@@ -17,14 +14,13 @@ const FarmerUpdateProfile = () => {
   const [updating, setUpdating] = useState(false);
   const [status, setStatus] = useState({ msg: '', isError: false });
 
-  // 1. Fetch data on mount
+  // 1. Fetch data (Standardized to /profile)
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // ✅ Standardized path
+        // ✅ CORRECTED: No more /my-profile
         const res = await api.get('/farmers/profile'); 
         const data = res.data.data;
-        
         setFormData({
           farm_name: data.farm_name || '',
           farm_type: data.farm_type || '',
@@ -37,10 +33,8 @@ const FarmerUpdateProfile = () => {
         });
         setPreview(data.photo_url || '');
       } catch (err) {
-        setStatus({ msg: 'Failed to load profile data', isError: true });
-      } finally {
-        setLoading(false);
-      }
+        setStatus({ msg: 'Failed to load profile', isError: true });
+      } finally { setLoading(false); }
     };
     fetchProfile();
   }, []);
@@ -58,49 +52,32 @@ const FarmerUpdateProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
-    setStatus({ msg: '', isError: false });
-
     const data = new FormData();
-    if (photoFile) {
-      data.append('photo', photoFile);
-    }
-
-    Object.keys(formData).forEach(key => {
-      data.append(key, formData[key]);
-    });
+    if (photoFile) data.append('photo', photoFile);
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
 
     try {
-      // ✅ Standardized path
+      // ✅ CORRECTED: No more /update-profile
       await api.put('/farmers/profile', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setStatus({ msg: 'Profile updated successfully!', isError: false });
+      setStatus({ msg: 'Update successful!', isError: false });
     } catch (err) {
-      setStatus({ 
-        msg: 'Update failed: ' + (err.response?.data?.error || 'Server error'), 
-        isError: true 
-      });
-    } finally {
-      setUpdating(false);
-    }
+      setStatus({ msg: 'Update failed', isError: true });
+    } finally { setUpdating(false); }
   };
 
-  if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>Loading Profile...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>;
 
   return (
-    <div style={{maxWidth: '800px', margin: 'auto', padding: '20px'}}>
-      <h1>Update Farmer Profile</h1>
-      {status.msg && <div style={{color: status.isError ? 'red' : 'green'}}>{status.msg}</div>}
+    <div style={{ maxWidth: '800px', margin: '40px auto', padding: '20px', backgroundColor: '#fff', borderRadius: '10px' }}>
+      <h1>Update Profile</h1>
+      {status.msg && <div style={{ color: status.isError ? 'red' : 'green' }}>{status.msg}</div>}
       <form onSubmit={handleSubmit}>
-        <div style={{textAlign: 'center', marginBottom: '20px'}}>
-           {preview && <img src={preview} alt="Profile" style={{width: '150px', height: '150px', borderRadius: '50%'}} />}
-           <input type="file" onChange={handlePhotoChange} style={{display: 'block', margin: '10px auto'}} />
-        </div>
-        
-        <input name="farm_name" value={formData.farm_name} onChange={handleChange} placeholder="Farm Name" style={{width: '100%', padding: '10px', marginBottom: '10px'}} />
-        {/* Add other inputs here following the same pattern */}
-        
-        <button type="submit" disabled={updating} style={{width: '100%', padding: '15px', backgroundColor: '#2d6a4f', color: '#fff', border: 'none', cursor: 'pointer'}}>
+        {preview && <img src={preview} alt="Profile" style={{ width: '120px', height: '120px', borderRadius: '50%', display: 'block', margin: 'auto' }} />}
+        <input type="file" onChange={handlePhotoChange} style={{ margin: '10px auto', display: 'block' }} />
+        <input name="farm_name" value={formData.farm_name} onChange={handleChange} placeholder="Farm Name" style={{ width: '100%', padding: '10px', marginBottom: '10px' }} />
+        <button type="submit" style={{ width: '100%', padding: '15px', background: '#2d6a4f', color: '#fff', border: 'none' }}>
           {updating ? 'Saving...' : 'Update Registry'}
         </button>
       </form>
@@ -108,4 +85,4 @@ const FarmerUpdateProfile = () => {
   );
 };
 
-export default FarmerUpdateProfile; // <--- This fixes the "default export" error
+export default FarmerUpdateProfile; // ✅ Fixes Vite build error
