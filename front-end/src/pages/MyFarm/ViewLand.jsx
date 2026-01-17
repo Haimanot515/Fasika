@@ -3,7 +3,7 @@ import api from "../../api/axios";
 import UpdateLand from "./UpdateLand";
 import { 
   FaPlus, FaShieldAlt, FaSearch, FaCaretDown, 
-  FaEllipsisV, FaEdit, FaTrash, FaMapMarkedAlt, FaExpand 
+  FaEllipsisV, FaEdit, FaTrash, FaMapMarkedAlt, FaExpand, FaStar 
 } from "react-icons/fa";
 
 const ViewLand = () => {
@@ -61,7 +61,7 @@ const ViewLand = () => {
     }
   };
 
-  if (loading) return <div style={premiumStyles.loader}>🌾 Synchronizing Registry Nodes...</div>;
+  if (loading) return <div style={premiumStyles.loader}>🌾 Accessing Secure Registry...</div>;
 
   // If editing, show the UpdateLand component
   if (editingPlotId) {
@@ -87,8 +87,8 @@ const ViewLand = () => {
         .category-dropdown { background: #f3f3f3; border-right: 1px solid #bbb; padding: 0 15px; display: flex; align-items: center; font-size: 13px; color: #555; cursor: pointer; }
         .search-input { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
         .search-button { background: #febd69; border: none; width: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .alibaba-card { font-family: 'Roboto', Helvetica, Arial, sans-serif; background: #ffffff; height: 380px; cursor: pointer; overflow: hidden; transition: all 0.3s ease; border: 1px solid #eee; display: flex; flex-direction: column; border-radius: 8px; position: relative; }
-        .image-half { flex: 0 0 180px; width: 100%; overflow: hidden; position: relative; background: #f0fdf4; display: flex; align-items: center; justify-content: center; color: #166534; }
+        .alibaba-card { font-family: 'Roboto', Helvetica, Arial, sans-serif; background: #ffffff; height: 461px; cursor: pointer; overflow: hidden; transition: all 0.3s ease; border: 1px solid #eee; display: flex; flex-direction: column; border-radius: 8px; position: relative; }
+        .image-half { flex: 0 0 230.5px; width: 100%; overflow: hidden; position: relative; background: #f0fdf4; display: flex; align-items: center; justify-content: center; color: #166534; }
         .text-half { flex: 1; width: 100%; padding: 0 12px; display: flex; flex-direction: column; overflow: hidden; }
         .alibaba-card:hover { box-shadow: 0 10px 25px 0 rgba(0,0,0,0.15); }
         .options-btn { position: absolute; top: 10px; right: 10px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 5; color: #555; border: none; cursor: pointer; }
@@ -104,7 +104,7 @@ const ViewLand = () => {
             <input 
               type="text" 
               className="search-input" 
-              placeholder="Search by plot name..." 
+              placeholder="Search registry by plot name..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -140,7 +140,7 @@ const ViewLand = () => {
               )}
 
               <div className="image-half">
-                <FaMapMarkedAlt size={60} opacity={0.2} />
+                <FaMapMarkedAlt size={80} opacity={0.1} />
                 <div style={premiumStyles.verifiedTag}><FaShieldAlt size={10} color="#15803d"/> Secure Node</div>
               </div>
 
@@ -149,12 +149,11 @@ const ViewLand = () => {
                 <div style={premiumStyles.idLabel}>REGISTRY ID: 0x{plot.id.toString().padStart(4, '0')}</div>
                 
                 <div style={premiumStyles.priceRow}>
-                  <FaExpand size={14} style={{marginRight: '5px', color: '#666'}}/>
                   <span style={premiumStyles.priceMain}>{plot.area_size}</span>
-                  <span style={premiumStyles.unit}>Ha</span>
+                  <span style={premiumStyles.unit}>Hectares (Ha)</span>
                 </div>
 
-                <div style={premiumStyles.statusRow}>
+                <div style={premiumStyles.moq}>
                    <span style={{
                      ...premiumStyles.statusBadge, 
                      backgroundColor: plot.land_status === 'Active' ? '#dcfce7' : '#f1f5f9',
@@ -164,9 +163,10 @@ const ViewLand = () => {
                    </span>
                 </div>
 
-                <div style={premiumStyles.vendorName}>Last Updated: {new Date(plot.created_at).toLocaleDateString()}</div>
+                <div style={premiumStyles.vendorName}>Registry Node Status: Verified</div>
                 
                 <div style={premiumStyles.ratingRow}>
+                  <FaStar color="#ff6600" size={10} />
                   <span style={premiumStyles.ratingCount}>{plot.crop_count || 0} Biological Assets Linked</span>
                 </div>
               </div>
@@ -179,22 +179,22 @@ const ViewLand = () => {
 };
 
 const premiumStyles = {
-  pageWrapper: { width: "100vw", minHeight: "100vh", background: "#e8eaef", position: "relative", zIndex: 1000 },
-  scrollLayer: { marginTop: "78px", width: "100%", paddingBottom: "50px" },
-  fullViewportGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", width: "100%", padding: "0 20px", columnGap: "15px", rowGap: "20px" },
-  headerAddBtn: { background: "#febd69", border: "1px solid #a88734", borderRadius: "4px", color: "#111", padding: "0 20px", height: "42px", cursor: "pointer", fontWeight: "600", display: "flex", alignItems: "center", gap: "5px" },
-  verifiedTag: { position: "absolute", top: "8px", left: "8px", background: "white", padding: "2px 6px", fontSize: "11px", borderRadius: "2px", fontWeight: "700", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", color: "#15803d" },
-  productTitle: { fontSize: "18px", color: "#007185", fontWeight: "700", margin: "12px 0 2px 0" },
-  idLabel: { fontSize: "11px", color: "#888", fontWeight: "bold", marginBottom: "8px" },
-  priceRow: { display: "flex", alignItems: "center", margin: "5px 0" },
-  priceMain: { fontSize: "22px", fontWeight: "800", color: "#333" },
-  unit: { fontSize: "14px", color: "#333", marginLeft: "4px", fontWeight: "600" },
-  statusRow: { marginTop: "5px" },
+  pageWrapper: { width: "100vw", minHeight: "100vh", background: "#e8eaef", position: "relative", zIndex: 10005 },
+  scrollLayer: { marginTop: "78px", width: "100%", padding: "0" },
+  fullViewportGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", width: "100%", padding: "0 20px", columnGap: "20px", rowGap: "20px" },
+  headerAddBtn: { background: "#ff9900", border: "1px solid #a88734", borderRadius: "4px", color: "#111", padding: "0 20px", height: "42px", cursor: "pointer", fontWeight: "600", display: "flex", alignItems: "center", gap: "5px" },
+  verifiedTag: { position: "absolute", top: "8px", left: "8px", background: "white", padding: "2px 6px", fontSize: "11px", borderRadius: "2px", fontWeight: "700", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" },
+  productTitle: { fontSize: "16px", color: "#007185", fontWeight: "600", lineHeight: "1.2", height: "40px", overflow: "hidden", margin: "10px 0 0 0" },
+  idLabel: { fontSize: "11px", color: "#666", fontWeight: "700", marginBottom: "5px" },
+  priceRow: { display: "flex", alignItems: "baseline", gap: "4px", margin: "5px 0" },
+  priceMain: { fontSize: "24px", fontWeight: "800", color: "#222" },
+  unit: { fontSize: "14px", color: "#222" },
+  moq: { margin: "5px 0" },
   statusBadge: { padding: "3px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", textTransform: "uppercase" },
-  vendorName: { fontSize: "11px", color: "#666", marginTop: "auto", paddingBottom: "5px" },
-  ratingRow: { display: "flex", alignItems: "center", borderTop: "1px solid #eee", paddingTop: "8px", paddingBottom: "10px" },
-  ratingCount: { fontSize: "12px", color: "#15803d", fontWeight: "700" },
-  loader: { textAlign: 'center', padding: '150px', fontSize: "18px", fontWeight: "bold", color: "#166534" }
+  vendorName: { fontSize: "12px", color: "#666", textDecoration: "underline", marginTop: "auto" },
+  ratingRow: { display: "flex", alignItems: "center", paddingBottom: "10px", marginTop: "5px" },
+  ratingCount: { fontSize: "11px", color: "#999", marginLeft: "5px" },
+  loader: { textAlign: 'center', padding: '150px' }
 };
 
 export default ViewLand;
