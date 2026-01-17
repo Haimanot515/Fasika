@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
+import { useNavigate } from 'react-router-dom'; // Added for navigation
 
 const FarmerUpdateProfile = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     farm_name: '', farm_type: '', public_farmer_id: '',
     plot_name: '', area_size: '',
@@ -79,6 +81,7 @@ const FarmerUpdateProfile = () => {
     label: { fontSize: '13px', marginBottom: '5px', fontWeight: '600', color: '#4a5568' },
     input: { padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e0', width: '100%', boxSizing: 'border-box' },
     button: { width: '100%', padding: '16px', backgroundColor: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
+    moreBtn: { marginTop: '15px', padding: '8px 15px', backgroundColor: '#e2e8f0', color: '#2d6a4f', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '12px', fontWeight: '600' },
     photoContainer: { textAlign: 'center', marginBottom: '20px' },
     photoPreview: { width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #2d6a4f', marginBottom: '10px' }
   };
@@ -97,7 +100,7 @@ const FarmerUpdateProfile = () => {
         )}
 
         <form onSubmit={handleSubmit}>
-          
+          <br />
           {/* SECTION 0: PHOTO UPDATE */}
           <div style={s.section}>
              <div style={s.sectionTitle}>Profile Photo</div>
@@ -120,6 +123,7 @@ const FarmerUpdateProfile = () => {
                 <input style={s.input} name="public_farmer_id" value={formData.public_farmer_id} onChange={handleChange} />
               </div>
             </div>
+            <button type="button" style={s.moreBtn} onClick={() => navigate('/dashboard')}>+ More Farms</button>
           </div>
 
           {/* SECTION 2: LAND & CROPS */}
@@ -143,6 +147,10 @@ const FarmerUpdateProfile = () => {
                 <input style={s.input} type="date" name="planting_date" value={formData.planting_date} onChange={handleChange} />
               </div>
             </div>
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button type="button" style={s.moreBtn} onClick={() => navigate('/my-farm/land/add')}>+ More Lands</button>
+              <button type="button" style={s.moreBtn} onClick={() => navigate('/dashboard')}>+ More Crops</button>
+            </div>
           </div>
 
           {/* SECTION 3: LIVESTOCK */}
@@ -158,6 +166,7 @@ const FarmerUpdateProfile = () => {
                 <input style={s.input} name="species" value={formData.species} onChange={handleChange} />
               </div>
             </div>
+            <button type="button" style={s.moreBtn} onClick={() => navigate('/dashboard')}>+ More Animals</button>
           </div>
 
           <button type="submit" disabled={updating} style={s.button}>
