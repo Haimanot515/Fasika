@@ -122,7 +122,6 @@ exports.registerUser = async (req, res) => {
                 .hero-title { color: #f8fafc; font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 15px; }
                 .description { color: #94a3b8; font-size: 15px; line-height: 1.6; text-align: center; margin-bottom: 35px; }
                 
-                /* AAU Credit Style */
                 .aau-credit { 
                   background: rgba(16, 185, 129, 0.1); 
                   border: 1px solid rgba(16, 185, 129, 0.2);
@@ -152,10 +151,10 @@ exports.registerUser = async (req, res) => {
                     </div>
 
                     <h1 class="hero-title">Verify Your Node</h1>
-                  <p class="description">
-  <span style="color: #10b981; font-weight: bold;">Dear ${full_name}</span>,<br/>
-  welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
-</p>
+                    <p class="description">
+                      <span style="color: #10b981; font-weight: bold;">Dear ${full_name}</span>,<br/><br/>
+                      welcome to the official Fasika Farmers Connect. Your account is ready for activation. Please use the button below to verify your secure access.
+                    </p>
 
                     <div style="text-align: center;">
                       <a href="${verificationLink}" class="btn-elite">ACTIVATE ACCOUNT</a>
