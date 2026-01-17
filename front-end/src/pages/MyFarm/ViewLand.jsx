@@ -4,7 +4,7 @@ import UpdateLand from "./UpdateLand";
 import { 
   FaPlus, FaShieldAlt, FaSearch, FaEllipsisV, 
   FaEdit, FaTrash, FaMapMarkedAlt, FaStar, FaVectorSquare,
-  FaSprout, FaPaw, FaChartLine
+  FaLeaf, FaPaw, FaChartLine 
 } from "react-icons/fa";
 
 const ViewLand = () => {
@@ -88,7 +88,8 @@ const ViewLand = () => {
         .alibaba-card { font-family: 'Roboto', sans-serif; background: #ffffff; height: 540px; overflow: hidden; border: 1px solid #ddd; display: flex; flex-direction: column; border-radius: 12px; position: relative; }
         .image-half { flex: 0 0 220px; width: 100%; position: relative; background: #e2e8f0 url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80') center/cover; }
         .asset-btn-row { display: flex; gap: 8px; margin: 15px 0; }
-        .asset-btn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; color: #475569; }
+        .asset-btn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; color: #475569; transition: 0.2s; }
+        .asset-btn:hover { background: #eff6ff; border-color: #3b82f6; }
         .asset-btn span { font-size: 11px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
         .options-btn { position: absolute; top: 15px; right: 15px; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 5; color: #333; border: none; cursor: pointer; }
         .land-dropdown-menu { position: absolute; top: 55px; right: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); z-index: 100; width: 170px; padding: 6px 0; }
@@ -117,7 +118,7 @@ const ViewLand = () => {
 
         <div className="land-grid">
           {filteredLands.map((plot) => (
-            <div key={plot.id} className="alibaba-card">
+            <div key={plot.id} className="alibaba-card" onClick={(e) => e.stopPropagation()}>
               <button 
                 className="options-btn" 
                 onClick={(e) => {
@@ -158,7 +159,7 @@ const ViewLand = () => {
                 </div>
 
                 <div className="asset-btn-row">
-                  <div className="asset-btn"><FaSprout size={18} color="#16a34a"/><span>Crops</span></div>
+                  <div className="asset-btn"><FaLeaf size={18} color="#16a34a"/><span>Crops</span></div>
                   <div className="asset-btn"><FaPaw size={18} color="#92400e"/><span>Animals</span></div>
                   <div className="asset-btn"><FaChartLine size={18} color="#2563eb"/><span>Health</span></div>
                 </div>
