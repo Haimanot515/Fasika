@@ -13,19 +13,18 @@ const Footer = () => {
       width: '100%',
       backgroundColor: '#FFFFFF',
       color: '#2d3436',
-      fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-      borderTop: '1px solid #e1e8ed'
+      fontFamily: '"Segoe UI", Roboto, Arial, sans-serif',
+      borderTop: '1px solid #e1e8ed',
     },
     backToTop: {
       backgroundColor: '#f8f9fa',
       color: '#2d6a4f',
       padding: '12px 0',
       textAlign: 'center',
-      fontSize: '0.9rem',
+      fontSize: '0.85rem',
       cursor: 'pointer',
       fontWeight: 'bold',
       borderBottom: '1px solid #f1f3f5',
-      transition: 'all 0.2s ease'
     },
     mainGrid: {
       maxWidth: '1200px',
@@ -37,11 +36,10 @@ const Footer = () => {
     },
     colTitle: {
       color: '#1b4332',
-      fontSize: '1.1rem',
+      fontSize: '1rem',
       fontWeight: '700',
       marginBottom: '18px',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px'
+      textTransform: 'uppercase'
     },
     link: {
       display: 'block',
@@ -49,51 +47,33 @@ const Footer = () => {
       textDecoration: 'none',
       fontSize: '0.95rem',
       marginBottom: '10px',
-      transition: 'color 0.2s'
-    },
-    iconGroup: {
-      display: 'flex',
-      gap: '20px',
-      fontSize: '1.4rem',
-      marginTop: '15px'
     },
     socialIcon: {
       color: '#2d6a4f',
-      cursor: 'pointer',
-      transition: 'transform 0.2s'
+      fontSize: '1.5rem',
+      marginRight: '15px',
+      cursor: 'pointer'
     },
     bottomBar: {
       borderTop: '1px solid #f1f3f5',
       padding: '30px 20px',
       backgroundColor: '#fdfdfd'
-    },
-    bottomContent: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: '20px'
     }
   };
 
   return (
     <footer style={s.footerWrapper}>
-      {/* Amazon-style Top Bar */}
       <div style={s.backToTop} onClick={scrollToTop}>
         <FaArrowUp style={{ marginRight: '8px' }} /> BACK TO TOP
       </div>
 
       <div style={s.mainGrid}>
-        {/* Column 1: Registry Info */}
         <div>
           <div style={s.colTitle}>Farmer Registry</div>
-          <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#636e72' }}>
-            Empowering agricultural growth through digital identity and 
-            smart land management systems.
+          <p style={{ fontSize: '0.9rem', color: '#636e72', lineHeight: '1.6' }}>
+            Empowering agricultural growth through digital identity and smart land management.
           </p>
-          <div style={s.iconGroup}>
+          <div style={{ marginTop: '15px' }}>
             <FaFacebook style={s.socialIcon} />
             <FaTelegram style={s.socialIcon} />
             <FaWhatsapp style={s.socialIcon} />
@@ -101,47 +81,43 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Column 2: Farmer Services */}
         <div>
-          <div style={s.colTitle}>Services</div>
-          <Link to="/my-farm/land/view" style={s.link}>My Land Plots</Link>
+          <div style={s.colTitle}>Quick Links</div>
+          <Link to="/dashboard" style={s.link}>Dashboard</Link>
+          <Link to="/my-farm/land/view" style={s.link}>My Plots</Link>
           <Link to="/market/sales" style={s.link}>Marketplace</Link>
-          <Link to="/weather" style={s.link}>Weather Forecast</Link>
-          <Link to="/advisory" style={s.link}>Advisory Board</Link>
+          <Link to="/weather" style={s.link}>Weather</Link>
         </div>
 
-        {/* Column 3: Help & Support */}
         <div>
           <div style={s.colTitle}>Support</div>
           <Link to="/support" style={s.link}>Help Center</Link>
-          <span style={s.link}>Registry Guidelines</span>
           <span style={s.link}>Privacy Policy</span>
           <span style={s.link}>Terms of Service</span>
         </div>
 
-        {/* Column 4: Contact */}
         <div>
-          <div style={s.colTitle}>Contact Us</div>
-          <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '10px'}}>
-            <FaPhoneAlt size={14}/> +251 900 000 000
+          <div style={s.colTitle}>Contact</div>
+          <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '8px'}}>
+            <FaPhoneAlt size={12}/> +251 900 000 000
           </div>
-          <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '10px'}}>
-            <FaEnvelope size={14}/> support@farmerregistry.et
+          <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '8px'}}>
+            <FaEnvelope size={12}/> support@farmer.et
           </div>
-          <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '10px'}}>
-            <FaGlobe size={14}/> Addis Ababa, Ethiopia
+          <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '8px'}}>
+            <FaGlobe size={12}/> Ethiopia
           </div>
         </div>
       </div>
 
       <div style={s.bottomBar}>
-        <div style={s.bottomContent}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', color: '#1b4332' }}>
-            <FaSeedling color="#40916c" size={24} />
+            <FaSeedling color="#40916c" size={20} />
             <span>ETHIOPIAN FARMER REGISTRY</span>
           </div>
           <div style={{ fontSize: '0.85rem', color: '#b2bec3' }}>
-            © 2026. All Rights Reserved. 
+            © 2026. All Rights Reserved.
           </div>
         </div>
       </div>
