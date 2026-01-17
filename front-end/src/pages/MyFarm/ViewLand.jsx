@@ -3,7 +3,7 @@ import api from "../../api/axios";
 import UpdateLand from "./UpdateLand";
 import { 
   FaPlus, FaShieldAlt, FaSearch, FaEllipsisV, 
-  FaEdit, FaTrash, FaMapMarkedAlt, FaStar, FaVectorSquare,
+  FaEdit, FaTrash, FaStar, FaVectorSquare,
   FaLeaf, FaPaw, FaChartLine 
 } from "react-icons/fa";
 
@@ -93,17 +93,41 @@ const ViewLand = () => {
         .search-wrapper { display: flex; width: 600px; height: 42px; border-radius: 4px; border: 1px solid #888; overflow: hidden; background: #fff; }
         .search-input { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
         .search-button { background: #febd69; border: none; width: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        
         .land-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .alibaba-card { font-family: 'Roboto', sans-serif; background: #ffffff; min-height: 540px; overflow: hidden; border: 1px solid #ddd; display: flex; flex-direction: column; border-radius: 12px; position: relative; }
+        
+        .alibaba-card { 
+          font-family: 'Roboto', sans-serif; 
+          background: #ffffff; 
+          min-height: 540px; 
+          overflow: hidden; 
+          border: 1px solid #ddd; 
+          display: flex; 
+          flex-direction: column; 
+          border-radius: 12px; 
+          position: relative; 
+        }
+        
         .image-half { flex: 0 0 220px; width: 100%; position: relative; background: #e2e8f0 url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80') center/cover; }
         .asset-btn-row { display: flex; gap: 8px; margin: 15px 0 5px 0; }
-        .asset-btn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; color: #475569; }
+        
+        .asset-btn { 
+          flex: 1; 
+          display: flex; 
+          flex-direction: column; 
+          align-items: center; 
+          padding: 8px; 
+          background: #f8f9fa; 
+          border: 1px solid #e2e8f0; 
+          border-radius: 8px; 
+          cursor: pointer; 
+          color: #475569; 
+        }
         .asset-btn.active { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
         .asset-btn span { font-size: 11px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
-        .asset-list-container { background: #fdfdfd; border: 1px solid #edf2f7; border-radius: 8px; margin-bottom: 15px; padding: 10px; animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .asset-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #334155; }
-        .asset-item:last-child { border-bottom: none; }
+
+        .asset-list-container { background: #fdfdfd; border: 1px solid #edf2f7; border-radius: 8px; margin-bottom: 15px; padding: 10px; }
+        .asset-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
       `}</style>
       
       <div style={premiumStyles.scrollLayer}>
@@ -118,11 +142,13 @@ const ViewLand = () => {
             />
             <button className="search-button"><FaSearch size={18} /></button>
           </div>
+
+          {/* SYNCED WITH SIDEBAR ROUTE: /my-farm/land/add */}
           <button 
-            onClick={() => { window.location.href = '/farmer/farm/add-land'; }} 
+            onClick={() => { window.location.href = '/my-farm/land/add'; }} 
             style={premiumStyles.headerAddBtn}
           >
-            <FaPlus /> Add Land
+            <FaPlus /> Add Land (DROP)
           </button>
         </div>
 
@@ -182,12 +208,11 @@ const ViewLand = () => {
 
                 {activeAssetView.plotId === plot.id && (
                   <div className="asset-list-container">
-                    <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
-                      {activeAssetView.type} Registry
+                    <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
+                      {activeAssetView.type} Sub-Registry
                     </div>
-                    {/* Items would be mapped here from your data */}
                     <div className="asset-item">
-                      <span>No active {activeAssetView.type} data</span>
+                      <span>No {activeAssetView.type} synced to this node.</span>
                     </div>
                   </div>
                 )}
@@ -216,7 +241,7 @@ const premiumStyles = {
   priceRow: { display: "flex", alignItems: "center", gap: "6px", margin: "5px 0" },
   priceMain: { fontSize: "26px", fontWeight: "900", color: "#111" },
   unit: { fontSize: "14px", color: "#444" },
-  statusBadge: { padding: "4px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "800", textTransform: "uppercase" },
+  statusBadge: { padding: "4px 12px", borderRadius: "20px", fontSize: "10px", fontWeight: "800", textTransform: "uppercase" },
   vendorName: { fontSize: "12px", color: "#666", marginTop: "auto", borderTop: "1px solid #eee", paddingTop: "10px" },
   ratingRow: { display: "flex", alignItems: "center", paddingBottom: "10px", marginTop: "5px" },
   ratingCount: { fontSize: "12px", color: "#15803d", marginLeft: "6px", fontWeight: "700" },
