@@ -86,26 +86,28 @@ const FarmerUpdateProfile = () => {
       minHeight: '100vh',
       width: '100%',
       display: 'flex',
+      flexDirection: 'column', // Changed to column to allow bottom stretch
       alignItems: 'center',
-      justifyContent: 'center',
       backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
-      padding: '80px 20px', // Extra top padding for navbar
+      paddingTop: '80px', // Space for Navbar
+      paddingBottom: '0px', // ✅ REMOVED bottom padding
       boxSizing: 'border-box',
       overflowX: 'hidden'
     },
     container: { 
       maxWidth: '850px', 
       width: '100%',
-      margin: '0 auto',
+      flex: 1, // ✅ Makes container fill all available vertical space
       padding: 'clamp(25px, 5%, 50px)', 
       backgroundColor: 'rgba(255, 255, 255, 0.95)', 
       backdropFilter: 'blur(10px)',
-      borderRadius: '24px', 
+      borderRadius: '24px 24px 0 0', // ✅ Round only top corners
       boxShadow: '0 20px 45px rgba(0,0,0,0.3)',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      marginTop: '20px' // Initial gap from top
     },
     title: { textAlign: 'center', color: '#1b4332', fontSize: '2.5rem', fontWeight: '900', marginBottom: '10px' },
     subtitle: { textAlign: 'center', color: '#40916c', marginBottom: '40px', fontSize: '1.2rem', fontWeight: '500' },
@@ -113,13 +115,13 @@ const FarmerUpdateProfile = () => {
     group: { marginBottom: '20px' },
     label: { display: 'block', marginBottom: '10px', fontWeight: '700', color: '#1b4332', fontSize: '1.05rem' },
     input: { width: '100%', padding: '14px 18px', borderRadius: '12px', border: '2px solid #d8f3dc', backgroundColor: '#f8fdf9', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box' },
-    button: { width: '100%', padding: '18px', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '1.3rem', marginTop: '30px', boxShadow: '0 6px 20px rgba(45, 106, 79, 0.4)' },
+    button: { width: '100%', padding: '22px', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '1.4rem', marginTop: '40px', marginBottom: '40px', boxShadow: '0 6px 20px rgba(45, 106, 79, 0.4)' },
     photoUpload: { width: '140px', height: '140px', margin: '0 auto 30px', borderRadius: '50%', border: '4px solid #b7e4c7', overflow: 'hidden', cursor: 'pointer', backgroundColor: '#e9f5ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }
   };
 
   if (loading) return (
     <div style={s.pageWrapper}>
-      <div style={{...s.container, textAlign: 'center', color: '#2d6a4f', fontSize: '1.5rem', fontWeight: 'bold'}}>
+      <div style={{...s.container, borderRadius: '24px', flex: 'none', marginTop: '100px', textAlign: 'center', color: '#2d6a4f', fontSize: '1.5rem', fontWeight: 'bold'}}>
         Syncing with Farm Registry...
       </div>
     </div>
@@ -183,7 +185,7 @@ const FarmerUpdateProfile = () => {
           </div>
 
           <button type="submit" disabled={updating} style={{...s.button, opacity: updating ? 0.7 : 1}}>
-            {updating ? 'Saving Changes...' : 'Update Profile'}
+            {updating ? 'Saving Changes...' : 'Sync Registry Changes'}
           </button>
         </form>
       </div>
