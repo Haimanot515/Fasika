@@ -19,6 +19,8 @@ const advisoryRoutes = require("./routes/farmer/farmerAdvisoryRoutes");
 const farmerSupportRoutes = require('./routes/farmer/farmerSupportRoutes');
 const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
+const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
+app.use('/api/farmers', farmerProfileRoutes);
 
 // 2️⃣ GLOBAL MIDDLEWARE
 app.use(express.json());
