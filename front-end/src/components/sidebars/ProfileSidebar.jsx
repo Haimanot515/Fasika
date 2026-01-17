@@ -4,14 +4,14 @@ import {
   FaUserCircle, FaIdCard, FaDoorOpen, FaChevronRight, FaChevronDown 
 } from "react-icons/fa";
 import { MdOutlineClose } from "react-icons/md";
-import api from "../../api/axios"; // Added to fetch database data
+import api from "../../api/axios"; 
 
 const ProfileSidebar = ({ isOpen = true }) => {
   const [collapsed, setCollapsed] = useState(!isOpen);
   const sidebarRef = useRef(null);
 
   // New State for Farmer Profile Data
-  const [farmerData, setFarmerData] = useState({ name: "", photo: null });
+  const [farmerData, setFarmerData] = useState({ name: "Loading...", photo: null });
 
   // Accordion state
   const [openL1, setOpenL1] = useState({ ACCOUNT: true });
@@ -23,15 +23,20 @@ const ProfileSidebar = ({ isOpen = true }) => {
   useEffect(() => {
     const fetchSidebarProfile = async () => {
       try {
-        const res = await api.get('/farmers/my-profile');
-        if (res.data) {
+        // ✅ FIXED: Changed from '/farmers/my-profile' to '/farmers/profile'
+        const res = await api.get('/farmers/profile');
+        
+        if (res.data && res.data.success) {
+          const d = res.data.data;
           setFarmerData({
-            name: res.data.full_name || res.data.farm_name || "User",
-            photo: res.data.photo || null
+            // Fallback chain: Full Name -> Farm Name -> Public ID -> "Farmer"
+            name: d.full_name || d.farm_name || d.public_farmer_id || "Farmer",
+            photo: d.photo_url || null // Matches your backend 'photo_url' column
           });
         }
       } catch (err) {
         console.error("Sidebar data fetch failed", err);
+        setFarmerData({ name: "Guest Farmer", photo: null });
       }
     };
     fetchSidebarProfile();
@@ -139,7 +144,7 @@ const ProfileSidebar = ({ isOpen = true }) => {
 
       <aside ref={sidebarRef} style={sidebarStyle} className="farmer-sidebar-scroll">
         
-        {/* --- GITHUB STYLE PROFILE HEADER --- */}
+        {/* --- PROFILE HEADER --- */}
         <div style={githubProfileHeader}>
           {farmerData.photo ? (
             <img src={farmerData.photo} alt="Profile" style={avatarStyle} />
