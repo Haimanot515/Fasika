@@ -47,27 +47,37 @@ const FarmerNavbar = ({ toggle }) => {
     fetchFarmerProfile();
   }, []);
 
-  const handleLogoClick = (e) => {
-    e.preventDefault(); 
-    setShowLogoPage(!showLogoPage);
+  // Closes everything
+  const closeAll = () => {
     setShowMyFarm(false);
     setShowMarket(false);
     setShowProfile(false);
+    setShowLogoPage(false);
+  };
+
+  const handleLogoClick = (e) => {
+    e.preventDefault(); 
+    const targetState = !showLogoPage;
+    closeAll();
+    setShowLogoPage(targetState);
   };
 
   const handleMyFarmClick = () => {
-    setShowMyFarm(!showMyFarm);
-    if (!showMyFarm) { setShowMarket(false); setShowProfile(false); setShowLogoPage(false); }
+    const targetState = !showMyFarm;
+    closeAll();
+    setShowMyFarm(targetState);
   };
 
   const handleMarketClick = () => {
-    setShowMarket(!showMarket);
-    if (!showMarket) { setShowMyFarm(false); setShowProfile(false); setShowLogoPage(false); }
+    const targetState = !showMarket;
+    closeAll();
+    setShowMarket(targetState);
   };
 
   const handleProfileClick = () => {
-    setShowProfile(!showProfile);
-    if (!showProfile) { setShowMyFarm(false); setShowMarket(false); setShowLogoPage(false); }
+    const targetState = !showProfile;
+    closeAll();
+    setShowProfile(targetState);
   };
 
   const getBtnStyle = (isActive) => ({
@@ -110,7 +120,6 @@ const FarmerNavbar = ({ toggle }) => {
     overflow: "hidden"
   };
 
-  // --- ETHIOPIAN MAP SVG LOGO ---
   const EthiopiaMapIcon = () => (
     <svg width="32" height="32" viewBox="0 0 512 512" fill="#2ecc71" xmlns="http://www.w3.org/2000/svg">
       <path d="M418.5 119.8c-12.7-18.7-32.5-31.5-63.4-31.4-15.6.1-26.6 5.8-37.4 12.5-12 7.4-23.3 16.5-36 21.6-13.6 5.5-29 5.8-43.5 3.3-15-2.6-28.7-10.3-43.4-15-18.1-5.7-37.7-6-56.1.1-17.7 5.9-32.9 19.3-43.1 35.8-12.6 20.3-17.8 45.4-13.7 69.1 2.8 15.9 8.7 30.9 14.8 45.9 6.5 16 13.5 31.8 19.8 47.9 4.3 11.1 7.8 22.5 11.8 33.7 3.1 8.7 6.8 17.2 10.5 25.7 6.1 14 12.7 27.9 20.2 41.2 10.2 18.2 23.3 35.5 41.2 47.4 14.8 9.9 32.1 15.1 49.9 15.3 22.8.2 44.9-8.4 62.4-23 15.9-13.2 28.5-30.1 38.6-48.5 7.4-13.5 13.6-27.7 20-41.8 4.7-10.4 9.8-20.7 15.2-30.8 7.3-13.7 15.1-27.1 23-40.4 8.7-14.7 17.7-29.3 25.1-44.8 8.9-18.6 14.2-39.1 14.1-59.8-.1-21.7-6.2-42.8-17.9-61.1z" />
@@ -119,9 +128,14 @@ const FarmerNavbar = ({ toggle }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showMyFarm && myFarmRef.current && !myFarmRef.current.contains(event.target)) setShowMyFarm(false);
-      if (showMarket && marketRef.current && !marketRef.current.contains(event.target)) setShowMarket(false);
-      if (showProfile && profileRef.current && !profileRef.current.contains(event.target)) setShowProfile(false);
+      // Check if click is outside all three sidebar refs
+      const outsideMyFarm = myFarmRef.current && !myFarmRef.current.contains(event.target);
+      const outsideMarket = marketRef.current && !marketRef.current.contains(event.target);
+      const outsideProfile = profileRef.current && !profileRef.current.contains(event.target);
+
+      if (showMyFarm && outsideMyFarm) setShowMyFarm(false);
+      if (showMarket && outsideMarket) setShowMarket(false);
+      if (showProfile && outsideProfile) setShowProfile(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -137,7 +151,6 @@ const FarmerNavbar = ({ toggle }) => {
         
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
           <Link to="/" className="brand" style={{ ...linkStyle, fontWeight: "800", fontSize: "1.4rem", pointerEvents: "none" }}>
-            {/* UPDATED: Map Icon instead of FaSeedling */}
             <EthiopiaMapIcon />
             <span style={{ marginLeft: "6px" }}>Farmers</span>
           </Link>
@@ -148,18 +161,17 @@ const FarmerNavbar = ({ toggle }) => {
           flex: 1, marginLeft: "40px", flexWrap: "nowrap", overflowX: "auto",
           msOverflowStyle: "none", scrollbarWidth: "none"
         }}>
-          
           <div style={{ display: "flex", gap: "25px", flexShrink: 0 }}> 
-            <Link to="/weather" style={linkStyle}>Weather <MdCloudQueue size={22}/></Link>
+            <Link to="/weather" style={linkStyle} onClick={closeAll}>Weather <MdCloudQueue size={22}/></Link>
             <button style={getBtnStyle(showMyFarm)} onClick={handleMyFarmClick}>
               My Farm <MdDashboard size={22}/>
             </button>
-            <Link to="/advisory" style={linkStyle}>Advisory <MdAgriculture size={22}/></Link>
+            <Link to="/advisory" style={linkStyle} onClick={closeAll}>Advisory <MdAgriculture size={22}/></Link>
           </div>
 
           <div style={{ display: "flex", gap: "25px", flexShrink: 0 }}> 
-            <Link to="/notifications" style={linkStyle}>Notifications <MdOutlineNotificationsActive size={22}/></Link>
-            <Link to="/support" style={linkStyle}>Support <MdHelpOutline size={22}/></Link>
+            <Link to="/notifications" style={linkStyle} onClick={closeAll}>Notifications <MdOutlineNotificationsActive size={22}/></Link>
+            <Link to="/support" style={linkStyle} onClick={closeAll}>Support <MdHelpOutline size={22}/></Link>
           </div>
 
           <div style={{ display: "flex", gap: "25px", alignItems: "center", flexShrink: 0 }}> 
