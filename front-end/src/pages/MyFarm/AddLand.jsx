@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../../api"; 
+import api from "../../api/axios"; 
 
 const AddLand = () => {
     const [loading, setLoading] = useState(false);
