@@ -114,7 +114,7 @@ const Footer = () => {
         <div>
           <div style={s.colTitle}>Official Contact</div>
           <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '12px'}}>
-            <FaPhoneAlt size={16}/> +251 900 000 000
+            <FaPhoneAlt size={16}/> +251 943257078
           </div>
           <div style={{...s.link, display: 'flex', alignItems: 'center', gap: '12px'}}>
             <FaEnvelope size={16}/> registry-support@gov.et
