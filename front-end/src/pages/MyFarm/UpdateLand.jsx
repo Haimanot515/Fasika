@@ -29,10 +29,17 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
     // Fetch existing data into the same fields
     useEffect(() => {
         const fetchCurrentPlot = async () => {
-            if (!plotId) return;
+            // Safety check: if plotId is missing, we can't fetch
+            if (!plotId || plotId === "undefined") {
+                setStatus({ type: "error", message: "Registry ID is missing. Cannot load data." });
+                setLoading(false);
+                return;
+            }
+
             try {
                 const res = await api.get('/farmer/farm/land');
                 const plot = res.data.data.find(p => String(p.id) === String(plotId));
+                
                 if (plot) {
                     setFormData({
                         plot_name: plot.plot_name || "",
@@ -44,12 +51,16 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                         woreda: plot.woreda || "",
                         kebele: plot.kebele || ""
                     });
+                    
+                    // Note: Ensure your backend GET includes these arrays, 
+                    // otherwise, they will default to empty
                     setCrops(plot.crops || []);
                     setAnimals(plot.animals || []);
                 }
                 setLoading(false);
             } catch (err) {
                 console.error("Registry Sync Failed", err);
+                setStatus({ type: "error", message: "Failed to sync with Registry." });
                 setLoading(false);
             }
         };
@@ -60,7 +71,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // --- Same Dynamic Row Logic as AddLand ---
+    // --- Dynamic Row Logic ---
     const addCropRow = () => setCrops([...crops, { crop_name: "", quantity: "" }]);
     const removeCropRow = (index) => setCrops(crops.filter((_, i) => i !== index));
     const updateCrop = (index, field, value) => {
@@ -79,29 +90,39 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Final safety check before sending to backend
+        if (!plotId || plotId === "undefined") {
+            alert("Error: Plot ID is undefined. Refresh the page and try again.");
+            return;
+        }
+
         setSubmitting(true);
         setStatus({ type: "", message: "" });
 
         const data = new FormData();
+        // Append basic metadata
         Object.keys(formData).forEach(key => data.append(key, formData[key]));
+        
+        // DROP and RE-SYNC crops and animals
         data.append("crops", JSON.stringify(crops));
         data.append("animals", JSON.stringify(animals));
 
         if (landImage) data.append("land_image", landImage);
 
         try {
-            // Uses PUT and the plotId to update existing registry node
             const response = await api.put(`/farmer/farm/land/${plotId}`, data, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
 
             if (response.data.success) {
-                alert("Registry Entry successfully DROPPED!");
+                alert("Registry Entry successfully DROPPED and UPDATED!");
                 onUpdateSuccess();
             }
         } catch (err) {
             console.error("Update Error:", err);
-            setStatus({ type: "error", message: err.response?.data?.error || "DROP UPDATE FAILED." });
+            const errorMsg = err.response?.data?.error || "DROP UPDATE FAILED.";
+            setStatus({ type: "error", message: errorMsg });
         } finally {
             setSubmitting(false);
         }
