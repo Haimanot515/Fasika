@@ -167,19 +167,20 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
 
 const theme = {
     wrapper: { 
-        position: 'fixed', // Locks it to the viewport
+        position: 'fixed', 
         top: 0, 
         left: 0, 
         width: '100vw', 
         height: '100vh', 
-        background: "rgba(0, 0, 0, 0.7)", 
-        backdropFilter: 'blur(8px)',
-        zIndex: 9999, // Extremely high to stay over Footer and Nav
+        background: "rgba(0, 0, 0, 0.75)", 
+        backdropFilter: 'blur(10px)',
+        // 🚀 HIGHEST Z-INDEX
+        zIndex: 1000000, 
         display: 'flex', 
         justifyContent: 'center', 
-        alignItems: 'flex-start', // Allows top-down scrolling
+        alignItems: 'flex-start', 
         padding: '60px 0', 
-        overflowY: 'auto' // Enables scrolling within the modal
+        overflowY: 'auto' 
     },
     glassCard: { 
         width: '90%', 
@@ -187,8 +188,8 @@ const theme = {
         background: 'white', 
         borderRadius: '24px', 
         height: 'fit-content', 
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-        marginBottom: '60px' // Space at bottom so it doesn't touch screen edge
+        boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)',
+        marginBottom: '100px' 
     },
     header: { 
         background: '#166534', 
