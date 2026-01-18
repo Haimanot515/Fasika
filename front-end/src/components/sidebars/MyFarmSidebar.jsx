@@ -151,10 +151,7 @@ const FarmSidebar = ({ isOpen = true }) => {
                     <FaPlusCircle /> <span className="sentence-case">Add my farm (DROP)</span>
                   </NavLink>
                   
-                  {/* Updated Route: Update Land (Using a placeholder ID for navigation) */}
-                  <NavLink to="/my-farm/land/update/current" style={l3LinkStyle}>
-                    <FaEdit /> <span className="sentence-case">Update my farm</span>
-                  </NavLink>
+                
                 </div>
               </div>
             )}
