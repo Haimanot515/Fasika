@@ -46,7 +46,7 @@ const FarmerDashboard = () => {
             width: 100%;
             background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2560&q=100');
             background-size: cover; 
-            filter: brightness(0.7);
+            filter: brightness(1.1);
             background-position: center top;
             background-attachment: fixed; 
             background-repeat: no-repeat;
