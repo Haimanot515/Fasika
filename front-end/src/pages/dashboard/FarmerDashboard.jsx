@@ -50,6 +50,7 @@ const FarmerDashboard = () => {
             background-attachment: fixed; 
             background-repeat: no-repeat;
             background-color: #064e3b;
+            filter: brightness(1.2); /* INCREASED BRIGHTNESS TO MAXIMUM */
             scroll-behavior: smooth;
             overflow-x: hidden;
           }
@@ -168,8 +169,8 @@ const headerStyle = {
   padding: "0 100px", 
   display: "flex", 
   justifyContent: "space-between", 
-  alignItems: "center", // Centered vertically for the first screen
-  background: "rgba(0,0,0,0.2)", 
+  alignItems: "center", 
+  background: "rgba(0,0,0,0.1)", // Lightened background overlay slightly for brightness
   boxSizing: "border-box", 
   minHeight: "100vh" 
 };
