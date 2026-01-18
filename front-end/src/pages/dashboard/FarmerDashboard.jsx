@@ -44,7 +44,6 @@ const FarmerDashboard = () => {
             padding: 0; 
             min-height: 100vh;
             width: 100%;
-            /* Optimized for full screen and 'longer' feel */
             background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2560&q=100');
             background-size: cover; 
             background-position: center top;
@@ -63,7 +62,7 @@ const FarmerDashboard = () => {
             border-bottom: 1px solid ${theme.border}; 
             width: 100%; 
             box-sizing: border-box; 
-            min-height: 100vh; /* Made cards longer for better scrolling feel */
+            min-height: 100vh;
             display: flex;
             align-items: center;
           }
@@ -84,13 +83,12 @@ const FarmerDashboard = () => {
       </div>
 
       <header style={headerStyle}>
-        <div>
-          
+        <div style={{ alignSelf: "center", paddingTop: "50px" }}>
           <h1 style={titleStyle}>Fasika's Farmer Connect</h1>
         </div>
-        <div style={{ textAlign: "right", color: "white" }}>
-          <div style={{ fontSize: "70px", fontWeight: "900" }}>{time.toLocaleTimeString()}</div>
-          <div style={{ fontSize: "16px", fontWeight: "800", opacity: 0.9 }}>LIVE ETHIOPIA </div>
+        <div style={{ textAlign: "right", color: "white", alignSelf: "center", paddingTop: "50px" }}>
+          <div style={{ fontSize: "80px", fontWeight: "900", lineHeight: "1" }}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</div>
+          <div style={{ fontSize: "18px", fontWeight: "800", opacity: 0.9, letterSpacing: "3px", marginTop: "10px" }}>LIVE ETHIOPIA </div>
         </div>
       </header>
 
@@ -142,8 +140,6 @@ const FarmerDashboard = () => {
   );
 };
 
-// ──────────────── STYLES ────────────────
-
 const containerStyle = { 
   marginLeft: "70px", 
   minHeight: "100vh", 
@@ -169,32 +165,23 @@ const sidebarStyle = {
 };
 
 const headerStyle = { 
-  padding: "150px 100px 100px 100px", 
+  padding: "0 100px", 
   display: "flex", 
   justifyContent: "space-between", 
-  alignItems: "flex-end", 
+  alignItems: "center", // Centered vertically for the first screen
   background: "rgba(0,0,0,0.2)", 
   boxSizing: "border-box", 
-  minHeight: "100vh" // Header is now full-screen height
-};
-
-const tagStyle = { 
-  fontSize: "14px", 
-  fontWeight: "900", 
-  color: "#ffffff", 
-  background: "rgba(6, 78, 59, 0.9)", 
-  padding: "8px 24px", 
-  borderRadius: "0px", 
-  letterSpacing: "8px" 
+  minHeight: "100vh" 
 };
 
 const titleStyle = { 
   fontSize: "90px", 
   fontWeight: "900", 
-  margin: "30px 0 0 0", 
+  margin: "0", 
   color: "#ffffff", 
   letterSpacing: "-5px", 
-  textShadow: "0 15px 50px rgba(0,0,0,0.5)" 
+  textShadow: "0 15px 50px rgba(0,0,0,0.5)",
+  lineHeight: "1"
 };
 
 const footerStyle = { 
