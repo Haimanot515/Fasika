@@ -11,7 +11,7 @@ const uploadToSupabase = async (file, bucket = 'FarmerListing') => {
     return urlData.publicUrl;
 };
 
-// 1. CREATE / DROP
+// 1. CREATE / DROP INTO REGISTRY
 exports.registerLand = async (req, res) => {
     const client = await pool.connect();
     try {
@@ -46,7 +46,6 @@ exports.registerLand = async (req, res) => {
         if (animals) {
             const parsedAnimals = typeof animals === 'string' ? JSON.parse(animals) : animals;
             for (let a of parsedAnimals) {
-                // FIXED: Included user_internal_id and auto-generated tag_number to satisfy DB constraints
                 await client.query(
                     `INSERT INTO animals (user_internal_id, current_land_plot_id, animal_type, head_count, tag_number) 
                      VALUES ($1, $2, $3, $4, $5)`, 
@@ -70,7 +69,7 @@ exports.registerLand = async (req, res) => {
     } finally { client.release(); }
 };
 
-// 2. GET / VIEW
+// 2. GET / VIEW REGISTRY
 exports.getMyLandRegistry = async (req, res) => {
     try {
         const userId = req.user.userInternalId;
@@ -87,36 +86,70 @@ exports.getMyLandRegistry = async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 };
 
-// 3. UPDATE
+// 3. UPDATE / DROP UPDATES
 exports.updateLand = async (req, res) => {
     const client = await pool.connect();
     try {
         const { id } = req.params;
         const userId = req.user.userInternalId;
-        const { plot_name, area_size, soil_type, climate_zone, region, zone, woreda, kebele } = req.body;
+        const { plot_name, area_size, soil_type, climate_zone, region, zone, woreda, kebele, crops, animals } = req.body;
+
+        // Prevent ID undefined errors
+        if (!id || id === 'undefined') {
+            return res.status(400).json({ error: "Invalid Registry ID provided." });
+        }
+
         await client.query('BEGIN');
 
+        // Handle Image Update
         let landImageUrl = req.body.land_image_url;
         if (req.file) landImageUrl = await uploadToSupabase(req.file);
 
         const soilRes = await client.query("SELECT id FROM soils WHERE soil_type_name = $1", [soil_type]);
         const soilId = soilRes.rows.length > 0 ? soilRes.rows[0].id : null;
 
+        // Update main land metadata
         await client.query(
             `UPDATE land_plots SET plot_name=$1, area_size=$2, soil_id=$3, climate_zone=$4, region=$5, zone=$6, woreda=$7, kebele=$8, land_image_url=$9
              WHERE id=$10 AND farmer_id=(SELECT id FROM farmers WHERE user_internal_id=$11)`,
             [plot_name, area_size, soilId, climate_zone, region, zone, woreda, kebele, landImageUrl, id, userId]
         );
 
+        // DROP and RE-SYNC Crops
+        if (crops) {
+            await client.query(`DELETE FROM crops WHERE land_plot_id = $1`, [id]);
+            const parsedCrops = typeof crops === 'string' ? JSON.parse(crops) : crops;
+            for (let c of parsedCrops) {
+                await client.query(
+                    `INSERT INTO crops (land_plot_id, crop_name, quantity) VALUES ($1, $2, $3)`,
+                    [id, c.crop_name, c.quantity]
+                );
+            }
+        }
+
+        // DROP and RE-SYNC Animals
+        if (animals) {
+            await client.query(`DELETE FROM animals WHERE current_land_plot_id = $1`, [id]);
+            const parsedAnimals = typeof animals === 'string' ? JSON.parse(animals) : animals;
+            for (let a of parsedAnimals) {
+                await client.query(
+                    `INSERT INTO animals (user_internal_id, current_land_plot_id, animal_type, head_count, tag_number) 
+                     VALUES ($1, $2, $3, $4, $5)`,
+                    [userId, id, a.animal_type, a.head_count, a.tag_number || `TAG-UPD-${Date.now()}`]
+                );
+            }
+        }
+
         await client.query('COMMIT');
-        res.json({ success: true });
+        res.json({ success: true, message: "Registry node UPDATED and DROPPED successfully" });
     } catch (err) {
         await client.query('ROLLBACK');
+        console.error("Registry UPDATE Error:", err.message);
         res.status(500).json({ error: err.message });
     } finally { client.release(); }
 };
 
-// 4. DELETE
+// 4. DELETE / REMOVE FROM REGISTRY
 exports.deleteLand = async (req, res) => {
     try {
         const { id } = req.params;
