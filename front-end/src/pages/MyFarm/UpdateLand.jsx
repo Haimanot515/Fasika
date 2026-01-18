@@ -11,7 +11,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
     const [status, setStatus] = useState({ type: "", message: "" });
     const [landImage, setLandImage] = useState(null);
 
-    // 1. Basic Land Details
+    // 1. Basic Land Details (Identical to AddLand)
     const [formData, setFormData] = useState({
         plot_name: "",
         area_size: "",
@@ -23,11 +23,11 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
         kebele: ""
     });
 
-    // 2. Dynamic Asset States
+    // 2. Dynamic Asset States (Identical to AddLand)
     const [crops, setCrops] = useState([]);
     const [animals, setAnimals] = useState([]);
 
-    // Load existing data into the form
+    // --- Data Fetching Logic ---
     useEffect(() => {
         const fetchCurrentPlot = async () => {
             try {
@@ -50,7 +50,6 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                 setLoading(false);
             } catch (err) {
                 console.error("Registry Sync Failed", err);
-                setStatus({ type: "error", message: "Failed to load plot data." });
                 setLoading(false);
             }
         };
@@ -61,7 +60,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // --- Dynamic Row Logic ---
+    // --- Dynamic Row Logic (Identical to AddLand) ---
     const addCropRow = () => setCrops([...crops, { crop_name: "", quantity: "" }]);
     const removeCropRow = (index) => setCrops(crops.filter((_, i) => i !== index));
     const updateCrop = (index, field, value) => {
@@ -87,6 +86,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
         Object.keys(formData).forEach(key => data.append(key, formData[key]));
         data.append("crops", JSON.stringify(crops));
         data.append("animals", JSON.stringify(animals));
+
         if (landImage) data.append("land_image", landImage);
 
         try {
@@ -95,32 +95,32 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
             });
 
             if (response.data.success) {
-                alert("Registry node updated successfully!");
+                alert("Registry Entry successfully DROPPED!");
                 onUpdateSuccess();
             }
         } catch (err) {
             console.error("Update Error:", err);
-            setStatus({ type: "error", message: err.response?.data?.error || "DROP UPDATE FAILED." });
+            setStatus({ type: "error", message: err.response?.data?.error || "Server connection failed." });
         } finally {
             setSubmitting(false);
         }
     };
 
     if (loading) return (
-        <div style={styles.modalWrapper}>
+        <div style={styles.overlay}>
             <Loader2 style={{ animation: 'spin 1s linear infinite', color: '#fff' }} size={40} />
         </div>
     );
 
     return (
-        <div style={styles.modalWrapper}>
+        <div style={styles.overlay}>
             <div style={styles.container}>
-                {/* Close Button for Modal */}
-                <button onClick={onCancel} style={styles.closeBtn}><X size={24}/></button>
+                {/* Close Button */}
+                <button onClick={onCancel} style={styles.closeIcon}><X size={24} /></button>
 
                 <div style={styles.header}>
                     <Sprout size={32} color="#166534" />
-                    <h2 style={styles.title}>Update Land Registry Node</h2>
+                    <h2 style={styles.title}>Update Secure Land Registry</h2>
                 </div>
                 
                 {status.message && (
@@ -136,6 +136,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                 )}
 
                 <form onSubmit={handleSubmit}>
+                    {/* Section 1: Land Details */}
                     <div style={styles.sectionHeader}>
                         <MapPin size={18} /> Physical & Geographic Metadata
                     </div>
@@ -179,6 +180,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
 
                     <hr style={styles.hr} />
 
+                    {/* Section 2: Crops Assets */}
                     <div style={styles.sectionHeader}>
                         <Plus size={18} /> Biological Assets: Crops
                     </div>
@@ -191,6 +193,7 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                     ))}
                     <button type="button" onClick={addCropRow} style={styles.addBtn}>+ Add Crop Row</button>
 
+                    {/* Section 3: Animals Assets */}
                     <div style={{...styles.sectionHeader, marginTop: '30px', color: '#1e40af'}}>
                         <Plus size={18} /> Biological Assets: Livestock
                     </div>
@@ -206,22 +209,22 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
                     <hr style={styles.hr} />
 
                     <div style={{ marginBottom: '30px' }}>
-                        <label style={{ ...styles.label, marginBottom: '15px' }}><Upload size={16}/> Replace Registry Image</label>
+                        <label style={{ ...styles.label, marginBottom: '15px' }}><Upload size={16}/> Update Registry Image</label>
                         <div style={styles.fileUploadBox}>
                             <input type="file" onChange={(e) => setLandImage(e.target.files[0])} style={{ cursor: 'pointer' }} />
                             {landImage && <p style={{ fontSize: '12px', color: '#166534', marginTop: '10px' }}>✓ {landImage.name} selected</p>}
                         </div>
                     </div>
 
-                    <div style={{display: 'flex', gap: '15px'}}>
+                    <div style={{ display: 'flex', gap: '15px' }}>
                         <button type="submit" disabled={submitting} style={styles.submitBtn}>
                             {submitting ? (
-                                <><Loader2 style={{ animation: 'spin 1s linear infinite' }} size={20}/> SYNCING REGISTRY...</>
+                                <><Loader2 style={{ animation: 'spin 1s linear infinite' }} size={20}/> SYNCING...</>
                             ) : (
                                 "DROP UPDATES"
                             )}
                         </button>
-                        <button type="button" onClick={onCancel} style={{...styles.submitBtn, backgroundColor: '#f1f5f9', color: '#64748b'}}>
+                        <button type="button" onClick={onCancel} style={{ ...styles.submitBtn, backgroundColor: '#f1f5f9', color: '#64748b' }}>
                             CANCEL
                         </button>
                     </div>
@@ -232,15 +235,16 @@ const UpdateLand = ({ plotId, onUpdateSuccess, onCancel }) => {
 };
 
 const styles = {
-    modalWrapper: {
+    overlay: {
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100vw',
         height: '100vh',
-        background: 'rgba(15, 23, 42, 0.8)',
-        backdropFilter: 'blur(8px)',
-        zIndex: 1000000, // 🚀 1 Million Z-Index
+        background: 'rgba(15, 23, 42, 0.85)',
+        backdropFilter: 'blur(10px)',
+        // 🚀 HIGHEST Z-INDEX
+        zIndex: 1000000, 
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
@@ -249,7 +253,7 @@ const styles = {
     },
     container: { 
         position: 'relative',
-        width: '90%',
+        width: '95%',
         maxWidth: '950px', 
         padding: '40px', 
         background: '#ffffff', 
@@ -257,7 +261,7 @@ const styles = {
         boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', 
         border: '1px solid #f1f5f9' 
     },
-    closeBtn: {
+    closeIcon: {
         position: 'absolute',
         top: '20px',
         right: '20px',
@@ -274,13 +278,13 @@ const styles = {
     grid4: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '30px' },
     inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
     label: { fontSize: '13px', fontWeight: '700', color: '#64748b' },
-    input: { width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', outline: 'none' },
+    input: { width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', outline: 'none', transition: 'all 0.2s' },
     assetRow: { display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center' },
     addBtn: { background: 'none', border: '2px dashed #166534', color: '#166534', padding: '10px 20px', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '13px' },
     removeBtn: { background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' },
     hr: { margin: '40px 0', border: '0', borderTop: '1px solid #f1f5f9' },
     fileUploadBox: { padding: '20px', border: '2px dashed #e2e8f0', borderRadius: '12px', textAlign: 'center', background: '#fcfcfc' },
-    submitBtn: { flex: 1, padding: '20px', backgroundColor: '#166534', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', fontWeight: '800', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }
+    submitBtn: { flex: 1, padding: '20px', backgroundColor: '#166534', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', fontWeight: '800', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', transition: 'all 0.3s' }
 };
 
 export default UpdateLand;
