@@ -85,7 +85,7 @@ const FarmerDashboard = () => {
 
       <header style={headerStyle}>
         <div>
-          <span style={tagStyle}>Ethiopian AGRICULTURAL HUB</span>
+          <span style={tagStyle}></span>
           <h1 style={titleStyle}>Fasika's Farmer Connect</h1>
         </div>
         <div style={{ textAlign: "right", color: "white" }}>
