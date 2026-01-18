@@ -1,11 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../../api/axios";
 import UpdateLand from "./UpdateLand";
-import { 
-  FaPlus, FaShieldAlt, FaSearch, FaEllipsisV, 
-  FaEdit, FaTrash, FaStar, FaVectorSquare,
-  FaLeaf, FaPaw, FaChartLine 
-} from "react-icons/fa";
 
 const ViewLand = () => {
   const [lands, setLands] = useState([]);
@@ -70,7 +65,12 @@ const ViewLand = () => {
     }
   };
 
-  if (loading) return <div style={premiumStyles.loader}>🌾 Accessing Secure Registry...</div>;
+  if (loading) return (
+    <div style={premiumStyles.loaderContainer}>
+      <div className="pulse-loader"></div>
+      <div style={{marginTop: '20px'}}>ACCESSING SECURE REGISTRY...</div>
+    </div>
+  );
 
   if (editingPlotId) {
     return (
@@ -88,167 +88,197 @@ const ViewLand = () => {
   return (
     <div style={premiumStyles.pageWrapper} onClick={() => setShowMenuId(null)}>
       <style>{`
-        body, html { margin: 0; padding: 0; overflow-x: hidden; background: #f0f2f5; }
-        .amazon-search-row { display: flex; justify-content: center; align-items: center; padding: 25px 0px; width: 100%; gap: 15px; }
-        .search-wrapper { display: flex; width: 600px; height: 42px; border-radius: 4px; border: 1px solid #888; overflow: hidden; background: #fff; }
-        .search-input { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
-        .search-button { background: #febd69; border: none; width: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
         
-        .land-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #f8fafc; color: #1e293b; }
         
-        .alibaba-card { 
-          font-family: 'Roboto', sans-serif; 
-          background: #ffffff; 
-          min-height: 540px; 
-          overflow: hidden; 
-          border: 1px solid #ddd; 
-          display: flex; 
-          flex-direction: column; 
-          border-radius: 12px; 
-          position: relative; 
+        .search-bar-container { display: flex; justify-content: center; padding: 40px 20px; gap: 15px; }
+        .custom-search { flex: 1; max-width: 600px; position: relative; }
+        .custom-search input { 
+          width: 100%; padding: 16px 25px; border-radius: 15px; border: 1px solid #e2e8f0; 
+          outline: none; font-size: 16px; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
         
-        .image-half { flex: 0 0 220px; width: 100%; position: relative; background: #e2e8f0 url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80') center/cover; }
-        .asset-btn-row { display: flex; gap: 8px; margin: 15px 0 5px 0; }
-        
-        .asset-btn { 
-          flex: 1; 
-          display: flex; 
-          flex-direction: column; 
-          align-items: center; 
-          padding: 8px; 
-          background: #f8f9fa; 
-          border: 1px solid #e2e8f0; 
-          border-radius: 8px; 
-          cursor: pointer; 
-          color: #475569; 
+        .add-land-btn { 
+          background: #166534; color: white; border: none; padding: 0 30px; 
+          border-radius: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+          box-shadow: 0 10px 15px -3px rgba(22, 101, 52, 0.3);
         }
-        .asset-btn.active { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
-        .asset-btn span { font-size: 11px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
+        .add-land-btn:hover { transform: translateY(-2px); background: #15803d; }
 
-        .asset-list-container { background: #fdfdfd; border: 1px solid #edf2f7; border-radius: 8px; margin-bottom: 15px; padding: 10px; }
-        .asset-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        .land-grid { 
+          display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
+          gap: 30px; max-width: 1300px; margin: 0 auto; padding: 0 25px 60px; 
+        }
+
+        .registry-card { 
+          background: white; border-radius: 25px; overflow: hidden; position: relative;
+          border: 1px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .registry-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); }
+
+        .card-banner { height: 200px; background: #166534; position: relative; overflow: hidden; }
+        .card-banner::after { 
+           content: ""; position: absolute; width: 100%; height: 100%; 
+           background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80') center/cover;
+           opacity: 0.7;
+        }
+
+        .verified-pill { 
+          position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9);
+          padding: 6px 15px; border-radius: 10px; font-size: 11px; font-weight: 800;
+          color: #166534; z-index: 2; letter-spacing: 1px;
+        }
+
+        .dots-btn {
+          position: absolute; top: 15px; right: 15px; width: 40px; height: 40px;
+          border-radius: 12px; border: none; background: rgba(255,255,255,0.9);
+          cursor: pointer; z-index: 10; font-weight: bold; font-size: 20px;
+        }
+
+        .card-body { padding: 30px; }
+        .node-id { font-size: 10px; color: #94a3b8; letter-spacing: 2px; font-weight: 800; margin-bottom: 10px; }
+        .plot-title { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 20px 0; }
+
+        .metric-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; }
+        .metric-main { font-size: 32px; font-weight: 800; color: #1e293b; line-height: 1; }
+        .metric-unit { font-size: 14px; color: #64748b; font-weight: 600; margin-left: 5px; }
+
+        .status-pill { padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+
+        .asset-nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav-pill { 
+          flex: 1; padding: 12px 5px; border-radius: 12px; border: 1px solid #f1f5f9;
+          background: #f8fafc; cursor: pointer; text-align: center; transition: 0.2s;
+        }
+        .nav-pill.active { background: #f0fdf4; border-color: #22c55e; }
+        .nav-pill b { display: block; font-size: 11px; color: #1e293b; text-transform: uppercase; }
+
+        .asset-drawer { 
+          background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 15px; 
+          padding: 20px; margin-bottom: 20px; text-align: center; color: #94a3b8; font-size: 13px;
+        }
+
+        .card-footer { 
+          border-top: 1px solid #f1f5f9; padding-top: 20px; 
+          display: flex; justify-content: space-between; align-items: center;
+        }
+        .sync-text { font-size: 11px; color: #22c55e; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; }
+
+        .pulse-loader {
+          width: 50px; height: 50px; border-radius: 50%; background: #166534;
+          animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+          0% { transform: scale(.33); }
+          80%, 100% { opacity: 0; }
+        }
+
+        .dropdown-menu {
+          position: absolute; top: 65px; right: 15px; background: white; width: 180px;
+          border-radius: 15px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+          z-index: 100; overflow: hidden; border: 1px solid #f1f5f9;
+        }
+        .dropdown-item { 
+          padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+        }
+        .dropdown-item:hover { background: #f8fafc; }
+        .drop-action { color: #dc2626; border-top: 1px solid #f1f5f9; }
       `}</style>
-      
-      <div style={premiumStyles.scrollLayer}>
-        <div className="amazon-search-row">
-          <div className="search-wrapper">
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Filter your land plots..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button className="search-button"><FaSearch size={18} /></button>
-          </div>
 
-          {/* SYNCED WITH SIDEBAR ROUTE: /my-farm/land/add */}
-          <button 
-            onClick={() => { window.location.href = '/my-farm/land/add'; }} 
-            style={premiumStyles.headerAddBtn}
-          >
-            <FaPlus /> Add Land (DROP)
-          </button>
+      <div className="search-bar-container">
+        <div className="custom-search">
+          <input 
+            type="text" 
+            placeholder="Search Land Node Registry..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <button className="add-land-btn" onClick={() => window.location.href = '/my-farm/land/add'}>
+          + ADD NEW LAND
+        </button>
+      </div>
 
-        <div className="land-grid">
-          {filteredLands.map((plot) => (
-            <div key={plot.id} className="alibaba-card">
-              <button 
-                style={premiumStyles.optionsBtn} 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenuId(showMenuId === plot.id ? null : plot.id);
-                }}
-              >
-                <FaEllipsisV />
-              </button>
+      <div className="land-grid">
+        {filteredLands.map((plot) => (
+          <div key={plot.id} className="registry-card">
+            <button className="dots-btn" onClick={(e) => {
+              e.stopPropagation();
+              setShowMenuId(showMenuId === plot.id ? null : plot.id);
+            }}>⋮</button>
 
-              {showMenuId === plot.id && (
-                <div style={premiumStyles.dropdownMenu} ref={menuRef}>
-                  <div style={premiumStyles.menuItem} onClick={() => setEditingPlotId(plot.id)}>
-                    <FaEdit color="#007185"/> Edit Asset
-                  </div>
-                  <div style={{...premiumStyles.menuItem, color: '#d32f2f', fontWeight: 'bold'}} onClick={() => handleDrop(plot.id)}>
-                    <FaTrash /> DROP Node
-                  </div>
+            {showMenuId === plot.id && (
+              <div className="dropdown-menu" ref={menuRef}>
+                <div className="dropdown-item" onClick={() => setEditingPlotId(plot.id)}>Edit Details</div>
+                <div className="dropdown-item drop-action" onClick={() => handleDrop(plot.id)}>DROP NODE</div>
+              </div>
+            )}
+
+            <div className="card-banner">
+              <div className="verified-pill">✓ VERIFIED PLOT</div>
+            </div>
+
+            <div className="card-body">
+              <div className="node-id">NODE :: 0x{plot.id?.toString().padStart(6, '0')}</div>
+              <h2 className="plot-title">{plot.plot_name}</h2>
+
+              <div className="metric-row">
+                <div>
+                  <span className="metric-main">{plot.area_size}</span>
+                  <span className="metric-unit">Hectares</span>
+                </div>
+                <div className="status-pill" style={{
+                  background: plot.land_status === 'Active' ? '#dcfce7' : '#fee2e2',
+                  color: plot.land_status === 'Active' ? '#166534' : '#991b1b'
+                }}>
+                  {plot.land_status || "Active"}
+                </div>
+              </div>
+
+              <div className="asset-nav">
+                <div className={`nav-pill ${activeAssetView.plotId === plot.id && activeAssetView.type === 'crops' ? 'active' : ''}`} onClick={() => toggleAssetView(plot.id, 'crops')}>
+                  <b>Crops</b>
+                </div>
+                <div className={`nav-pill ${activeAssetView.plotId === plot.id && activeAssetView.type === 'animals' ? 'active' : ''}`} onClick={() => toggleAssetView(plot.id, 'animals')}>
+                  <b>Livestock</b>
+                </div>
+                <div className={`nav-pill ${activeAssetView.plotId === plot.id && activeAssetView.type === 'health' ? 'active' : ''}`} onClick={() => toggleAssetView(plot.id, 'health')}>
+                  <b>Health</b>
+                </div>
+              </div>
+
+              {activeAssetView.plotId === plot.id && (
+                <div className="asset-drawer">
+                  <b>{activeAssetView.type.toUpperCase()} REGISTRY</b><br/>
+                  Securely synced. Data encrypted at node level.
                 </div>
               )}
 
-              <div className="image-half">
-                <div style={premiumStyles.verifiedTag}><FaShieldAlt size={12} color="#15803d"/> Verified Plot</div>
-              </div>
-
-              <div className="text-half" style={{ padding: "15px", flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <h2 style={premiumStyles.productTitle}>{plot.plot_name}</h2>
-                <div style={premiumStyles.idLabel}>REGISTRY TOKEN: 0x{plot.id?.toString().padStart(6, '0')}</div>
-                
-                <div style={premiumStyles.priceRow}>
-                  <span style={premiumStyles.priceMain}>{plot.area_size}</span>
-                  <span style={premiumStyles.unit}>Hectares (Ha)</span>
-                  <span style={{...premiumStyles.statusBadge, 
-                    backgroundColor: plot.land_status === 'Active' ? '#dcfce7' : '#fee2e2',
-                    color: plot.land_status === 'Active' ? '#166534' : '#991b1b',
-                    marginLeft: 'auto'
-                  }}>{plot.land_status || "Active"}</span>
+              <div className="card-footer">
+                <div className="sync-text">
+                  <span className="dot"></span> SECURE SYNCED
                 </div>
-
-                <div className="asset-btn-row">
-                  <div className={`asset-btn ${activeAssetView.plotId === plot.id && activeAssetView.type === 'crops' ? 'active' : ''}`} onClick={() => toggleAssetView(plot.id, 'crops')}>
-                    <FaLeaf size={18} color="#16a34a"/><span>Crops</span>
-                  </div>
-                  <div className={`asset-btn ${activeAssetView.plotId === plot.id && activeAssetView.type === 'animals' ? 'active' : ''}`} onClick={() => toggleAssetView(plot.id, 'animals')}>
-                    <FaPaw size={18} color="#92400e"/><span>Animals</span>
-                  </div>
-                  <div className={`asset-btn ${activeAssetView.plotId === plot.id && activeAssetView.type === 'health' ? 'active' : ''}`} onClick={() => toggleAssetView(plot.id, 'health')}>
-                    <FaChartLine size={18} color="#2563eb"/><span>Health</span>
-                  </div>
-                </div>
-
-                {activeAssetView.plotId === plot.id && (
-                  <div className="asset-list-container">
-                    <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
-                      {activeAssetView.type} Sub-Registry
-                    </div>
-                    <div className="asset-item">
-                      <span>No {activeAssetView.type} synced to this node.</span>
-                    </div>
-                  </div>
-                )}
-
-                <div style={premiumStyles.vendorName}>Secure Registry Node • Last Synced Today</div>
-                <div style={premiumStyles.ratingRow}>
-                  <FaStar color="#ff9900" size={12} />
-                  <span style={premiumStyles.ratingCount}>{plot.crop_count || 0} Assets Linked</span>
+                <div style={{fontSize: '11px', fontWeight: '800', color: '#94a3b8'}}>
+                  {plot.crop_count || 0} ASSETS LINKED
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
 const premiumStyles = {
-  pageWrapper: { width: "100vw", minHeight: "100vh", background: "#f0f2f5", position: "relative", zIndex: 1000 },
-  scrollLayer: { marginTop: "78px", width: "100%", paddingBottom: "60px" },
-  headerAddBtn: { background: "#ff9900", border: "1px solid #a88734", borderRadius: "4px", color: "#111", padding: "0 25px", height: "42px", cursor: "pointer", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" },
-  verifiedTag: { position: "absolute", top: "12px", left: "12px", background: "white", padding: "4px 10px", fontSize: "12px", borderRadius: "4px", fontWeight: "800", color: "#15803d", display: "flex", alignItems: "center", gap: "5px" },
-  productTitle: { fontSize: "20px", color: "#007185", fontWeight: "700", margin: "0 0 5px 0" },
-  idLabel: { fontSize: "11px", color: "#777", letterSpacing: "1px", marginBottom: "8px" },
-  priceRow: { display: "flex", alignItems: "center", gap: "6px", margin: "5px 0" },
-  priceMain: { fontSize: "26px", fontWeight: "900", color: "#111" },
-  unit: { fontSize: "14px", color: "#444" },
-  statusBadge: { padding: "4px 12px", borderRadius: "20px", fontSize: "10px", fontWeight: "800", textTransform: "uppercase" },
-  vendorName: { fontSize: "12px", color: "#666", marginTop: "auto", borderTop: "1px solid #eee", paddingTop: "10px" },
-  ratingRow: { display: "flex", alignItems: "center", paddingBottom: "10px", marginTop: "5px" },
-  ratingCount: { fontSize: "12px", color: "#15803d", marginLeft: "6px", fontWeight: "700" },
-  optionsBtn: { position: "absolute", top: "15px", right: "15px", background: "white", width: "35px", height: "35px", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", zIndex: 5, color: "#333", border: "none", cursor: "pointer" },
-  dropdownMenu: { position: "absolute", top: "55px", right: "15px", background: "white", border: "1px solid #ddd", borderRadius: "6px", boxShadow: "0 8px 16px rgba(0,0,0,0.15)", zIndex: 100, width: "170px", padding: "6px 0" },
-  menuItem: { padding: "12px 18px", display: "flex", alignItems: "center", gap: "12px", fontSize: "14px", cursor: "pointer" },
-  loader: { textAlign: 'center', padding: '150px', fontSize: '20px', color: '#166534', fontWeight: 'bold' }
+  pageWrapper: { minHeight: "100vh", position: "relative" },
+  loaderContainer: { 
+    height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', 
+    alignItems: 'center', fontWeight: '800', color: '#166534', letterSpacing: '2px' 
+  }
 };
 
 export default ViewLand;
