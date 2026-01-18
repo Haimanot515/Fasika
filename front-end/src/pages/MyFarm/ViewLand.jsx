@@ -4,7 +4,7 @@ import UpdateLand from "./UpdateLand";
 import { 
     Trash2, Edit3, Search, ChevronDown, 
     ShieldCheck, Plus, MapPin, Leaf, Dog,
-    Loader2
+    Loader2, Box
 } from "lucide-react";
 
 const ViewLand = () => {
@@ -17,7 +17,6 @@ const ViewLand = () => {
   
   const menuRef = useRef(null);
 
-  // FIX: Added '/view' to match your backend router: router.get('/view', ...)
   const fetchLands = async () => {
     setLoading(true);
     try {
@@ -32,16 +31,6 @@ const ViewLand = () => {
   };
 
   useEffect(() => { fetchLands(); }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenuId(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showMenuId]);
 
   useEffect(() => {
     const results = lands.filter(item =>
@@ -59,79 +48,80 @@ const ViewLand = () => {
           setLands(prev => prev.filter(item => item.id !== id));
           setShowMenuId(null);
         }
-      } catch (err) { 
-        console.error("DROP Failed:", err);
-      }
+      } catch (err) { console.error("DROP Failed:", err); }
     }
   };
 
   if (loading) return (
     <div style={styles.loaderContainer}>
-      <Loader2 className="spin" size={40} color="#166534" />
-      <div style={{marginTop: '20px', fontWeight: '800'}}>SYNCING REGISTRY...</div>
+      <Loader2 className="spin" size={60} color="#166534" />
+      <div style={{marginTop: '20px', fontWeight: '800', fontSize: '20px'}}>SYNCING REGISTRY...</div>
       <style>{` .spin { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } } `}</style>
     </div>
   );
 
-  if (editingPlotId) {
-    return (
-      <div style={styles.pageWrapper}>
-        <UpdateLand 
-          plotId={editingPlotId} 
-          onUpdateSuccess={() => { setEditingPlotId(null); fetchLands(); }} 
-          onCancel={() => setEditingPlotId(null)} 
-        />
-      </div>
-    );
-  }
+  if (editingPlotId) return (
+    <div style={styles.pageWrapper}>
+      <UpdateLand plotId={editingPlotId} onUpdateSuccess={() => { setEditingPlotId(null); fetchLands(); }} onCancel={() => setEditingPlotId(null)} />
+    </div>
+  );
 
   return (
     <div style={styles.pageWrapper}>
       <div style={styles.contentContainer}>
-        {/* Top Controls */}
         <div style={styles.topBar}>
           <div style={styles.searchContainer}>
-            <Search size={18} color="#64748b" />
-            <input 
-              style={styles.searchInput}
-              placeholder="Filter nodes..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Search size={24} color="#64748b" />
+            <input style={styles.searchInput} placeholder="Filter secure nodes..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
           <button style={styles.addBtn} onClick={() => window.location.href = '/my-farm/land/add'}>
-            <Plus size={18} /> DROP NEW LAND
+            <Plus size={24} /> DROP NEW LAND
           </button>
         </div>
 
-        {/* Nodes Grid */}
         <div style={styles.grid}>
           {filteredLands.map((plot) => (
             <div key={plot.id} style={styles.card}>
               <div style={{...styles.banner, backgroundImage: `url(${plot.land_image_url || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'})`}}>
-                <div style={styles.verifiedBadge}><ShieldCheck size={12} /> SECURE NODE</div>
+                <div style={styles.verifiedBadge}><ShieldCheck size={16} /> REGISTRY VERIFIED</div>
                 <button style={styles.menuTrigger} onClick={(e) => { e.stopPropagation(); setShowMenuId(showMenuId === plot.id ? null : plot.id); }}>
-                  <ChevronDown size={18} />
+                  <ChevronDown size={24} />
                 </button>
                 {showMenuId === plot.id && (
                   <div style={styles.dropdown} ref={menuRef}>
-                    <div style={styles.dropItem} onClick={() => setEditingPlotId(plot.id)}><Edit3 size={14} /> Update</div>
-                    <div style={{...styles.dropItem, color: '#ef4444'}} onClick={() => handleDrop(plot.id)}><Trash2 size={14} /> DROP</div>
+                    <div style={styles.dropItem} onClick={() => setEditingPlotId(plot.id)}><Edit3 size={18} /> Update Node</div>
+                    <div style={{...styles.dropItem, color: '#ef4444'}} onClick={() => handleDrop(plot.id)}><Trash2 size={18} /> DROP NODE</div>
                   </div>
                 )}
               </div>
 
               <div style={styles.cardContent}>
-                <div style={styles.nodeRef}>REG_ID: {plot.id}</div>
+                <div style={styles.nodeRef}>IDENTIFIER: #00{plot.id}</div>
                 <h3 style={styles.plotName}>{plot.plot_name}</h3>
-                <div style={styles.locRow}><MapPin size={14} /> {plot.woreda}, {plot.region}</div>
+                <div style={styles.locRow}><MapPin size={18} /> {plot.woreda}, {plot.region}, {plot.zone}</div>
+                
                 <div style={styles.statGrid}>
-                  <div style={styles.statBox}><span style={styles.statVal}>{plot.area_size}</span><span style={styles.statLabel}>HA</span></div>
-                  <div style={styles.statBox}><span style={styles.statVal}>{plot.soil_type_name || 'Nitosols'}</span><span style={styles.statLabel}>SOIL</span></div>
+                  <div style={styles.statBox}><span style={styles.statVal}>{plot.area_size}</span><span style={styles.statLabel}>HECTARES</span></div>
+                  <div style={styles.statBox}><span style={styles.statVal}>{plot.soil_type_name || 'Nitosols'}</span><span style={styles.statLabel}>SOIL COMPOSITION</span></div>
                 </div>
-                <div style={styles.assetCounts}>
-                  <div style={styles.assetPill}><Leaf size={14}/> {plot.crop_count}</div>
-                  <div style={styles.assetPill}><Dog size={14}/> {plot.animal_count}</div>
+
+                <div style={styles.assetHeader}><Box size={18}/> REGISTERED BIOLOGICAL ASSETS</div>
+                <div style={styles.assetList}>
+                   {/* This assumes your backend sends nested arrays or you can fetch them. 
+                       If they are not nested, we display the count badges below */}
+                   <div style={styles.assetGroup}>
+                      <div style={styles.groupTitle}><Leaf size={14}/> Crops in Registry ({plot.crop_count})</div>
+                      <p style={styles.assetNote}>Crops are synced at node level.</p>
+                   </div>
+                   <div style={styles.assetGroup}>
+                      <div style={styles.groupTitle}><Dog size={14}/> Livestock in Registry ({plot.animal_count})</div>
+                      <p style={styles.assetNote}>Live monitoring active.</p>
+                   </div>
+                </div>
+
+                <div style={styles.footer}>
+                  <div style={styles.syncStatus}><div style={styles.greenDot}></div> SECURE SYNCED</div>
+                  <div style={{fontSize: '14px', fontWeight: '700', color: '#94a3b8'}}>{plot.climate_zone}</div>
                 </div>
               </div>
             </div>
@@ -143,40 +133,43 @@ const ViewLand = () => {
 };
 
 const styles = {
-  // Added padding-top to ensure visibility below navbar
-  pageWrapper: { 
-    paddingTop: '100px', 
-    paddingBottom: '60px',
-    backgroundColor: '#f8fafc', 
-    minHeight: '100vh' 
-  },
-  contentContainer: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '0 20px'
-  },
-  topBar: { display: 'flex', justifyContent: 'space-between', gap: '20px', marginBottom: '40px' },
-  searchContainer: { flex: 1, display: 'flex', alignItems: 'center', background: 'white', padding: '0 20px', borderRadius: '14px', border: '1px solid #e2e8f0' },
-  searchInput: { border: 'none', outline: 'none', width: '100%', padding: '15px', fontSize: '14px' },
-  addBtn: { background: '#166534', color: 'white', border: 'none', padding: '0 25px', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '25px' },
-  card: { background: 'white', borderRadius: '24px', overflow: 'hidden', border: '1px solid #f1f5f9', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' },
-  banner: { height: '140px', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' },
-  verifiedBadge: { position: 'absolute', top: '12px', left: '12px', background: 'rgba(255,255,255,0.9)', padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: '900', color: '#166534', display: 'flex', alignItems: 'center', gap: '4px' },
-  menuTrigger: { position: 'absolute', top: '12px', right: '12px', width: '32px', height: '32px', borderRadius: '8px', background: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  dropdown: { position: 'absolute', top: '50px', right: '12px', background: 'white', borderRadius: '12px', width: '150px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 10 },
-  dropItem: { padding: '12px 15px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' },
-  cardContent: { padding: '20px' },
-  nodeRef: { fontSize: '9px', color: '#94a3b8', fontWeight: '800' },
-  plotName: { margin: '5px 0', fontSize: '18px', color: '#0f172a', fontWeight: '800' },
-  locRow: { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#64748b', marginBottom: '15px' },
-  statGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' },
-  statBox: { background: '#f8fafc', padding: '10px', borderRadius: '10px', textAlign: 'center' },
-  statVal: { display: 'block', fontSize: '16px', fontWeight: '800', color: '#1e293b' },
-  statLabel: { fontSize: '8px', color: '#94a3b8', fontWeight: '800' },
-  assetCounts: { display: 'flex', gap: '8px' },
-  assetPill: { background: '#f0fdf4', color: '#166534', padding: '5px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '5px' },
-  loaderContainer: { height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }
+  pageWrapper: { paddingTop: '120px', paddingBottom: '80px', backgroundColor: '#f1f5f9', minHeight: '100vh' },
+  contentContainer: { maxWidth: '1300px', margin: '0 auto', padding: '0 30px' },
+  topBar: { display: 'flex', justifyContent: 'space-between', gap: '30px', marginBottom: '50px' },
+  searchContainer: { flex: 1, display: 'flex', alignItems: 'center', background: 'white', padding: '0 25px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' },
+  searchInput: { border: 'none', outline: 'none', width: '100%', padding: '20px', fontSize: '18px', fontWeight: '500' },
+  addBtn: { background: '#166534', color: 'white', border: 'none', padding: '0 35px', borderRadius: '20px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 15px -3px rgba(22, 101, 52, 0.3)' },
+  
+  // Grid forced to 2 columns
+  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' },
+  
+  card: { background: 'white', borderRadius: '32px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.05)' },
+  banner: { height: '220px', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' },
+  verifiedBadge: { position: 'absolute', top: '20px', left: '20px', background: 'rgba(255,255,255,0.95)', padding: '8px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: '900', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' },
+  menuTrigger: { position: 'absolute', top: '20px', right: '20px', width: '45px', height: '45px', borderRadius: '14px', background: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' },
+  dropdown: { position: 'absolute', top: '75px', right: '20px', background: 'white', borderRadius: '18px', width: '220px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.2)', zIndex: 10, overflow: 'hidden' },
+  dropItem: { padding: '18px 20px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', transition: '0.2s' },
+  
+  cardContent: { padding: '35px' },
+  nodeRef: { fontSize: '12px', color: '#94a3b8', fontWeight: '900', letterSpacing: '1px' },
+  plotName: { margin: '10px 0', fontSize: '28px', color: '#0f172a', fontWeight: '900' },
+  locRow: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', color: '#64748b', fontWeight: '600', marginBottom: '25px' },
+  
+  statGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' },
+  statBox: { background: '#f8fafc', padding: '20px', borderRadius: '20px', textAlign: 'left', border: '1px solid #f1f5f9' },
+  statVal: { display: 'block', fontSize: '24px', fontWeight: '900', color: '#1e293b' },
+  statLabel: { fontSize: '11px', color: '#94a3b8', fontWeight: '800', letterSpacing: '0.5px' },
+  
+  assetHeader: { fontSize: '13px', fontWeight: '900', color: '#166534', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase' },
+  assetList: { background: '#f1f5f9', borderRadius: '20px', padding: '20px', marginBottom: '30px' },
+  assetGroup: { marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid #e2e8f0' },
+  groupTitle: { fontSize: '15px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' },
+  assetNote: { fontSize: '13px', color: '#64748b', margin: '5px 0 0 22px' },
+
+  footer: { borderTop: '2px solid #f8fafc', paddingTop: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  syncStatus: { fontSize: '13px', color: '#22c55e', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '8px' },
+  greenDot: { width: '10px', height: '10px', background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' },
+  loaderContainer: { height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f1f5f9' }
 };
 
 export default ViewLand;
