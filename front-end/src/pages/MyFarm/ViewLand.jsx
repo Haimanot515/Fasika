@@ -4,11 +4,12 @@ import UpdateLand from "./UpdateLand";
 import { 
     Trash2, Edit3, Search, ChevronDown, 
     ShieldCheck, Plus, MapPin, Leaf, Dog,
-    Loader2, Box
+    Loader2, Box, Ruler, Layers
 } from "lucide-react";
 
 const ViewLand = () => {
   const [lands, setLands] = useState([]);
+  const [stats, setStats] = useState({ total_lands: 0, total_animals: 0, total_hectares: 0 });
   const [filteredLands, setFilteredLands] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -17,12 +18,22 @@ const ViewLand = () => {
   
   const menuRef = useRef(null);
 
-  const fetchLands = async () => {
+  const fetchRegistryData = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get("/farmer/farm/land/view");
-      setLands(data.data || []);
-      setFilteredLands(data.data || []);
+      // 1. Fetching Detailed Data (with lists of crops/animals) and Global Stats
+      const [detailedRes, statsRes] = await Promise.all([
+        api.get("/farmer/farm/land/view-detailed"),
+        api.get("/farmer/farm/land/stats")
+      ]);
+
+      const landsData = detailedRes.data.data || [];
+      setLands(landsData);
+      setFilteredLands(landsData);
+      
+      if (statsRes.data.success) {
+        setStats(statsRes.data.stats);
+      }
     } catch (err) { 
       console.error("Registry Sync Error:", err); 
     } finally { 
@@ -30,7 +41,7 @@ const ViewLand = () => {
     }
   };
 
-  useEffect(() => { fetchLands(); }, []);
+  useEffect(() => { fetchRegistryData(); }, []);
 
   useEffect(() => {
     const results = lands.filter(item =>
@@ -45,7 +56,7 @@ const ViewLand = () => {
       try {
         const response = await api.delete(`/farmer/farm/land/${id}`);
         if (response.data.success) {
-          setLands(prev => prev.filter(item => item.id !== id));
+          fetchRegistryData(); // Refresh both lists and stats
           setShowMenuId(null);
         }
       } catch (err) { console.error("DROP Failed:", err); }
@@ -62,17 +73,31 @@ const ViewLand = () => {
 
   if (editingPlotId) return (
     <div style={styles.pageWrapper}>
-      <UpdateLand plotId={editingPlotId} onUpdateSuccess={() => { setEditingPlotId(null); fetchLands(); }} onCancel={() => setEditingPlotId(null)} />
+      <UpdateLand plotId={editingPlotId} onUpdateSuccess={() => { setEditingPlotId(null); fetchRegistryData(); }} onCancel={() => setEditingPlotId(null)} />
     </div>
   );
 
   return (
     <div style={styles.pageWrapper}>
       <div style={styles.contentContainer}>
+        
+        {/* SECTION 1: GLOBAL STATISTICS HEADER */}
+        <div style={styles.statsHeader}>
+            <div style={styles.headerText}>
+                <h1 style={styles.mainTitle}>FARM REGISTRY DASHBOARD</h1>
+                <p style={styles.subTitle}>Live monitoring of biological and territorial assets</p>
+            </div>
+            <div style={styles.headerStatsRow}>
+                <div style={styles.statCardSmall}><Layers color="#166534"/> <div><b>{stats.total_lands}</b><span>PLOTS</span></div></div>
+                <div style={styles.statCardSmall}><Ruler color="#166534"/> <div><b>{stats.total_hectares}</b><span>HECTARES</span></div></div>
+                <div style={styles.statCardSmall}><Dog color="#166534"/> <div><b>{stats.total_animals}</b><span>LIVESTOCK</span></div></div>
+            </div>
+        </div>
+
         <div style={styles.topBar}>
           <div style={styles.searchContainer}>
             <Search size={24} color="#64748b" />
-            <input style={styles.searchInput} placeholder="Filter secure nodes..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input style={styles.searchInput} placeholder="Filter secure nodes by name or region..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
           <button style={styles.addBtn} onClick={() => window.location.href = '/my-farm/land/add'}>
             <Plus size={24} /> DROP NEW LAND
@@ -102,20 +127,30 @@ const ViewLand = () => {
                 
                 <div style={styles.statGrid}>
                   <div style={styles.statBox}><span style={styles.statVal}>{plot.area_size}</span><span style={styles.statLabel}>HECTARES</span></div>
-                  <div style={styles.statBox}><span style={styles.statVal}>{plot.soil_type_name || 'Nitosols'}</span><span style={styles.statLabel}>SOIL COMPOSITION</span></div>
+                  <div style={styles.statBox}><span style={styles.statVal}>{plot.soil_type_name || 'Nitosols'}</span><span style={styles.statLabel}>SOIL TYPE</span></div>
                 </div>
 
                 <div style={styles.assetHeader}><Box size={18}/> REGISTERED BIOLOGICAL ASSETS</div>
+                
                 <div style={styles.assetList}>
-                   {/* This assumes your backend sends nested arrays or you can fetch them. 
-                       If they are not nested, we display the count badges below */}
+                   {/* DYNAMIC LIST OF CROPS */}
                    <div style={styles.assetGroup}>
-                      <div style={styles.groupTitle}><Leaf size={14}/> Crops in Registry ({plot.crop_count})</div>
-                      <p style={styles.assetNote}>Crops are synced at node level.</p>
+                      <div style={styles.groupTitle}><Leaf size={14}/> Crops ({plot.crop_count})</div>
+                      <div style={styles.itemList}>
+                        {plot.crop_list ? plot.crop_list.map((c, i) => (
+                            <div key={i} style={styles.pill}>{c.crop_name} <small>({c.quantity})</small></div>
+                        )) : <span style={styles.emptyText}>No crops registered</span>}
+                      </div>
                    </div>
+
+                   {/* DYNAMIC LIST OF ANIMALS */}
                    <div style={styles.assetGroup}>
-                      <div style={styles.groupTitle}><Dog size={14}/> Livestock in Registry ({plot.animal_count})</div>
-                      <p style={styles.assetNote}>Live monitoring active.</p>
+                      <div style={styles.groupTitle}><Dog size={14}/> Livestock ({plot.animal_count})</div>
+                      <div style={styles.itemList}>
+                        {plot.animal_list ? plot.animal_list.map((a, i) => (
+                            <div key={i} style={styles.pill}>{a.animal_type} <small>({a.head_count} head)</small></div>
+                        )) : <span style={styles.emptyText}>No animals registered</span>}
+                      </div>
                    </div>
                 </div>
 
@@ -133,16 +168,22 @@ const ViewLand = () => {
 };
 
 const styles = {
-  pageWrapper: { paddingTop: '120px', paddingBottom: '80px', backgroundColor: '#f1f5f9', minHeight: '100vh' },
-  contentContainer: { maxWidth: '1300px', margin: '0 auto', padding: '0 30px' },
+  pageWrapper: { paddingTop: '120px', paddingBottom: '80px', backgroundColor: '#f8fafc', minHeight: '100vh' },
+  contentContainer: { maxWidth: '1400px', margin: '0 auto', padding: '0 30px' },
+  
+  // Stats Header Styles
+  statsHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', background: 'white', padding: '30px', borderRadius: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0' },
+  mainTitle: { fontSize: '32px', fontWeight: '900', color: '#0f172a', margin: 0 },
+  subTitle: { color: '#64748b', fontSize: '16px', fontWeight: '500', marginTop: '5px' },
+  headerStatsRow: { display: 'flex', gap: '20px' },
+  statCardSmall: { display: 'flex', alignItems: 'center', gap: '15px', padding: '10px 20px', background: '#f1f5f9', borderRadius: '16px' },
+  
   topBar: { display: 'flex', justifyContent: 'space-between', gap: '30px', marginBottom: '50px' },
   searchContainer: { flex: 1, display: 'flex', alignItems: 'center', background: 'white', padding: '0 25px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' },
   searchInput: { border: 'none', outline: 'none', width: '100%', padding: '20px', fontSize: '18px', fontWeight: '500' },
   addBtn: { background: '#166534', color: 'white', border: 'none', padding: '0 35px', borderRadius: '20px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 15px -3px rgba(22, 101, 52, 0.3)' },
   
-  // Grid forced to 2 columns
   grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' },
-  
   card: { background: 'white', borderRadius: '32px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.05)' },
   banner: { height: '220px', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' },
   verifiedBadge: { position: 'absolute', top: '20px', left: '20px', background: 'rgba(255,255,255,0.95)', padding: '8px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: '900', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' },
@@ -156,15 +197,17 @@ const styles = {
   locRow: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', color: '#64748b', fontWeight: '600', marginBottom: '25px' },
   
   statGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' },
-  statBox: { background: '#f8fafc', padding: '20px', borderRadius: '20px', textAlign: 'left', border: '1px solid #f1f5f9' },
-  statVal: { display: 'block', fontSize: '24px', fontWeight: '900', color: '#1e293b' },
+  statBox: { background: '#f8fafc', padding: '20px', borderRadius: '20px', border: '1px solid #f1f5f9' },
+  statVal: { display: 'block', fontSize: '22px', fontWeight: '900', color: '#1e293b' },
   statLabel: { fontSize: '11px', color: '#94a3b8', fontWeight: '800', letterSpacing: '0.5px' },
   
   assetHeader: { fontSize: '13px', fontWeight: '900', color: '#166534', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase' },
-  assetList: { background: '#f1f5f9', borderRadius: '20px', padding: '20px', marginBottom: '30px' },
-  assetGroup: { marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid #e2e8f0' },
-  groupTitle: { fontSize: '15px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' },
-  assetNote: { fontSize: '13px', color: '#64748b', margin: '5px 0 0 22px' },
+  assetList: { background: '#f8fafc', borderRadius: '20px', padding: '20px', marginBottom: '30px' },
+  assetGroup: { marginBottom: '15px' },
+  groupTitle: { fontSize: '14px', fontWeight: '800', color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' },
+  itemList: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginLeft: '22px' },
+  pill: { background: 'white', padding: '6px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: '700', color: '#1e293b', border: '1px solid #e2e8f0' },
+  emptyText: { fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' },
 
   footer: { borderTop: '2px solid #f8fafc', paddingTop: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   syncStatus: { fontSize: '13px', color: '#22c55e', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '8px' },
