@@ -41,7 +41,7 @@ const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes');
 const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
 
 // --- NEW: LAND REGISTRY ROUTE ---
-const landRoutes = require('./routes/farmer/landRoutes');
+const landRoutes = require('./routes/farmer/farmerFarmRoutes');
 
 // 🏠 ROOT HEALTH CHECK
 app.get('/', (req, res) => {
