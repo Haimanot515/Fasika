@@ -135,7 +135,7 @@ const FarmerDashboard = () => {
       </main>
 
       <footer style={footerStyle}>
-        <div style={{ fontSize: "32px", fontWeight: "900", color: "white", letterSpacing: "5px" }}>🌿 FASIKA FARMER AND BUYER CONNECT </div>
+        <div style={{ fontSize: "32px", fontWeight: "900", color: "white", letterSpacing: "5px" }}>FASIKA FARMER AND BUYER CONNECT </div>
         <p style={{ fontSize: "14px", color: "white", letterSpacing: "4px", marginTop: "20px", opacity: 0.8 }}>CORE NODE // ESTABLISHED 2026 // ADDIS CLUSTER</p>
       </footer>
     </div>
