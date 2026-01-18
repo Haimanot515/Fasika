@@ -89,8 +89,8 @@ const FarmerDashboard = () => {
           <h1 style={titleStyle}>Fasika's Farmer Connect</h1>
         </div>
         <div style={{ textAlign: "right", color: "white" }}>
-          <div style={{ fontSize: "56px", fontWeight: "900" }}>{time.toLocaleTimeString()}</div>
-          <div style={{ fontSize: "16px", fontWeight: "800", opacity: 0.9 }}>LIVE Ethiopia </div>
+          <div style={{ fontSize: "70px", fontWeight: "900" }}>{time.toLocaleTimeString()}</div>
+          <div style={{ fontSize: "16px", fontWeight: "800", opacity: 0.9 }}>LIVE ETHIOPIA </div>
         </div>
       </header>
 
