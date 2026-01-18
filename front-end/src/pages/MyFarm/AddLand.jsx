@@ -11,9 +11,14 @@ const AddLand = () => {
   const [formData, setFormData] = useState({
     plot_name: "",
     area_size: "",
-    location: "", 
+    soil_type: "",
+    climate_zone: "", // New Climate Field
+    region: "",
+    zone: "",
+    woreda: "",
+    kebele: "",
     land_status: "Active",
-    land_image: null, // New field for photo taker
+    land_image: null,
     crops: [{ crop_name: "", crop_variety: "", current_stage: "Seedling" }],
     animals: [{ species: "", breed: "", tag_number: "", health_status: "Healthy" }]
   });
@@ -26,14 +31,6 @@ const AddLand = () => {
     }
   };
 
-  const addMoreCrop = () => {
-    setFormData({ ...formData, crops: [...formData.crops, { crop_name: "", crop_variety: "", current_stage: "Seedling" }] });
-  };
-
-  const addMoreAnimal = () => {
-    setFormData({ ...formData, animals: [...formData.animals, { tag_number: "", species: "", breed: "", health_status: "Healthy" }] });
-  };
-
   const updateEntry = (type, index, field, value) => {
     const list = [...formData[type]];
     list[index][field] = value;
@@ -44,19 +41,18 @@ const AddLand = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Using FormData to handle image file upload + JSON data
     const data = new FormData();
-    data.append("plot_name", formData.plot_name);
-    data.append("area_size", formData.area_size);
+    Object.keys(formData).forEach(key => {
+      if (key === 'crops' || key === 'animals') {
+        data.append(key, JSON.stringify(formData[key]));
+      } else {
+        data.append(key, formData[key]);
+      }
+    });
     data.append("action", "DROP_TO_REGISTRY");
-    if (formData.land_image) data.append("image", formData.land_image);
-    data.append("crops", JSON.stringify(formData.crops));
-    data.append("animals", JSON.stringify(formData.animals));
 
     try {
-      await api.post("/farmer/farm/land", data, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      await api.post("/farmer/farm/land", data);
       navigate("/my-farm/land/view");
     } catch (err) {
       console.error("DROP Failed:", err);
@@ -69,84 +65,92 @@ const AddLand = () => {
   return (
     <div style={styles.pageOverlay}>
       <style>{`
-        .asset-btn { flex: 1; padding: 18px; background: #fff; border: 3px solid #cbd5e0; border-radius: 12px; cursor: pointer; text-align: center; transition: 0.2s; }
-        .asset-btn.active { border-color: #2e7d32; background: #f0fdf4; }
-        .row-container { display: flex; align-items: flex-end; gap: 12px; width: 100%; margin-bottom: 15px; }
-        .add-action-btn { white-space: nowrap; height: 48px; background: #f8fafc; border: 2px solid #cbd5e0; padding: 0 18px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; }
-        .photo-uploader { border: 2px dashed #cbd5e0; border-radius: 12px; padding: 20px; text-align: center; background: #f9fafb; cursor: pointer; position: relative; }
-        .photo-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 10px; }
+        .row-container { display: flex; align-items: flex-end; gap: 12px; width: 100%; margin-bottom: 12px; }
+        .add-action-btn { white-space: nowrap; height: 42px; background: #f1f5f9; border: 1px solid #cbd5e0; padding: 0 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .photo-uploader { border: 2px dashed #cbd5e0; border-radius: 12px; padding: 10px; text-align: center; background: #f9fafb; cursor: pointer; height: 110px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        .asset-btn { flex: 1; padding: 12px; background: #fff; border: 2px solid #cbd5e0; border-radius: 10px; cursor: pointer; text-align: center; font-weight: bold; }
+        .asset-btn.active { border-color: #2e7d32; background: #f0fdf4; color: #2e7d32; }
       `}</style>
 
       <div style={styles.fullWidthContainer}>
         <div style={styles.header}>
-          <h2 style={styles.title}>Register Land Plot</h2>
+          <h2 style={styles.title}>Register Land & Ecology</h2>
           <button onClick={() => navigate("/my-farm/land/view")} style={styles.closeBtn}>CANCEL</button>
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
+          {/* PRIMARY INFO SECTION */}
           <div style={styles.mainInputsRow}>
-            <div style={{ flex: 2, display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div style={{ flex: 1.5, display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Plot Name</label>
-                <input type="text" required style={styles.input} placeholder="Field Identification" onChange={(e) => setFormData({...formData, plot_name: e.target.value})} />
+                <input type="text" required style={styles.input} placeholder="e.g. Upper Ridge" onChange={(e) => setFormData({...formData, plot_name: e.target.value})} />
               </div>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>Hectares</label>
-                <input type="number" step="0.01" required style={styles.input} placeholder="0.00" onChange={(e) => setFormData({...formData, area_size: e.target.value})} />
+                <label style={styles.label}>Soil Type</label>
+                <select style={styles.input} onChange={(e) => setFormData({...formData, soil_type: e.target.value})}>
+                  <option value="">Choose Soil...</option>
+                  <option value="Loamy">Loamy</option>
+                  <option value="Clay">Clay (Koticha)</option>
+                  <option value="Sandy">Sandy</option>
+                  <option value="Black Cotton">Black Cotton</option>
+                </select>
               </div>
             </div>
 
-            {/* PHOTO TAKER SECTION */}
+            <div style={{ flex: 1.5, display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Climate Zone (Ethiopian Types)</label>
+                <select style={styles.input} required onChange={(e) => setFormData({...formData, climate_zone: e.target.value})}>
+                  <option value="">Select Climate...</option>
+                  <option value="Wurch">Wurch (Cold, >3200m)</option>
+                  <option value="Dega">Dega (Cool, 2400-3200m)</option>
+                  <option value="Weyna Dega">Weyna Dega (Temperate, 1500-2400m)</option>
+                  <option value="Kolla">Kolla (Hot, 500-1500m)</option>
+                  <option value="Berha">Berha (Desert, <500m)</option>
+                </select>
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Hectares</label>
+                <input type="number" step="0.01" style={styles.input} placeholder="0.00" onChange={(e) => setFormData({...formData, area_size: e.target.value})} />
+              </div>
+            </div>
+
             <div style={{ flex: 1 }}>
-              <label style={styles.label}>Land Photo</label>
+              <label style={styles.label}>Field Photo</label>
               <div className="photo-uploader" onClick={() => document.getElementById('land-img').click()}>
-                <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#718096' }}>
-                  {preview ? "CHANGE PHOTO" : "TAP TO TAKE PHOTO"}
-                </span>
+                {preview ? <img src={preview} alt="Preview" style={{ height: "100%", width: "100%", objectFit: "cover", borderRadius: "8px" }} /> : <span style={{fontSize: "12px", color: "#718096"}}>CAPTURE PHOTO</span>}
                 <input id="land-img" type="file" accept="image/*" capture="environment" hidden onChange={handleImageChange} />
-                {preview && <img src={preview} alt="Preview" className="photo-preview" />}
               </div>
             </div>
           </div>
 
-          <div style={styles.sectionDivider}><span style={styles.dividerText}>Asset Registry</span></div>
+          <div style={styles.sectionDivider}><span style={styles.dividerText}>Administrative Location</span></div>
+
+          <div style={styles.mainInputsRow}>
+            <div style={styles.inputGroup}><label style={styles.smallLabel}>Region</label>
+              <input type="text" style={styles.input} placeholder="e.g. Oromia" onChange={(e) => setFormData({...formData, region: e.target.value})} />
+            </div>
+            <div style={styles.inputGroup}><label style={styles.smallLabel}>Woreda</label>
+              <input type="text" style={styles.input} placeholder="Woreda" onChange={(e) => setFormData({...formData, woreda: e.target.value})} />
+            </div>
+            <div style={styles.inputGroup}><label style={styles.smallLabel}>Kebele</label>
+              <input type="text" style={styles.input} placeholder="Kebele" onChange={(e) => setFormData({...formData, kebele: e.target.value})} />
+            </div>
+          </div>
 
           <div style={styles.assetBtnRow}>
-            <div className={`asset-btn ${activeTab === 'crops' ? 'active' : ''}`} onClick={() => setActiveTab('crops')}>
-              <span className="asset-btn-text" style={{ fontSize: '18px', fontWeight: 'bold' }}>CROPS</span>
-            </div>
-            <div className={`asset-btn ${activeTab === 'animals' ? 'active' : ''}`} onClick={() => setActiveTab('animals')}>
-              <span className="asset-btn-text" style={{ fontSize: '18px', fontWeight: 'bold' }}>ANIMALS</span>
-            </div>
+            <div className={`asset-btn ${activeTab === 'crops' ? 'active' : ''}`} onClick={() => setActiveTab('crops')}>CROPS</div>
+            <div className={`asset-btn ${activeTab === 'animals' ? 'active' : ''}`} onClick={() => setActiveTab('animals')}>LIVESTOCK</div>
           </div>
 
           {activeTab === 'crops' && (
             <div style={styles.subFormDrawer}>
                {formData.crops.map((crop, index) => (
                  <div key={index} className="row-container">
-                   <div style={{ flex: 1 }}><label style={styles.smallLabel}>Crop Name</label>
-                     <input type="text" style={styles.input} value={crop.crop_name} onChange={(e) => updateEntry('crops', index, 'crop_name', e.target.value)} />
-                   </div>
-                   <div style={{ flex: 1 }}><label style={styles.smallLabel}>Variety</label>
-                     <input type="text" style={styles.input} value={crop.crop_variety} onChange={(e) => updateEntry('crops', index, 'crop_variety', e.target.value)} />
-                   </div>
-                   <button type="button" className="add-action-btn" onClick={addMoreCrop}>+ ADD</button>
-                 </div>
-               ))}
-            </div>
-          )}
-
-          {activeTab === 'animals' && (
-            <div style={styles.subFormDrawer}>
-               {formData.animals.map((animal, index) => (
-                 <div key={index} className="row-container">
-                   <div style={{ flex: 1 }}><label style={styles.smallLabel}>Tag #</label>
-                     <input type="text" style={styles.input} value={animal.tag_number} onChange={(e) => updateEntry('animals', index, 'tag_number', e.target.value)} />
-                   </div>
-                   <div style={{ flex: 1 }}><label style={styles.smallLabel}>Species</label>
-                     <input type="text" style={styles.input} value={animal.species} onChange={(e) => updateEntry('animals', index, 'species', e.target.value)} />
-                   </div>
-                   <button type="button" className="add-action-btn" onClick={addMoreAnimal}>+ ADD</button>
+                   <div style={{ flex: 1 }}><input type="text" placeholder="Crop Name" style={styles.input} onChange={(e) => updateEntry('crops', index, 'crop_name', e.target.value)} /></div>
+                   <div style={{ flex: 1 }}><input type="text" placeholder="Variety" style={styles.input} onChange={(e) => updateEntry('crops', index, 'crop_variety', e.target.value)} /></div>
+                   <button type="button" className="add-action-btn" onClick={() => setFormData({...formData, crops: [...formData.crops, {crop_name:"", crop_variety:""}]})}>+ ADD</button>
                  </div>
                ))}
             </div>
@@ -154,7 +158,7 @@ const AddLand = () => {
 
           <div style={styles.footer}>
             <button type="submit" disabled={loading} style={styles.submitBtn}>
-              {loading ? "SAVING..." : "DROP LAND TO REGISTRY"}
+              {loading ? "SAVING TO REGISTRY..." : "DROP LAND TO REGISTRY"}
             </button>
           </div>
         </form>
@@ -164,23 +168,23 @@ const AddLand = () => {
 };
 
 const styles = {
-  pageOverlay: { width: "100%", minHeight: "100vh", background: "#f0f2f5", display: "flex", justifyContent: "center", padding: "100px 0" },
-  fullWidthContainer: { width: "95%", maxWidth: "1200px", background: "#fff", borderRadius: "16px", padding: "40px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px", borderBottom: "2px solid #eee", paddingBottom: "15px" },
-  title: { fontSize: "28px", color: "#1a202c", margin: 0, fontWeight: "900" },
-  closeBtn: { background: "#eee", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" },
-  form: { display: "flex", flexDirection: "column", gap: "20px" },
-  mainInputsRow: { display: "flex", gap: "25px" },
-  inputGroup: { display: "flex", flexDirection: "column", gap: "6px" },
-  label: { fontSize: "16px", fontWeight: "bold", color: "#4a5568", marginBottom: "4px" },
-  smallLabel: { fontSize: "12px", fontWeight: "bold", color: "#718096", marginBottom: "2px" },
-  input: { padding: "10px 15px", borderRadius: "10px", border: "2px solid #cbd5e0", fontSize: "18px", width: "100%", boxSizing: "border-box" },
-  sectionDivider: { textAlign: "center", margin: "10px 0", borderBottom: "1px solid #e2e8f0", lineHeight: "0.1em" },
-  dividerText: { background: "#fff", padding: "0 20px", fontSize: "13px", fontWeight: "bold", color: "#cbd5e0" },
-  assetBtnRow: { display: "flex", gap: "20px" },
-  subFormDrawer: { background: "#f8fafc", border: "2px solid #e2e8f0", borderRadius: "12px", padding: "15px" },
-  footer: { marginTop: "15px" },
-  submitBtn: { width: "100%", background: "#27ae60", color: "white", padding: "16px", border: "none", borderRadius: "12px", fontSize: "20px", fontWeight: "900", cursor: "pointer" }
+  pageOverlay: { width: "100%", background: "#f0f2f5", display: "flex", justifyContent: "center", padding: "60px 0" },
+  fullWidthContainer: { width: "95%", maxWidth: "1150px", background: "#fff", borderRadius: "16px", padding: "25px", boxShadow: "0 4px 15px rgba(0,0,0,0.05)" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" },
+  title: { fontSize: "22px", color: "#1a202c", fontWeight: "900" },
+  closeBtn: { background: "#f1f5f9", border: "none", padding: "8px 15px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", fontSize: "12px" },
+  form: { display: "flex", flexDirection: "column", gap: "15px" },
+  mainInputsRow: { display: "flex", gap: "15px" },
+  inputGroup: { flex: 1, display: "flex", flexDirection: "column", gap: "4px" },
+  label: { fontSize: "14px", fontWeight: "bold", color: "#4a5568" },
+  smallLabel: { fontSize: "12px", fontWeight: "bold", color: "#94a3b8" },
+  input: { padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e0", fontSize: "16px", width: "100%", background: "#fdfdfd" },
+  sectionDivider: { textAlign: "center", margin: "5px 0", borderBottom: "1px solid #f1f5f9", lineHeight: "0.1em" },
+  dividerText: { background: "#fff", padding: "0 10px", fontSize: "11px", color: "#cbd5e0", textTransform: "uppercase" },
+  assetBtnRow: { display: "flex", gap: "15px" },
+  subFormDrawer: { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "12px" },
+  footer: { marginTop: "10px" },
+  submitBtn: { width: "100%", background: "#2e7d32", color: "white", padding: "16px", border: "none", borderRadius: "10px", fontSize: "18px", fontWeight: "900", cursor: "pointer" }
 };
 
 export default AddLand;
