@@ -144,8 +144,8 @@ const FarmerNavbar = ({ toggle }) => {
         {/* LOGO SECTION WITH MdForest */}
         <div onClick={handleLogoClick} style={{ cursor: "pointer", flexShrink: 0 }}>
           <div className="brand" style={{ ...linkStyle, fontWeight: "800", fontSize: "1.4rem" }}>
-            <MdForest size={32} color="#2ecc71" />
-            <span style={{ marginLeft: "6px" }}>Farmers</span>
+            <MdForest size={32} color="#1d6e46" />
+            <span style={{ marginLeft: "4px" }}>Farmers</span>
           </div>
         </div>
 
