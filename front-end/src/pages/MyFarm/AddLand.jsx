@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../../api"; // Your Axios instance
+import api from "../../api/axios"; // Your Axios instance
 
 const AddLand = () => {
     const [loading, setLoading] = useState(false);
