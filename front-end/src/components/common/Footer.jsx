@@ -129,10 +129,10 @@ const Footer = () => {
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px', fontWeight: '900', color: '#1b4332', fontSize: '1.4rem' }}>
             <FaSeedling color="#40916c" size={30} />
-            <span>ETHIOPIAN FARMER REGISTRY</span>
+            <span> Fasika Farmers Connect, GRAND ETHIOPIAN FARMERS CENTER </span>
           </div>
           <div style={{ fontSize: '1rem', color: '#b2bec3', fontWeight: '600' }}>
-            © 2026. SECURE AGRICULTURAL DATA SYSTEM.
+            © 2018. SECURE AGRICULTURAL DATA SYSTEM.
           </div>
         </div>
       </div>
