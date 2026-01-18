@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const landCtrl = require('../../controllers/farmer/ farmerFarmController'); // Path to your land controller
+const landCtrl = require('../../controllers/farmer/farmerFarmController'); // Path to your land controller
 const authenticate = require('../../middleware/authMiddleware');
 
 // Multer setup for image memory storage (Matches Profile Logic)
