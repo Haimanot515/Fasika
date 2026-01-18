@@ -19,48 +19,36 @@ const uploadToSupabase = async (file, bucket = 'FarmerListing') => {
     return urlData.publicUrl;
 };
 
-// 1. UPDATE: Modify Existing Land Registry
-exports.updateLand = async (req, res) => {
+// 1. CREATE: Register Land (The "DROP" into Registry)
+exports.registerLand = async (req, res) => {
     const client = await pool.connect();
     try {
-        const { id } = req.params; // Land Plot ID
-        const userId = req.user.userInternalId;
-        const { 
-            plot_name, area_size, soil_type, climate_zone,
-            region, zone, woreda, kebele, land_status 
-        } = req.body;
+        const userId = req.user.userInternalId; 
+        const { plot_name, area_size, soil_type, climate_zone, region, zone, woreda, kebele } = req.body;
 
         await client.query('BEGIN');
 
-        // Handle new image if provided
-        let landImageUrl = req.body.land_image_url; 
+        // A. Image Upload
+        let landImageUrl = null;
         if (req.file) landImageUrl = await uploadToSupabase(req.file);
 
-        const updateQuery = `
-            UPDATE land_plots SET 
-                plot_name = COALESCE($1, plot_name),
-                area_size = COALESCE($2, area_size),
-                soil_type = COALESCE($3, soil_type),
-                climate_zone = COALESCE($4, climate_zone),
-                region = COALESCE($5, region),
-                zone = COALESCE($6, zone),
-                woreda = COALESCE($7, woreda),
-                kebele = COALESCE($8, kebele),
-                land_image_url = COALESCE($9, land_image_url),
-                land_status = COALESCE($10, land_status)
-            WHERE id = $11 AND farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $12)
-            RETURNING *`;
+        // B. Soil Lookup (Get ID from the soils registry)
+        const soilRes = await client.query("SELECT id FROM soils WHERE soil_type_name = $1", [soil_type]);
+        const soilId = soilRes.rows.length > 0 ? soilRes.rows[0].id : null;
 
-        const result = await client.query(updateQuery, [
-            plot_name, area_size, soil_type, climate_zone,
-            region, zone, woreda, kebele, landImageUrl, land_status,
-            id, userId
-        ]);
+        // C. Get Farmer ID
+        const farmerRes = await client.query(`SELECT id FROM farmers WHERE user_internal_id = $1`, [userId]);
+        const farmerId = farmerRes.rows[0].id;
 
-        if (result.rows.length === 0) throw new Error("Land plot not found or unauthorized");
+        // D. INSERT Plot
+        const result = await client.query(
+            `INSERT INTO land_plots (farmer_id, plot_name, area_size, soil_id, climate_zone, region, zone, woreda, kebele, land_image_url)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+            [farmerId, plot_name, area_size, soilId, climate_zone, region, zone, woreda, kebele, landImageUrl]
+        );
 
         await client.query('COMMIT');
-        res.json({ success: true, message: "Land Registry Updated", data: result.rows[0] });
+        res.status(201).json({ success: true, data: result.rows[0] });
     } catch (err) {
         await client.query('ROLLBACK');
         res.status(500).json({ error: err.message });
@@ -69,54 +57,81 @@ exports.updateLand = async (req, res) => {
     }
 };
 
-// 2. DELETE: Remove Land Plot (DROP from Registry)
-exports.deleteLand = async (req, res) => {
+// 2. READ: Get Registry for Farmer
+exports.getMyLandRegistry = async (req, res) => {
+    try {
+        const userId = req.user.userInternalId;
+        const result = await pool.query(
+            `SELECT lp.*, s.soil_type_name 
+             FROM land_plots lp 
+             LEFT JOIN soils s ON lp.soil_id = s.id
+             WHERE lp.farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1)`,
+            [userId]
+        );
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// 3. UPDATE: Modify Existing Land
+exports.updateLand = async (req, res) => {
     const client = await pool.connect();
     try {
-        const { id } = req.params; // Land Plot ID
+        const { id } = req.params;
         const userId = req.user.userInternalId;
+        const { plot_name, area_size, soil_type, climate_zone, region, zone, woreda, kebele, land_status } = req.body;
 
         await client.query('BEGIN');
 
-        // A. Verify ownership via Farmer table
-        const ownershipCheck = await client.query(
-            `SELECT lp.id, lp.land_image_url FROM land_plots lp 
-             JOIN farmers f ON lp.farmer_id = f.id 
-             WHERE lp.id = $1 AND f.user_internal_id = $2`,
-            [id, userId]
-        );
+        let landImageUrl = req.body.land_image_url; 
+        if (req.file) landImageUrl = await uploadToSupabase(req.file);
 
-        if (ownershipCheck.rows.length === 0) {
-            return res.status(403).json({ error: "Unauthorized or Plot not found" });
-        }
+        const soilRes = await client.query("SELECT id FROM soils WHERE soil_type_name = $1", [soil_type]);
+        const soilId = soilRes.rows.length > 0 ? soilRes.rows[0].id : null;
 
-        // B. Cleanup: Animals associated with this land are moved to 'null' plot (unlinked)
-        await client.query(
-            `UPDATE animals SET current_land_plot_id = NULL WHERE current_land_plot_id = $1`,
-            [id]
-        );
+        const updateQuery = `
+            UPDATE land_plots SET 
+                plot_name = COALESCE($1, plot_name), area_size = COALESCE($2, area_size),
+                soil_id = COALESCE($3, soil_id), climate_zone = COALESCE($4, climate_zone),
+                region = COALESCE($5, region), zone = COALESCE($6, zone),
+                woreda = COALESCE($7, woreda), kebele = COALESCE($8, kebele),
+                land_image_url = COALESCE($9, land_image_url), land_status = COALESCE($10, land_status)
+            WHERE id = $11 AND farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $12)
+            RETURNING *`;
 
-        // C. Cleanup: Delete crops (Crops cannot exist without land)
-        await client.query(`DELETE FROM crops WHERE land_plot_id = $1`, [id]);
-
-        // D. Final: Delete the Land Plot
-        await client.query(`DELETE FROM land_plots WHERE id = $1`, [id]);
-
-        // E. Optional: Delete image from Supabase storage if it exists
-        const oldImageUrl = ownershipCheck.rows[0].land_image_url;
-        if (oldImageUrl) {
-            const path = oldImageUrl.split(`${process.env.SUPABASE_URL}/storage/v1/object/public/FarmerListing/`)[1];
-            if (path) {
-                await supabase.storage.from('FarmerListing').remove([path]);
-            }
-        }
-
+        const result = await client.query(updateQuery, [plot_name, area_size, soilId, climate_zone, region, zone, woreda, kebele, landImageUrl, land_status, id, userId]);
+        
         await client.query('COMMIT');
-        res.json({ success: true, message: "Land and associated crops removed from registry" });
+        res.json({ success: true, data: result.rows[0] });
     } catch (err) {
         await client.query('ROLLBACK');
         res.status(500).json({ error: err.message });
-    } finally {
-        client.release();
-    }
+    } finally { client.release(); }
+};
+
+// 4. DELETE: Remove Land Plot
+exports.deleteLand = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { id } = req.params;
+        const userId = req.user.userInternalId;
+        await client.query('BEGIN');
+
+        const ownershipCheck = await client.query(
+            `SELECT lp.id, lp.land_image_url FROM land_plots lp 
+             JOIN farmers f ON lp.farmer_id = f.id WHERE lp.id = $1 AND f.user_internal_id = $2`, [id, userId]);
+
+        if (ownershipCheck.rows.length === 0) return res.status(403).json({ error: "Unauthorized" });
+
+        await client.query(`UPDATE animals SET current_land_plot_id = NULL WHERE current_land_plot_id = $1`, [id]);
+        await client.query(`DELETE FROM crops WHERE land_plot_id = $1`, [id]);
+        await client.query(`DELETE FROM land_plots WHERE id = $1`, [id]);
+
+        await client.query('COMMIT');
+        res.json({ success: true, message: "Land DROPPED from registry" });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        res.status(500).json({ error: err.message });
+    } finally { client.release(); }
 };
