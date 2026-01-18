@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Footer from "./components/common/Footer";
 
 // --- AUTH & PUBLIC PAGES ---
@@ -41,7 +41,7 @@ import WeatherPage from "./pages/WeatherPage";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 
 const Spinner = () => (
-  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontSize: "24px", color: "#065f46", fontWeight: "bold", fontFamily: "sans-serif" }}>
+  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontSize: "24px", color: "#166534", fontWeight: "bold" }}>
     🌾 Loading Farm Systems...
   </div>
 );
@@ -67,7 +67,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* 🌍 PUBLIC ROUTES (No Footer) */}
+        {/* 🌍 PUBLIC ROUTES */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<LoginForm onLogin={setRole} />} />
         <Route path="/register" element={<RegisterForm />} />
@@ -77,12 +77,14 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/marketplace" element={<BuyerMarketplace />} />
 
-        {/* 🔐 PROTECTED ROUTES (Footer only shown here) */}
+        {/* 🔐 PROTECTED ROUTES (Structured to prevent Footer overlapping) */}
         <Route element={
-          <>
-            <ProtectedLayout role={role} />
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <div style={{ flex: 1 }}>
+              <ProtectedLayout role={role} />
+            </div>
             <Footer />
-          </>
+          </div>
         }>
           <Route path="/dashboard/*" element={<DynamicDashboard role={role} />} />
           <Route path="/my-farm/land/view" element={<ViewLand />} />
