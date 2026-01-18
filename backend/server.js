@@ -10,7 +10,6 @@ const app = express();
 app.set('trust proxy', 1);
 
 // 1️⃣ CORS CONFIGURATION (MUST BE FIRST)
-// Moving this here ensures that even the logger and health check respond with correct headers
 app.use(cors({
   origin: 'https://fasika-frontend.onrender.com', // No trailing slash
   credentials: true,
@@ -20,7 +19,7 @@ app.use(cors({
 
 // 2️⃣ GLOBAL MIDDLEWARE
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Added for better form-data handling
+app.use(express.urlencoded({ extended: true })); 
 app.use(cookieParser());
 
 // 🛰️ REQUEST LOGGER
@@ -40,6 +39,9 @@ const farmerSupportRoutes = require('./routes/farmer/farmerSupportRoutes');
 const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
+
+// --- NEW: LAND REGISTRY ROUTE ---
+const landRoutes = require('./routes/farmer/landRoutes');
 
 // 🏠 ROOT HEALTH CHECK
 app.get('/', (req, res) => {
@@ -64,7 +66,11 @@ pool.connect((err, client, release) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/farmers', adminFarmerRoutes);
+
+// --- LAND DROP REGISTRY (Specific route must come before generic farm route) ---
+app.use('/api/farmer/farm/land', landRoutes); 
 app.use('/api/farmer/farm', farmerFarmRoutes);
+
 app.use('/api/farmer/listings', farmerListingRoutes);
 app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
 
@@ -72,7 +78,7 @@ app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
 app.use("/api/farmer/advisory", advisoryRoutes);
 app.use('/api/farmer/support', farmerSupportRoutes);
 app.use("/api/farmer/notifications", notificationRoutes);
-app.use('/api/farmers', farmerProfileRoutes); // Note: frontend calls /api/farmers/profile
+app.use('/api/farmers', farmerProfileRoutes); 
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
