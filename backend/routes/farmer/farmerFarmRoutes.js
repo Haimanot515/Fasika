@@ -16,8 +16,18 @@ const upload = multer({
 // 1. CREATE / DROP: Register new land and assets
 router.post('/', authenticate, upload.single('land_image'), landCtrl.registerLand);
 
-// 2. GET: Retrieve all land registry entries for the logged-in farmer
+// 2. GET: Retrieve basic land registry entries
 router.get('/view', authenticate, landCtrl.getMyLandRegistry);
+
+// --- NEW ENHANCED REGISTRY ROUTES ---
+
+// 2.1 GET DETAILED: Fetches plots with nested crop_list and animal_list
+router.get('/view-detailed', authenticate, landCtrl.getDetailedLandRegistry);
+
+// 2.2 GET STATS: Fetches total counts of animals, crops, and hectares
+router.get('/stats', authenticate, landCtrl.getFarmerRegistryStats);
+
+// ------------------------------------
 
 // 3. UPDATE: Sync changes to an existing land plot
 // Note: :id is the specific land plot ID
