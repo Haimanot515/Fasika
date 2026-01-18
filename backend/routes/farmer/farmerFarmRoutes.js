@@ -1,42 +1,29 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const landCtrl = require('../../controllers/farmer/landController'); // Path to your land controller
 const authenticate = require('../../middleware/authMiddleware');
-const farmCtrl = require('../../controllers/farmer/farmerFarmController');
 
-// All routes require valid JWT
-router.use(authenticate);
+// Multer setup for image memory storage (Matches Profile Logic)
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
-// --- 📊 DASHBOARD ---
-router.get('/summary', farmCtrl.getFarmSummary);
+// All paths are managed under the '/land' context in your server.js
+// Final URL Example: /api/farmer/farm/land/
 
-// --- 🚜 LAND REGISTRY (SMART DROP SYSTEM) ---
-router.post('/land', farmCtrl.addLand);            // This now handles land + crops + animals
-router.get('/land', farmCtrl.getLand);             
-router.put('/land/:id', farmCtrl.updateLand);      
-router.delete('/land/:id', farmCtrl.deleteLand);   
+// 1. CREATE / DROP: Register new land and assets
+router.post('/', authenticate, upload.single('land_image'), landCtrl.registerLand);
 
-/* NOTE: If your frontend still needs separate buttons to add ONLY a crop 
-  or ONLY an animal later, you must ensure these functions are defined 
-  in farmerFarmController.js. 
-  
-  Since we consolidated them into addLand for the 'Unlimited' feature, 
-  commenting these out will stop the server from crashing.
-*/
+// 2. GET: Retrieve all land registry entries for the logged-in farmer
+router.get('/view', authenticate, landCtrl.getMyLandRegistry);
 
-// --- 🌿 CROPS (If defined in controller) ---
-if (farmCtrl.addCrop) {
-    router.post('/crops', farmCtrl.addCrop);
-    router.get('/crops', farmCtrl.getFarmerCrops);
-    router.patch('/crops/:cropId/stage', farmCtrl.updateCropStage);
-    router.delete('/crops/:cropId', farmCtrl.deleteCrop);
-}
+// 3. UPDATE: Sync changes to an existing land plot
+// Note: :id is the specific land plot ID
+router.put('/:id', authenticate, upload.single('land_image'), landCtrl.updateLand);
 
-// --- 🐄 ANIMALS (If defined in controller) ---
-if (farmCtrl.addAnimal) {
-    router.post('/animals', farmCtrl.addAnimal);
-    router.get('/animals', farmCtrl.getAnimals);
-    router.put('/animals/:animalId', farmCtrl.updateAnimal);
-    router.delete('/animals/:animalId', farmCtrl.deleteAnimal);
-}
+// 4. DELETE: Remove land and associated assets
+router.delete('/:id', authenticate, landCtrl.deleteLand);
 
 module.exports = router;
