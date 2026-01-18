@@ -35,13 +35,29 @@ exports.registerLand = async (req, res) => {
         if (crops) {
             const parsedCrops = typeof crops === 'string' ? JSON.parse(crops) : crops;
             for (let c of parsedCrops) {
-                await client.query(`INSERT INTO crops (land_plot_id, crop_name, quantity) VALUES ($1, $2, $3)`, [newLandId, c.crop_name, c.quantity]);
+                await client.query(
+                    `INSERT INTO crops (land_plot_id, crop_name, quantity) 
+                     VALUES ($1, $2, $3)`, 
+                    [newLandId, c.crop_name, c.quantity]
+                );
             }
         }
+        
         if (animals) {
             const parsedAnimals = typeof animals === 'string' ? JSON.parse(animals) : animals;
             for (let a of parsedAnimals) {
-                await client.query(`INSERT INTO animals (current_land_plot_id, animal_type, head_count) VALUES ($1, $2, $3)`, [newLandId, a.animal_type, a.head_count]);
+                // FIXED: Included user_internal_id and auto-generated tag_number to satisfy DB constraints
+                await client.query(
+                    `INSERT INTO animals (user_internal_id, current_land_plot_id, animal_type, head_count, tag_number) 
+                     VALUES ($1, $2, $3, $4, $5)`, 
+                    [
+                        userId, 
+                        newLandId, 
+                        a.animal_type, 
+                        a.head_count, 
+                        a.tag_number || `TAG-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+                    ]
+                );
             }
         }
 
@@ -49,6 +65,7 @@ exports.registerLand = async (req, res) => {
         res.status(201).json({ success: true, landId: newLandId });
     } catch (err) {
         await client.query('ROLLBACK');
+        console.error("Registry DROP Error:", err.message);
         res.status(500).json({ error: err.message });
     } finally { client.release(); }
 };
@@ -62,14 +79,15 @@ exports.getMyLandRegistry = async (req, res) => {
                 (SELECT COUNT(*) FROM crops WHERE land_plot_id = lp.id) as crop_count,
                 (SELECT COUNT(*) FROM animals WHERE current_land_plot_id = lp.id) as animal_count
              FROM land_plots lp LEFT JOIN soils s ON lp.soil_id = s.id
-             WHERE lp.farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1)`,
+             WHERE lp.farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1)
+             ORDER BY lp.created_at DESC`,
             [userId]
         );
         res.json({ success: true, data: result.rows });
     } catch (err) { res.status(500).json({ error: err.message }); }
 };
 
-// 3. UPDATE (The function that was missing/undefined)
+// 3. UPDATE
 exports.updateLand = async (req, res) => {
     const client = await pool.connect();
     try {
