@@ -3,7 +3,7 @@ import axios from "axios";
 const api = axios.create({
   // Ensure your VITE_API_URL does NOT have a trailing slash
   baseURL: `${import.meta.env.VITE_API_URL}/api`,
-  withCredentials: true, // 🚨 CRITICAL: Sends and receives HttpOnly cookies
+  withCredentials: true, // CRITICAL: Sends and receives HttpOnly cookies
 });
 
 // Request Interceptor: No longer needs to manually attach headers if 
