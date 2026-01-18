@@ -40,7 +40,7 @@ const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
 
-// --- NEW: LAND REGISTRY ROUTE ---
+// --- LAND REGISTRY ROUTE (Linked to your updated farmerFarmRoutes) ---
 const landRoutes = require('./routes/farmer/farmerFarmRoutes');
 
 // 🏠 ROOT HEALTH CHECK
@@ -67,7 +67,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/farmers', adminFarmerRoutes);
 
-// --- LAND DROP REGISTRY (Specific route must come before generic farm route) ---
+// --- LAND DROP REGISTRY ---
+// These handles: /api/farmer/farm/land/view-detailed and /api/farmer/farm/land/stats
 app.use('/api/farmer/farm/land', landRoutes); 
 app.use('/api/farmer/farm', farmerFarmRoutes);
 
