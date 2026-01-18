@@ -50,7 +50,7 @@ const FarmerDashboard = () => {
             background-attachment: fixed; 
             background-repeat: no-repeat;
             background-color: #064e3b;
-            filter: brightness(1.2); /* INCREASED BRIGHTNESS TO MAXIMUM */
+            filter: brightness(1); /* INCREASED BRIGHTNESS TO MAXIMUM */
             scroll-behavior: smooth;
             overflow-x: hidden;
           }
