@@ -160,8 +160,16 @@ exports.getDetailedLandRegistry = async (req, res) => {
             `SELECT 
                 lp.*, 
                 s.soil_type_name,
-                (SELECT json_agg(c) FROM (SELECT id, crop_name, quantity FROM crops WHERE land_plot_id = lp.id) c) as crop_list,
-                (SELECT json_agg(a) FROM (SELECT id, animal_type, head_count, tag_number FROM animals WHERE current_land_plot_id = lp.id) a) as animal_list,
+                COALESCE((
+                    SELECT json_agg(c) FROM (
+                        SELECT id, crop_name, quantity FROM crops WHERE land_plot_id = lp.id
+                    ) c
+                ), '[]'::json) as crop_list,
+                COALESCE((
+                    SELECT json_agg(a) FROM (
+                        SELECT animal_id, animal_type, head_count, tag_number FROM animals WHERE current_land_plot_id = lp.id
+                    ) a
+                ), '[]'::json) as animal_list,
                 (SELECT COUNT(*) FROM crops WHERE land_plot_id = lp.id) as crop_count,
                 (SELECT COUNT(*) FROM animals WHERE current_land_plot_id = lp.id) as animal_count
              FROM land_plots lp 
@@ -172,6 +180,7 @@ exports.getDetailedLandRegistry = async (req, res) => {
         );
         res.json({ success: true, data: result.rows });
     } catch (err) { 
+        console.error("Detailed Sync Error:", err.message);
         res.status(500).json({ error: err.message }); 
     }
 };
@@ -184,9 +193,7 @@ exports.getFarmerRegistryStats = async (req, res) => {
             `SELECT 
                 COUNT(DISTINCT lp.id) as total_lands,
                 COALESCE(SUM(lp.area_size), 0) as total_hectares,
-                -- Sum of all animal headcounts belonging to this user
                 COALESCE((SELECT SUM(head_count) FROM animals WHERE user_internal_id = $1), 0) as total_animals,
-                -- Count of all crop entries belonging to this farmer's plots
                 COALESCE((SELECT COUNT(*) FROM crops WHERE land_plot_id IN 
                     (SELECT id FROM land_plots WHERE farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1))
                 ), 0) as total_crop_nodes
@@ -196,6 +203,7 @@ exports.getFarmerRegistryStats = async (req, res) => {
         );
         res.json({ success: true, stats: stats.rows[0] });
     } catch (err) { 
+        console.error("Stats Sync Error:", err.message);
         res.status(500).json({ error: err.message }); 
     }
 };
