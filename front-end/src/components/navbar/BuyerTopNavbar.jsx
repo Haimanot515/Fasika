@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Added useNavigate
 import { FaSearch, FaMapMarkerAlt, FaShoppingCart, FaCaretDown } from "react-icons/fa";
 import { MdOutlineAccountCircle } from "react-icons/md";
 import api from "../../api/axios";
 import DraggablePromotionPage from "../../pages/dashboard/BuyerPromotionPage";
 
 const BuyerTopNavbar = () => {
-  // Initialize from localStorage if available
+  const navigate = useNavigate(); // Hook for programmatic navigation
   const [region, setRegion] = useState(localStorage.getItem("userRegion") || "Locating...");
   const [showRegionMenu, setShowRegionMenu] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
@@ -20,7 +20,13 @@ const BuyerTopNavbar = () => {
     "South West Ethiopia", "Tigray"
   ];
 
-  // 1. Auto-Location Logic (only runs if no region is saved)
+  // Function to handle Logo Click
+  const handleLogoClick = () => {
+    setShowPromo(!showPromo); // Toggle Promotion Page
+    navigate("/dashboard");   // Redirect to Dashboard
+  };
+
+  // 1. Auto-Location Logic
   useEffect(() => {
     if (!localStorage.getItem("userRegion") && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -89,12 +95,16 @@ const BuyerTopNavbar = () => {
           .region-item:hover { background: #f3f3f3; color: #131921; }
         `}</style>
 
-        {/* Logo */}
-        <div onClick={() => setShowPromo(!showPromo)} className="nav-hover logo-btn" style={amazonStyles.logo}>
+        {/* Logo - Navigates to Dashboard & Toggles Promo */}
+        <div 
+          onClick={handleLogoClick} 
+          className="nav-hover logo-btn" 
+          style={amazonStyles.logo}
+        >
           fasika<span style={{ color: "#febd69" }}>.et</span>
         </div>
 
-        {/* 3. Location Section - Clickable Text (No Dropdown Arrow) */}
+        {/* Location Section */}
         <div 
           className="nav-hover" 
           style={{ ...amazonStyles.navSection, position: 'relative' }} 
@@ -107,7 +117,6 @@ const BuyerTopNavbar = () => {
             <span style={amazonStyles.lineTwo}>{region}</span>
           </div>
 
-          {/* Custom Choices Menu */}
           {showRegionMenu && (
             <div style={amazonStyles.customDropdown}>
               <div style={{ padding: '8px', borderBottom: '1px solid #ddd', fontWeight: 'bold', color: '#555' }}>
@@ -187,7 +196,6 @@ const BuyerTopNavbar = () => {
   );
 };
 
-// ... Styles
 const overlayStyles = {
     wrapper: { position: 'fixed', top: '60px', left: 0, width: '100%', height: 'calc(100vh - 60px)', zIndex: 15000, backgroundColor: '#f0f2f2', overflowY: 'auto' },
     header: { background: '#232f3e', color: 'white', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', fontWeight: 'bold' },
@@ -213,27 +221,8 @@ const amazonStyles = {
   cartCount: { position: "absolute", top: "-5px", right: "10px", backgroundColor: "#131921", color: "#f08804", fontSize: "16px", fontWeight: "bold", borderRadius: "50%", width: "20px", textAlign: "center" },
   avatarCircle: { width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.15)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.3)" },
   avatarImg: { width: "100%", height: "100%", objectFit: "cover" },
-  
-  // Custom Choices Styling
-  customDropdown: {
-    position: 'absolute',
-    top: '55px',
-    left: '0',
-    backgroundColor: 'white',
-    color: '#333',
-    minWidth: '180px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-    borderRadius: '4px',
-    zIndex: 20000,
-    maxHeight: '300px',
-    overflowY: 'auto'
-  },
-  dropdownItem: {
-    padding: '10px 15px',
-    fontSize: '13px',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
-  }
+  customDropdown: { position: 'absolute', top: '55px', left: '0', backgroundColor: 'white', color: '#333', minWidth: '180px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', borderRadius: '4px', zIndex: 20000, maxHeight: '300px', overflowY: 'auto' },
+  dropdownItem: { padding: '10px 15px', fontSize: '13px', cursor: 'pointer', transition: 'background 0.2s' }
 };
 
 export default BuyerTopNavbar;
