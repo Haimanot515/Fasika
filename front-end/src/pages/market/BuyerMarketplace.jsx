@@ -64,8 +64,14 @@ const BuyerMarketplace = () => {
   return (
     <div style={premiumStyles.pageWrapper}>
       <style>{`
-        /* High Brightness Background */
-        body, html { margin: 0; padding: 0; overflow-x: hidden; background: #f0f2f5; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        /* Pure White Background for the entire page */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden; 
+            background: #ffffff; /* Changed from #f0f2f5 to pure white */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+        }
         
         .amazon-header { background-color: #000000; padding: 12px 20px; display: flex; align-items: center; gap: 30px; position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .search-container-amazon { display: flex; flex: 1; max-width: 700px; height: 42px; border-radius: 6px; overflow: hidden; background-color: #ffffff; border: 1px solid #ddd; }
@@ -82,6 +88,7 @@ const BuyerMarketplace = () => {
           width: 100%;
           padding: 20px; 
           box-sizing: border-box;
+          background: #ffffff; /* Ensures grid area is white */
         }
 
         .alibaba-card { 
@@ -212,7 +219,8 @@ const BuyerMarketplace = () => {
 };
 
 const premiumStyles = {
-  pageWrapper: { width: "100vw", minHeight: "100vh" },
+  // Added backgroundColor: "#ffffff" to ensure the wrapper is pure white
+  pageWrapper: { width: "100vw", minHeight: "100vh", backgroundColor: "#ffffff" },
   logo: { fontSize: "28px", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap", letterSpacing: "1px" },
   categoryItem: { fontSize: "15px", fontWeight: "700", color: "#222", cursor: "pointer" },
   textHalf: { padding: "16px", display: "flex", flexDirection: "column" },
@@ -222,7 +230,7 @@ const premiumStyles = {
   unit: { fontSize: "14px", color: "#444", fontWeight: "600" },
   stockInfo: { fontSize: "14px", color: "#222", fontWeight: "700", marginTop: "2px" },
   location: { fontSize: "13px", color: "#666", fontWeight: "600", marginTop: "10px" },
-  bottomArea: { width: "100%", padding: "50px 0", display: "flex", justifyContent: "center" }
+  bottomArea: { width: "100%", padding: "50px 0", display: "flex", justifyContent: "center", background: "#ffffff" }
 };
 
 export default BuyerMarketplace;
