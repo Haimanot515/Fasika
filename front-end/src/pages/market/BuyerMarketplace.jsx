@@ -76,7 +76,6 @@ const BuyerMarketplace = () => {
         .search-button-amazon { background-color: #ff9900; border: none; width: 55px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #fff; }
         
         .category-scroll-wrapper { background: #ffffff; padding: 14px 20px; overflow-x: auto; white-space: nowrap; display: flex; gap: 30px; border-bottom: 1px solid #f0f0f0; }
-        .category-scroll-wrapper::-webkit-scrollbar { display: none; }
 
         .full-edge-grid { 
           display: grid; 
@@ -92,17 +91,12 @@ const BuyerMarketplace = () => {
           background: #ffffff; 
           display: flex; 
           flex-direction: column; 
-          border-radius: 8px; 
           position: relative; 
-          overflow: hidden;
           transition: all 0.3s ease;
           border: none;
           cursor: pointer;
-        }
-        
-        .alibaba-card:hover { 
-          box-shadow: 0 12px 30px rgba(0,0,0,0.08); 
-          transform: translateY(-5px);
+          /* Increased height by adding to the container min-height */
+          min-height: 403px; 
         }
 
         .image-container { 
@@ -114,7 +108,17 @@ const BuyerMarketplace = () => {
           border-radius: 8px;
         }
         
-        .product-img { width: 100%; height: 100%; object-fit: cover; }
+        .product-img { 
+          width: 100%; 
+          height: 100%; 
+          object-fit: cover; 
+          transition: transform 0.5s ease; /* Zoom speed */
+        }
+
+        /* 1. Zoom effect on hover */
+        .alibaba-card:hover .product-img {
+          transform: scale(1.1);
+        }
 
         .verified-badge { 
           position: absolute; 
@@ -130,14 +134,13 @@ const BuyerMarketplace = () => {
           border: 1px solid #00b411;
         }
 
-        /* Updated Buy Now Button Style */
         .buy-now-btn {
             width: 100%;
-            margin-top: 15px;
+            margin-top: auto; /* Pushes button to the bottom of the card */
             padding: 12px;
             border-radius: 6px;
             border: none;
-            background: #ff9900; /* Amazon-style Orange */
+            background: #ff9900;
             color: #ffffff;
             font-weight: 700;
             font-size: 14px;
@@ -146,9 +149,7 @@ const BuyerMarketplace = () => {
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: background 0.2s;
         }
-        .buy-now-btn:hover { background: #e68a00; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-spinner { width: 32px; height: 32px; border: 4px solid #f3f3f3; border-top: 4px solid #ff5000; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -207,9 +208,6 @@ const BuyerMarketplace = () => {
 
       <div style={premiumStyles.bottomArea}>
         {loading && <div className="loading-spinner"></div>}
-        {!hasMore && products.length > 0 && (
-          <span style={{color: '#aaa', fontSize: '14px', fontWeight: '500'}}>End of results</span>
-        )}
       </div>
     </div>
   );
@@ -217,15 +215,15 @@ const BuyerMarketplace = () => {
 
 const premiumStyles = {
   pageWrapper: { width: "100vw", minHeight: "100vh", backgroundColor: "#ffffff" },
-  logo: { fontSize: "24px", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap", letterSpacing: "0.5px" },
+  logo: { fontSize: "24px", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap" },
   categoryItem: { fontSize: "14px", fontWeight: "600", color: "#444", cursor: "pointer" },
-  textHalf: { padding: "12px 0px", display: "flex", flexDirection: "column" },
-  productTitle: { fontSize: "15px", fontWeight: "600", color: "#222", height: "40px", overflow: "hidden", lineHeight: "1.4", marginBottom: "4px" },
+  textHalf: { padding: "12px 0px", display: "flex", flexDirection: "column", flexGrow: 1 },
+  productTitle: { fontSize: "15px", fontWeight: "600", color: "#222", height: "40px", overflow: "hidden", marginBottom: "4px" },
   priceRow: { display: "flex", alignItems: "baseline", gap: "2px", margin: "2px 0" },
   priceMain: { fontSize: "18px", fontWeight: "800", color: "#111" },
   unit: { fontSize: "12px", color: "#666" },
-  stockInfo: { fontSize: "12px", color: "#555", marginTop: "2px" },
-  location: { fontSize: "11px", color: "#999", marginTop: "8px" },
+  stockInfo: { fontSize: "12px", color: "#555" },
+  location: { fontSize: "11px", color: "#999", marginTop: "8px", marginBottom: "10px" },
   bottomArea: { width: "100%", padding: "60px 0", display: "flex", justifyContent: "center", background: "#ffffff" }
 };
 
