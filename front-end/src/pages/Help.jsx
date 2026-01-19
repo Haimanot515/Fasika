@@ -92,7 +92,7 @@ const SupportPage = () => {
       <header style={headerStyle}>
         <div>
           <span style={tagStyle}>FASIKA REGISTRY SUPPORT</span>
-          <h1 style={titleStyle}>Farmer Support Hub</h1>
+          <h1 style={titleStyle}>Support Hub</h1>
         </div>
         <div style={{ textAlign: "right", color: theme.primary }}>
           <div style={{ fontSize: "56px", fontWeight: "900" }}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
