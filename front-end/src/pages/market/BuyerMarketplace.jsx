@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "../../api/axios"; 
 import { 
-  FaSearch, FaShieldAlt, FaMapMarkerAlt, FaEnvelope 
+  FaSearch, FaShieldAlt, FaMapMarkerAlt, FaShoppingCart 
 } from "react-icons/fa";
 
 const BuyerMarketplace = () => {
@@ -89,19 +89,18 @@ const BuyerMarketplace = () => {
         }
 
         .alibaba-card { 
-          background: #ffffff; /* Same as background */
+          background: #ffffff; 
           display: flex; 
           flex-direction: column; 
           border-radius: 8px; 
           position: relative; 
           overflow: hidden;
           transition: all 0.3s ease;
-          border: none; /* Removed borders for seamless white look */
+          border: none;
           cursor: pointer;
         }
         
         .alibaba-card:hover { 
-          /* Soft shadow to distinguish card from background only when interacting */
           box-shadow: 0 12px 30px rgba(0,0,0,0.08); 
           transform: translateY(-5px);
         }
@@ -111,7 +110,7 @@ const BuyerMarketplace = () => {
           width: 100%; 
           overflow: hidden; 
           position: relative; 
-          background: #fcfcfc; /* Extremely light gray just to show image bounds */
+          background: #fcfcfc; 
           border-radius: 8px;
         }
         
@@ -121,7 +120,7 @@ const BuyerMarketplace = () => {
           position: absolute; 
           top: 10px; 
           left: 10px; 
-          background: rgba(255,255,255,0.9); 
+          background: rgba(255,255,255,0.95); 
           color: #00b411; 
           padding: 3px 8px; 
           font-size: 10px; 
@@ -131,20 +130,25 @@ const BuyerMarketplace = () => {
           border: 1px solid #00b411;
         }
 
-        .alibaba-contact-btn {
+        /* Updated Buy Now Button Style */
+        .buy-now-btn {
             width: 100%;
             margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px; /* More modern squared-off look */
-            border: 1.5px solid #ff6600;
-            background: #ffffff;
-            color: #ff6600;
+            padding: 12px;
+            border-radius: 6px;
+            border: none;
+            background: #ff9900; /* Amazon-style Orange */
+            color: #ffffff;
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
         }
-        .alibaba-contact-btn:hover { background: #ff6600; color: #ffffff; }
+        .buy-now-btn:hover { background: #e68a00; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-spinner { width: 32px; height: 32px; border: 4px solid #f3f3f3; border-top: 4px solid #ff5000; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -193,8 +197,8 @@ const BuyerMarketplace = () => {
               </div>
               <div style={premiumStyles.stockInfo}>Stock: {item.quantity} units</div>
               <div style={premiumStyles.location}><FaMapMarkerAlt size={11} /> Ethiopia</div>
-              <button className="alibaba-contact-btn">
-                Contact Supplier
+              <button className="buy-now-btn">
+                <FaShoppingCart size={14} /> Buy Now
               </button>
             </div>
           </div>
@@ -215,10 +219,10 @@ const premiumStyles = {
   pageWrapper: { width: "100vw", minHeight: "100vh", backgroundColor: "#ffffff" },
   logo: { fontSize: "24px", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap", letterSpacing: "0.5px" },
   categoryItem: { fontSize: "14px", fontWeight: "600", color: "#444", cursor: "pointer" },
-  textHalf: { padding: "12px 0px", display: "flex", flexDirection: "column" }, // Removed side padding for seamless alignment
-  productTitle: { fontSize: "15px", fontWeight: "500", color: "#222", height: "40px", overflow: "hidden", lineHeight: "1.4", marginBottom: "4px" },
+  textHalf: { padding: "12px 0px", display: "flex", flexDirection: "column" },
+  productTitle: { fontSize: "15px", fontWeight: "600", color: "#222", height: "40px", overflow: "hidden", lineHeight: "1.4", marginBottom: "4px" },
   priceRow: { display: "flex", alignItems: "baseline", gap: "2px", margin: "2px 0" },
-  priceMain: { fontSize: "18px", fontWeight: "700", color: "#111" },
+  priceMain: { fontSize: "18px", fontWeight: "800", color: "#111" },
   unit: { fontSize: "12px", color: "#666" },
   stockInfo: { fontSize: "12px", color: "#555", marginTop: "2px" },
   location: { fontSize: "11px", color: "#999", marginTop: "8px" },
