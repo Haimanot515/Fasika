@@ -7,7 +7,7 @@
   background-color: #065f46; /* darker green */
   color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  z-index: 1200;
+  z-index: 100000;
   height:10vh;
 }
 
