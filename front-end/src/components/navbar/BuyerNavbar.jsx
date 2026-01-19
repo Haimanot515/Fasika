@@ -109,7 +109,7 @@ const styles = {
     height: "100vh",
     backgroundColor: "rgba(0,0,0,0.6)", 
     // Set to 99999 to be just below the navbar/sidebar
-    zIndex: 99999, 
+    zIndex: 9999, 
     transition: "0.3s opacity ease"
   }
 };
