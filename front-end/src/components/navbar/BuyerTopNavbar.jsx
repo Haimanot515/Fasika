@@ -91,7 +91,6 @@ const BuyerTopNavbar = () => {
           .region-item { color: #111; font-size: 14px; transition: background 0.1s; font-weight: 600; }
           .region-item:hover { background: #F0F2F2; color: #c45500 !important; }
           
-          /* Amazon Dropdown Arrow */
           .amazon-arrow {
             position: absolute;
             top: -10px;
@@ -145,7 +144,7 @@ const BuyerTopNavbar = () => {
           )}
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar - Fixed Visibility */}
         <div className="search-focus" style={amazonStyles.searchContainer}>
           <div style={amazonStyles.searchCategory}>
             <select style={amazonStyles.categorySelect}>
@@ -156,7 +155,9 @@ const BuyerTopNavbar = () => {
             <FaCaretDown style={amazonStyles.caretIcon} />
           </div>
           <input type="text" style={amazonStyles.searchInput} placeholder="Search for bulls, teff, or honey..." />
-          <button style={amazonStyles.searchButton}><FaSearch style={{ fontSize: "20px" }} /></button>
+          <button style={amazonStyles.searchButton}>
+            <FaSearch style={{ fontSize: "20px", color: "#333" }} />
+          </button>
         </div>
 
         {/* Profile Section */}
@@ -187,11 +188,10 @@ const BuyerTopNavbar = () => {
             <FaShoppingCart style={{ fontSize: "34px" }} />
             <span style={amazonStyles.cartCount}>3</span>
           </div>
-          <span style={{ ...amazonStyles.lineTwo, marginTop: "12px" }}>Cart</span>
+          <span style={{ ...amazonStyles.lineTwo, marginTop: "10px" }}>Cart</span>
         </Link>
       </nav>
 
-      {/* Promo Overlay */}
       {showPromo && (
         <div style={overlayStyles.wrapper}>
           <div style={overlayStyles.header}>
@@ -212,28 +212,53 @@ const overlayStyles = {
 };
 
 const amazonStyles = {
-  navbar: { display: "flex", alignItems: "center", backgroundColor: "#131921", padding: "8px 20px", gap: "15px", height: "70px", color: "#fff", position: "fixed", top: 0, left: 0, right: 0, zIndex: 10000 },
-  logo: { textDecoration: "none", color: "#fff", fontSize: "28px", fontWeight: "800", padding: "6px 12px", border: "1px solid transparent" },
-  navSection: { display: "flex", alignItems: "center", padding: "6px 10px", cursor: "pointer", border: "1px solid transparent", gap: "8px" },
-  navSectionLink: { textDecoration: "none", color: "#fff", padding: "6px 10px", border: "1px solid transparent" },
-  locationIcon: { fontSize: "20px", marginTop: "10px" },
-  navTextContainer: { display: "flex", flexDirection: "column" },
-  lineOne: { fontSize: "13px", color: "#ccc", fontWeight: "600" }, // LARGER AND BOLDER
-  lineTwo: { fontSize: "16px", fontWeight: "800" }, // LARGER AND BOLDER
-  searchContainer: { display: "flex", flex: 1, height: "45px", borderRadius: "4px", overflow: "hidden", backgroundColor: "#fff", margin: "0 10px" },
-  searchCategory: { display: "flex", alignItems: "center", backgroundColor: "#f3f3f3", padding: "0 12px", borderRight: "1px solid #bbb", position: "relative" },
+  navbar: { 
+    display: "flex", 
+    alignItems: "center", 
+    backgroundColor: "#131921", 
+    padding: "5px 20px", // Reduced top/bottom padding to pull text up
+    gap: "12px", 
+    minHeight: "65px", // Using minHeight instead of fixed height for better vertical centering
+    color: "#fff", 
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    zIndex: 10000 
+  },
+  logo: { textDecoration: "none", color: "#fff", fontSize: "28px", fontWeight: "800", padding: "4px 10px", border: "1px solid transparent" },
+  navSection: { display: "flex", alignItems: "center", padding: "4px 8px", cursor: "pointer", border: "1px solid transparent", gap: "6px" },
+  navSectionLink: { textDecoration: "none", color: "#fff", padding: "4px 8px", border: "1px solid transparent" },
+  locationIcon: { fontSize: "20px", alignSelf: "center", marginTop: "12px" },
+  navTextContainer: { display: "flex", flexDirection: "column", justifyContent: "center" },
+  lineOne: { fontSize: "13px", color: "#ccc", fontWeight: "600", lineHeight: "1.1" },
+  lineTwo: { fontSize: "16px", fontWeight: "800", lineHeight: "1.1" },
+  
+  // Search Bar fixes
+  searchContainer: { display: "flex", flex: 1, height: "45px", borderRadius: "4px", overflow: "hidden", backgroundColor: "#fff", margin: "0 5px" },
+  searchCategory: { display: "flex", alignItems: "center", backgroundColor: "#f3f3f3", padding: "0 10px", borderRight: "1px solid #bbb", position: "relative" },
   categorySelect: { appearance: "none", backgroundColor: "transparent", border: "none", fontSize: "14px", paddingRight: "15px", outline: "none", cursor: "pointer", fontWeight: "700" },
   caretIcon: { position: "absolute", right: "5px", fontSize: "11px", color: "#555" },
-  searchInput: { flex: 1, border: "none", padding: "0 12px", outline: "none", fontSize: "16px", fontWeight: "500" },
-  searchButton: { backgroundColor: "#febd69", border: "none", width: "50px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
+  searchInput: { flex: 1, border: "none", padding: "0 12px", outline: "none", fontSize: "16px", fontWeight: "500", color: "#111" },
+  searchButton: { 
+    backgroundColor: "#febd69", 
+    border: "none", 
+    minWidth: "50px", // Ensured width
+    height: "100%",   // Ensured height matches container
+    cursor: "pointer", 
+    display: "flex", 
+    alignItems: "center", 
+    justifyContent: "center" 
+  },
+
   cartSection: { display: "flex", alignItems: "center", textDecoration: "none", color: "#fff", padding: "0 10px", gap: "5px" },
-  cartCount: { position: "absolute", top: "-5px", right: "10px", backgroundColor: "#131921", color: "#f08804", fontSize: "18px", fontWeight: "900", borderRadius: "50%", width: "22px", textAlign: "center" },
+  cartCount: { position: "absolute", top: "-8px", right: "12px", color: "#f08804", fontSize: "18px", fontWeight: "900" },
   avatarCircle: { width: "38px", height: "38px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.15)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.3)" },
   avatarImg: { width: "100%", height: "100%", objectFit: "cover" },
   
   customDropdown: { 
     position: 'absolute', 
-    top: '60px', 
+    top: '55px', 
     left: '-10px', 
     backgroundColor: 'white', 
     minWidth: '260px', 
@@ -243,20 +268,8 @@ const amazonStyles = {
     padding: '0 0 10px 0',
     border: '1px solid #D5D9D9'
   },
-  dropdownHeader: {
-    padding: '14px 15px',
-    backgroundColor: '#F0F2F2',
-    borderBottom: '1px solid #D5D9D9',
-    borderRadius: '8px 8px 0 0',
-    color: '#111',
-    fontWeight: '800',
-    fontSize: '15px'
-  },
-  dropdownItem: { 
-    padding: '12px 15px', 
-    cursor: 'pointer',
-    borderBottom: '1px solid #f3f3f3'
-  }
+  dropdownHeader: { padding: '14px 15px', backgroundColor: '#F0F2F2', borderBottom: '1px solid #D5D9D9', borderRadius: '8px 8px 0 0', color: '#111', fontWeight: '800', fontSize: '15px' },
+  dropdownItem: { padding: '12px 15px', cursor: 'pointer', borderBottom: '1px solid #f3f3f3' }
 };
 
 export default BuyerTopNavbar;
