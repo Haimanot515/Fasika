@@ -74,8 +74,12 @@ const styles = {
     scrollbarWidth: "none", 
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     cursor: "pointer",
-    position: "relative",
-    // Set to 100000 to be on top of everything
+    
+    // FIXED POSITIONING
+    position: "fixed",
+    top: "60px", // Adjust this based on your TopNavbar height
+    left: 0,
+    right: 0,
     zIndex: 100000 
   },
   link: {
@@ -108,8 +112,7 @@ const styles = {
     width: "100vw",
     height: "100vh",
     backgroundColor: "rgba(0,0,0,0.6)", 
-    // Set to 99999 to be just below the navbar/sidebar
-    zIndex: 9999, 
+    zIndex: 99999, // Adjusted to sit right behind the fixed navbar
     transition: "0.3s opacity ease"
   }
 };
