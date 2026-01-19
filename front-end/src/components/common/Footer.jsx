@@ -16,7 +16,7 @@ const Footer = () => {
       fontFamily: '"Segoe UI", Roboto, Arial, sans-serif',
       borderTop: '1px solid #e1e8ed',
       position: 'relative',
-      zIndex: 9999, // ✅ Higher Z-Index to stay above backgrounds
+      zIndex: 999, // ✅ Higher Z-Index to stay above backgrounds
       marginTop: 'auto'
     },
     backToTop: {
