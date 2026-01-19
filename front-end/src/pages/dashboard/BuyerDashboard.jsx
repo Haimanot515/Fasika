@@ -144,13 +144,61 @@ const BuyerMarketplace = () => {
       <div className="welcome-section" style={styles.welcomeSection}>
         <h1 style={styles.mainTitle}>Digital Gebeya Market</h1>
         <p style={styles.subTitle}>Premium fresh produce and livestock directly from verified sources.</p>
-        
+        <br />
         <div className="tab-wrapper">
           <div className={`market-tab ${activeTab === "for-you" ? "active" : ""}`} onClick={() => setActiveTab("for-you")}>For You</div>
-          <div className={`market-tab ${activeTab === "recommended" ? "active" : ""}`} onClick={() => setActiveTab("recommended")}><FaFire size={14} color={activeTab === "recommended" ? "#ff4500" : "#bbb"} /> Recommended</div>
-          <div className={`market-tab ${activeTab === "grains" ? "active" : ""}`} onClick={() => setActiveTab("grains")}><GiWheat size={16} color={activeTab === "grains" ? "#d4a373" : "#bbb"} /> Grains</div>
-          <div className={`market-tab ${activeTab === "livestock-premium" ? "active" : ""}`} onClick={() => setActiveTab("livestock-premium")}><GiSheep size={16} color={activeTab === "livestock-premium" ? "#8e8e93" : "#bbb"} /> Livestock</div>
-          <div className={`market-tab ${activeTab === "tools" ? "active" : ""}`} onClick={() => setActiveTab("tools")}><FaTractor size={14} color={activeTab === "tools" ? "#5856d6" : "#bbb"} /> Agri Tools</div>
+          
+          <div className={`market-tab ${activeTab === "recommended" ? "active" : ""}`} onClick={() => setActiveTab("recommended")}>
+            <FaFire size={14} color={activeTab === "recommended" ? "#ff4500" : "#bbb"} /> Recommended
+          </div>
+
+          <div className={`market-tab ${activeTab === "nearby" ? "active" : ""}`} onClick={() => setActiveTab("nearby")}>
+            <FaMapPin size={14} color={activeTab === "nearby" ? "#007aff" : "#bbb"} /> Nearby
+          </div>
+
+          <div className={`market-tab ${activeTab === "top-sellers" ? "active" : ""}`} onClick={() => setActiveTab("top-sellers")}>
+            <FaMedal size={14} color={activeTab === "top-sellers" ? "#ffcc00" : "#bbb"} /> Top Sellers
+          </div>
+
+          <div className={`market-tab ${activeTab === "daily-deals" ? "active" : ""}`} onClick={() => setActiveTab("daily-deals")}>
+            <FaPercentage size={14} color={activeTab === "daily-deals" ? "#ff3b30" : "#bbb"} /> Daily Deals
+          </div>
+
+          <div className={`market-tab ${activeTab === "organic" ? "active" : ""}`} onClick={() => setActiveTab("organic")}>
+            <FaLeaf size={14} color={activeTab === "organic" ? "#34c759" : "#bbb"} /> 100% Organic
+          </div>
+
+          <div className={`market-tab ${activeTab === "grains" ? "active" : ""}`} onClick={() => setActiveTab("grains")}>
+            <GiWheat size={16} color={activeTab === "grains" ? "#d4a373" : "#bbb"} /> Grains
+          </div>
+
+          <div className={`market-tab ${activeTab === "livestock-premium" ? "active" : ""}`} onClick={() => setActiveTab("livestock-premium")}>
+            <GiSheep size={16} color={activeTab === "livestock-premium" ? "#8e8e93" : "#bbb"} /> Livestock
+          </div>
+
+          <div className={`market-tab ${activeTab === "dairy" ? "active" : ""}`} onClick={() => setActiveTab("dairy")}>
+            <FaGlassWhiskey size={14} color={activeTab === "dairy" ? "#5ac8fa" : "#bbb"} /> Fresh Dairy
+          </div>
+
+          <div className={`market-tab ${activeTab === "seasonal" ? "active" : ""}`} onClick={() => setActiveTab("seasonal")}>
+            <FaCloudSun size={14} color={activeTab === "seasonal" ? "#ff9500" : "#bbb"} /> Seasonal
+          </div>
+
+          <div className={`market-tab ${activeTab === "bulk" ? "active" : ""}`} onClick={() => setActiveTab("bulk")}>
+            <FaBoxOpen size={14} color={activeTab === "bulk" ? "#af52de" : "#bbb"} /> Bulk Orders
+          </div>
+
+          <div className={`market-tab ${activeTab === "seeds" ? "active" : ""}`} onClick={() => setActiveTab("seeds")}>
+            <FaSeedling size={14} color={activeTab === "seeds" ? "#30d158" : "#bbb"} /> Seeds
+          </div>
+
+          <div className={`market-tab ${activeTab === "tools" ? "active" : ""}`} onClick={() => setActiveTab("tools")}>
+            <FaTractor size={14} color={activeTab === "tools" ? "#5856d6" : "#bbb"} /> Agri Tools
+          </div>
+
+          <div className={`market-tab ${activeTab === "new" ? "active" : ""}`} onClick={() => setActiveTab("new")}>
+            <FaClock size={14} color={activeTab === "new" ? "#007aff" : "#bbb"} /> New
+          </div>
         </div>
       </div>
 
@@ -168,7 +216,7 @@ const BuyerMarketplace = () => {
 
             <div style={styles.textHalf}>
               <h2 style={styles.productTitle}>{item.product_name}</h2>
-              
+              <br />
               {/* Description fetched from database */}
               <p className="product-description">
                 {item.description || "Premium quality product sourced from verified local suppliers. Guaranteed freshness for all orders."}
