@@ -64,12 +64,9 @@ const BuyerMarketplace = () => {
   return (
     <div style={premiumStyles.pageWrapper}>
       <style>{`
-        /* Pure White Background for the entire page */
         body, html { 
-            margin: 0; 
-            padding: 0; 
-            overflow-x: hidden; 
-            background: #ffffff; /* Changed from #f0f2f5 to pure white */
+            margin: 0; padding: 0; overflow-x: hidden; 
+            background: #ffffff; 
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
         }
         
@@ -84,11 +81,11 @@ const BuyerMarketplace = () => {
         .full-edge-grid { 
           display: grid; 
           grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-          gap: 16px; 
+          gap: 20px; 
           width: 100%;
           padding: 20px; 
           box-sizing: border-box;
-          background: #ffffff; /* Ensures grid area is white */
+          background: #ffffff;
         }
 
         .alibaba-card { 
@@ -98,15 +95,15 @@ const BuyerMarketplace = () => {
           border-radius: 12px; 
           position: relative; 
           overflow: hidden;
-          transition: all 0.2s ease-in-out;
-          border: 1px solid #eef0f2;
+          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+          border: 1px solid #f0f0f0; /* Subtle neutral border */
           cursor: pointer;
         }
         
         .alibaba-card:hover { 
-          box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-          transform: translateY(-3px);
-          border: 1px solid #ff6600;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.08); /* Soft shadow on hover */
+          transform: translateY(-4px);
+          border: 1px solid #e0e0e0; /* Neutral border change, no orange/red */
         }
 
         .image-container { 
@@ -114,7 +111,7 @@ const BuyerMarketplace = () => {
           width: 100%; 
           overflow: hidden; 
           position: relative; 
-          background: #f9f9f9; 
+          background: #fafafa; 
         }
         
         .product-img { width: 100%; height: 100%; object-fit: cover; }
@@ -131,7 +128,6 @@ const BuyerMarketplace = () => {
           border-radius: 4px; 
           z-index: 2; 
           border: 1px solid #00b411;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .alibaba-contact-btn {
@@ -139,10 +135,10 @@ const BuyerMarketplace = () => {
             margin-top: 12px;
             padding: 10px;
             border-radius: 25px;
-            border: 2px solid #ff6600;
+            border: 1px solid #ff6600; /* Thinner border */
             background: #ffffff;
             color: #ff6600;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 14px;
             cursor: pointer;
             display: flex;
@@ -219,17 +215,16 @@ const BuyerMarketplace = () => {
 };
 
 const premiumStyles = {
-  // Added backgroundColor: "#ffffff" to ensure the wrapper is pure white
   pageWrapper: { width: "100vw", minHeight: "100vh", backgroundColor: "#ffffff" },
   logo: { fontSize: "28px", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap", letterSpacing: "1px" },
   categoryItem: { fontSize: "15px", fontWeight: "700", color: "#222", cursor: "pointer" },
   textHalf: { padding: "16px", display: "flex", flexDirection: "column" },
-  productTitle: { fontSize: "18px", fontWeight: "700", color: "#111", height: "48px", overflow: "hidden", lineHeight: "1.3", marginBottom: "6px" },
-  priceRow: { display: "flex", alignItems: "baseline", gap: "3px", margin: "6px 0" },
-  priceMain: { fontSize: "22px", fontWeight: "900", color: "#000" },
-  unit: { fontSize: "14px", color: "#444", fontWeight: "600" },
-  stockInfo: { fontSize: "14px", color: "#222", fontWeight: "700", marginTop: "2px" },
-  location: { fontSize: "13px", color: "#666", fontWeight: "600", marginTop: "10px" },
+  productTitle: { fontSize: "16px", fontWeight: "600", color: "#333", height: "42px", overflow: "hidden", lineHeight: "1.3", marginBottom: "6px" },
+  priceRow: { display: "flex", alignItems: "baseline", gap: "3px", margin: "4px 0" },
+  priceMain: { fontSize: "20px", fontWeight: "800", color: "#000" },
+  unit: { fontSize: "13px", color: "#666", fontWeight: "600" },
+  stockInfo: { fontSize: "13px", color: "#444", fontWeight: "600", marginTop: "2px" },
+  location: { fontSize: "12px", color: "#888", fontWeight: "500", marginTop: "10px" },
   bottomArea: { width: "100%", padding: "50px 0", display: "flex", justifyContent: "center", background: "#ffffff" }
 };
 
