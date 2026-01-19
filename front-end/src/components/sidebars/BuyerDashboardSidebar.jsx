@@ -40,7 +40,7 @@ const BuyerDashboardSidebar = ({ isOpen, onClose }) => {
     height: "100vh",
     left: 0,
     // UPDATED Z-INDEX TO 99999
-    zIndex: 99999, 
+    zIndex: 100000, 
     overflowY: "auto",
     overflowX: "hidden",
     boxShadow: collapsed ? "none" : "15px 0 30px rgba(0,0,0,0.08)",
