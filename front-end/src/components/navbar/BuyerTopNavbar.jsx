@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaMapMarkerAlt, FaShoppingCart, FaCaretDown } from "react-icons/fa";
 import { MdOutlineAccountCircle } from "react-icons/md";
 import api from "../../api/axios";
 import DraggablePromotionPage from "../../pages/dashboard/BuyerPromotionPage";
 
-const BuyerTopNavbar = () => {
+// 1. Added onSearch prop to receive the function from Parent
+const BuyerTopNavbar = ({ onSearch }) => {
   const navigate = useNavigate();
   const [region, setRegion] = useState(localStorage.getItem("userRegion") || "Locating...");
   const [showRegionMenu, setShowRegionMenu] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
   const [userData, setUserData] = useState({ name: "", photo: null });
+  
+  // 2. State to track what the user is typing
+  const [searchValue, setSearchValue] = useState("");
   
   const regionRef = useRef(null);
 
@@ -19,6 +23,17 @@ const BuyerTopNavbar = () => {
     "Gambela", "Harari", "Oromia", "Sidama", "Somali", "South Ethiopia", 
     "South West Ethiopia", "Tigray"
   ];
+
+  // 3. Function to trigger the search
+  const handleSearchSubmit = () => {
+    if (onSearch) {
+      onSearch(searchValue); // Sends the typed text to the Marketplace
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSearchSubmit();
+  };
 
   const handleLogoClick = () => {
     setShowPromo(!showPromo);
@@ -144,7 +159,7 @@ const BuyerTopNavbar = () => {
           )}
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar - Integrated with handleSearchSubmit */}
         <div className="search-focus" style={amazonStyles.searchContainer}>
           <div style={amazonStyles.searchCategory}>
             <select style={amazonStyles.categorySelect}>
@@ -154,8 +169,20 @@ const BuyerTopNavbar = () => {
             </select>
             <FaCaretDown style={amazonStyles.caretIcon} />
           </div>
-          <input type="text" style={amazonStyles.searchInput} placeholder="Search for bulls, teff, or honey..." />
-          <button style={amazonStyles.searchButton}><FaSearch style={{ fontSize: "18px" }} /></button>
+          <input 
+            type="text" 
+            style={amazonStyles.searchInput} 
+            placeholder="Search for bulls, teff, or honey..." 
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <button 
+            style={amazonStyles.searchButton}
+            onClick={handleSearchSubmit}
+          >
+            <FaSearch style={{ fontSize: "18px" }} />
+          </button>
         </div>
 
         {/* Profile Section */}
