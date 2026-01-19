@@ -65,7 +65,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "20px",
-    backgroundColor: "#065f46", // Forest Green to match Agri Brand
+    backgroundColor: "#065f46", 
     padding: "10px 25px",
     fontFamily: "'Segoe UI', Roboto, sans-serif",
     fontSize: "14px",
@@ -75,7 +75,8 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     cursor: "pointer",
     position: "relative",
-    zIndex: 1000 
+    // Set to 100000 to be on top of everything
+    zIndex: 100000 
   },
   link: {
     textDecoration: "none",
@@ -106,8 +107,9 @@ const styles = {
     left: 0,
     width: "100vw",
     height: "100vh",
-    backgroundColor: "rgba(0,0,0,0.6)", // Darker backdrop for better focus
-    zIndex: 9999, // Sits right behind the 10000 z-index sidebar
+    backgroundColor: "rgba(0,0,0,0.6)", 
+    // Set to 99999 to be just below the navbar/sidebar
+    zIndex: 99999, 
     transition: "0.3s opacity ease"
   }
 };
