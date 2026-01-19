@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import api from "../../api/axios"; // Standardized api instance for Render deployment
+import api from "../../api/axios"; 
 import { 
   FaShieldAlt, FaMapMarkerAlt, FaStar, FaWarehouse, FaTruck, 
   FaFire, FaMapPin, FaMedal, FaPercentage, FaLeaf, FaBoxOpen, 
-  FaClock, FaSeedling, FaCloudSun, FaTractor, FaGlassWhiskey 
+  FaClock, FaSeedling, FaCloudSun, FaTractor, FaGlassWhiskey,
+  FaShoppingCart
 } from "react-icons/fa";
-import { GiCow, GiFruitBowl, GiWheat, GiSheep } from "react-icons/gi";
+import { GiWheat, GiSheep } from "react-icons/gi";
 
 const BuyerMarketplace = () => {
   const [products, setProducts] = useState([]);
@@ -15,6 +16,7 @@ const BuyerMarketplace = () => {
   useEffect(() => {
     const fetchMarketplace = async () => {
       try {
+        // Fetching data - ensure 'description' is included in your database query
         const { data } = await api.get("/buyer/marketplace/public");
         setProducts(data.data || []);
       } catch (err) {
@@ -26,69 +28,18 @@ const BuyerMarketplace = () => {
     fetchMarketplace();
   }, []);
 
-  if (loading) return <div style={styles.loader}> Loading Fasika Marketplace Grid...</div>;
+  if (loading) return <div style={styles.loader}>Loading Fasika Marketplace...</div>;
 
   return (
     <div style={styles.pageWrapper}>
       <style>{`
-        /* Global Brightness Reset */
-        body, html { margin: 0; padding: 0; background: #ffffff !important; }
-
-        .full-edge-grid { 
-          display: grid; 
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-          gap: 25px; 
-          padding: 25px; 
-          width: 100%;
-          box-sizing: border-box;
-          background: #ffffff;
+        body, html { 
+            margin: 0; padding: 0; 
+            background: #ffffff !important; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
         }
 
-        .agri-card { 
-          background: #ffffff; 
-          height: 500px; 
-          cursor: pointer; 
-          display: flex; 
-          flex-direction: column; 
-          border-radius: 12px; 
-          overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-          border: 1px solid #f2f2f2;
-          position: relative;
-          outline: none;
-          user-select: none;
-        }
-        
-        .agri-card:hover { 
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-          transform: translateY(-8px);
-          border-color: #eee;
-        }
-
-        /* Smooth Zoom Effect */
-        .image-container { 
-          height: 230px; 
-          width: 100%; 
-          overflow: hidden; 
-          position: relative; 
-          background: #ffffff; 
-        }
-        .product-img { 
-          width: 100%; 
-          height: 100%; 
-          object-fit: cover; 
-          transition: transform 0.7s ease; 
-        }
-        .agri-card:hover .product-img { 
-          transform: scale(1.15); 
-        }
-
-        .welcome-section {
-          padding: 50px 25px 0px;
-          background: #ffffff;
-          border-bottom: 1px solid #f5f5f5;
-        }
-
+        /* 1. Seamless Horizontal List (No Scrollbar) */
         .tab-wrapper {
           display: flex;
           gap: 35px;
@@ -103,7 +54,7 @@ const BuyerMarketplace = () => {
           padding-bottom: 15px;
           cursor: pointer;
           font-size: 15px;
-          font-weight: 800; 
+          font-weight: 700; 
           color: #999;
           white-space: nowrap;
           transition: 0.2s;
@@ -111,9 +62,7 @@ const BuyerMarketplace = () => {
           align-items: center;
           gap: 10px;
           position: relative;
-          flex-shrink: 0;
         }
-        .market-tab:hover { color: #111; }
         .market-tab.active { color: #000; }
         .market-tab.active::after {
           content: "";
@@ -121,96 +70,130 @@ const BuyerMarketplace = () => {
           bottom: 0;
           left: 0;
           width: 100%;
-          height: 4px;
+          height: 3px;
           background: #ff9900;
-          border-radius: 10px;
+        }
+
+        .full-edge-grid { 
+          display: grid; 
+          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+          gap: 30px; 
+          padding: 30px 25px; 
+          background: #ffffff;
+        }
+
+        /* 2. Seamless Card Look */
+        .agri-card { 
+          background: #ffffff; 
+          display: flex; 
+          flex-direction: column; 
+          position: relative;
+          transition: all 0.3s ease;
+          border: none;
+          cursor: pointer;
+          min-height: 463px; /* Added 3px to base height */
         }
         
-        button:focus, .agri-card:focus { outline: none; }
+        .agri-card:hover { 
+          box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+          transform: translateY(-5px);
+        }
+
+        /* 3. Image Zoom Effect */
+        .image-container { 
+          aspect-ratio: 1/1; 
+          width: 100%; 
+          overflow: hidden; 
+          position: relative; 
+          background: #fcfcfc; 
+          border-radius: 8px;
+        }
+        .product-img { 
+          width: 100%; 
+          height: 100%; 
+          object-fit: cover; 
+          transition: transform 0.6s ease; 
+        }
+        .agri-card:hover .product-img { 
+          transform: scale(1.12); 
+        }
+
+        .verified-badge { 
+          position: absolute; top: 10px; left: 10px; 
+          background: rgba(255,255,255,0.95); 
+          color: #00b411; padding: 3px 8px; font-size: 10px; 
+          font-weight: 800; border-radius: 4px; z-index: 2; border: 1px solid #00b411;
+        }
+
+        .product-description {
+            font-size: 13px; color: #666; line-height: 1.5; margin-top: 8px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; text-overflow: ellipsis; height: 38px;
+        }
+
+        .buy-now-btn {
+            width: 100%; margin-top: auto; padding: 12px; border-radius: 6px; 
+            border: none; background: #ff9900; color: #ffffff; 
+            font-weight: 700; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s;
+        }
+        .buy-now-btn:hover { background: #e68a00; }
       `}</style>
 
-      <div className="welcome-section">
-        <h1 style={{ color: "#000", margin: "0 0 8px 0", fontSize: "32px", fontWeight: "900", letterSpacing: "-0.5px" }}>
-          Digital Gebeya Market
-        </h1>
-        <p style={{ color: "#666", margin: 0, fontSize: "17px", fontWeight: "500" }}>
-          Premium fresh produce and livestock directly from verified sources.
-        </p>
+      <div className="welcome-section" style={styles.welcomeSection}>
+        <h1 style={styles.mainTitle}>Digital Gebeya Market</h1>
+        <p style={styles.subTitle}>Premium fresh produce and livestock directly from verified sources.</p>
         
         <div className="tab-wrapper">
           <div className={`market-tab ${activeTab === "for-you" ? "active" : ""}`} onClick={() => setActiveTab("for-you")}>For You</div>
-          <div className={`market-tab ${activeTab === "recommended" ? "active" : ""}`} onClick={() => setActiveTab("recommended")}>
-            <FaFire size={14} color={activeTab === "recommended" ? "#ff4500" : "#bbb"} /> Recommended
-          </div>
-          <div className={`market-tab ${activeTab === "nearby" ? "active" : ""}`} onClick={() => setActiveTab("nearby")}>
-            <FaMapPin size={14} color={activeTab === "nearby" ? "#007aff" : "#bbb"} /> Nearby
-          </div>
-          <div className={`market-tab ${activeTab === "top-sellers" ? "active" : ""}`} onClick={() => setActiveTab("top-sellers")}>
-            <FaMedal size={14} color={activeTab === "top-sellers" ? "#ffcc00" : "#bbb"} /> Top Sellers
-          </div>
-          <div className={`market-tab ${activeTab === "daily-deals" ? "active" : ""}`} onClick={() => setActiveTab("daily-deals")}>
-            <FaPercentage size={14} color={activeTab === "daily-deals" ? "#ff3b30" : "#bbb"} /> Daily Deals
-          </div>
-          <div className={`market-tab ${activeTab === "organic" ? "active" : ""}`} onClick={() => setActiveTab("organic")}>
-            <FaLeaf size={14} color={activeTab === "organic" ? "#34c759" : "#bbb"} /> 100% Organic
-          </div>
-          <div className={`market-tab ${activeTab === "grains" ? "active" : ""}`} onClick={() => setActiveTab("grains")}>
-            <GiWheat size={16} color={activeTab === "grains" ? "#d4a373" : "#bbb"} /> Grains
-          </div>
-          <div className={`market-tab ${activeTab === "livestock-premium" ? "active" : ""}`} onClick={() => setActiveTab("livestock-premium")}>
-            <GiSheep size={16} color={activeTab === "livestock-premium" ? "#8e8e93" : "#bbb"} /> Premium Livestock
-          </div>
-          <div className={`market-tab ${activeTab === "dairy" ? "active" : ""}`} onClick={() => setActiveTab("dairy")}>
-            <FaGlassWhiskey size={14} color={activeTab === "dairy" ? "#5ac8fa" : "#bbb"} /> Fresh Dairy
-          </div>
-          <div className={`market-tab ${activeTab === "seasonal" ? "active" : ""}`} onClick={() => setActiveTab("seasonal")}>
-            <FaCloudSun size={14} color={activeTab === "seasonal" ? "#ff9500" : "#bbb"} /> Seasonal
-          </div>
-          <div className={`market-tab ${activeTab === "bulk" ? "active" : ""}`} onClick={() => setActiveTab("bulk")}>
-            <FaBoxOpen size={14} color={activeTab === "bulk" ? "#af52de" : "#bbb"} /> Bulk Orders
-          </div>
-          <div className={`market-tab ${activeTab === "seeds" ? "active" : ""}`} onClick={() => setActiveTab("seeds")}>
-            <FaSeedling size={14} color={activeTab === "seeds" ? "#30d158" : "#bbb"} /> Seeds
-          </div>
-          <div className={`market-tab ${activeTab === "tools" ? "active" : ""}`} onClick={() => setActiveTab("tools")}>
-            <FaTractor size={14} color={activeTab === "tools" ? "#5856d6" : "#bbb"} /> Agri Tools
-          </div>
-          <div className={`market-tab ${activeTab === "new" ? "active" : ""}`} onClick={() => setActiveTab("new")}>
-            <FaClock size={14} color={activeTab === "new" ? "#007aff" : "#bbb"} /> New
-          </div>
+          <div className={`market-tab ${activeTab === "recommended" ? "active" : ""}`} onClick={() => setActiveTab("recommended")}><FaFire size={14} color={activeTab === "recommended" ? "#ff4500" : "#bbb"} /> Recommended</div>
+          <div className={`market-tab ${activeTab === "grains" ? "active" : ""}`} onClick={() => setActiveTab("grains")}><GiWheat size={16} color={activeTab === "grains" ? "#d4a373" : "#bbb"} /> Grains</div>
+          <div className={`market-tab ${activeTab === "livestock-premium" ? "active" : ""}`} onClick={() => setActiveTab("livestock-premium")}><GiSheep size={16} color={activeTab === "livestock-premium" ? "#8e8e93" : "#bbb"} /> Livestock</div>
+          <div className={`market-tab ${activeTab === "tools" ? "active" : ""}`} onClick={() => setActiveTab("tools")}><FaTractor size={14} color={activeTab === "tools" ? "#5856d6" : "#bbb"} /> Agri Tools</div>
         </div>
       </div>
 
       <div className="full-edge-grid">
         {products.map((item) => (
-          <div key={item.id} className="agri-card" tabIndex="0">
+          <div key={item.id} className="agri-card">
             <div className="image-container">
               <img 
-                src={item.primary_image_url || "https://images.unsplash.com/photo-1546501078-c53c82990ddd?q=80&w=300&auto=format&fit=crop"} 
+                src={item.primary_image_url || "https://via.placeholder.com/300"} 
                 alt={item.product_name} 
                 className="product-img" 
               />
-              {/* Badges removed from here */}
+              <div className="verified-badge"><FaShieldAlt size={10} /> VERIFIED</div>
             </div>
 
             <div style={styles.textHalf}>
               <h2 style={styles.productTitle}>{item.product_name}</h2>
+              
+              {/* Description fetched from database */}
+              <p className="product-description">
+                {item.description || "Premium quality product sourced from verified local suppliers. Guaranteed freshness for all orders."}
+              </p>
+
               <div style={styles.priceRow}>
                 <span style={styles.priceMain}>ETB {item.price_per_unit}</span>
                 <span style={styles.unit}>/ {item.unit || 'Qtl'}</span>
               </div>
+
               <div style={styles.infoRow}>
                 <span><FaWarehouse size={12}/> Stock: <b>{item.quantity}</b></span>
-                <span><FaTruck size={12}/> Ready</span>
+                <div style={styles.ratingRow}>
+                   <FaStar color="#ffcc00" size={12} />
+                   <span style={{fontSize: '12px', fontWeight: '700'}}>4.8</span>
+                </div>
               </div>
+
               <div style={styles.location}>
                 <FaMapMarkerAlt size={11} /> {item.location || "Ethiopia"}
               </div>
-              <div style={styles.ratingRow}>
-                {[...Array(5)].map((_, i) => <FaStar key={i} color="#ffcc00" size={13} />)}
-                <span style={{fontSize: '12px', color: '#111', fontWeight: '700', marginLeft: '5px'}}>4.8</span>
-              </div>
-              <button style={styles.contactBtn}>Contact Supplier</button>
+
+              <button className="buy-now-btn">
+                <FaShoppingCart size={14} /> Buy Now
+              </button>
             </div>
           </div>
         ))}
@@ -221,20 +204,18 @@ const BuyerMarketplace = () => {
 
 const styles = {
   pageWrapper: { width: "100%", background: "#ffffff", minHeight: "100vh" },
-  textHalf: { padding: "20px", display: "flex", flexDirection: "column", flex: 1, gap: '10px' },
-  productTitle: { fontSize: "20px", fontWeight: "800", color: "#000", margin: 0, letterSpacing: "-0.3px" },
-  priceRow: { display: "flex", alignItems: "baseline", gap: "5px" },
-  priceMain: { fontSize: "28px", fontWeight: "900", color: "#000" },
-  unit: { fontSize: "15px", color: "#666", fontWeight: "600" },
-  infoRow: { display: 'flex', gap: '15px', fontSize: '14px', color: '#111', fontWeight: '500' },
-  location: { fontSize: "13px", color: "#888", display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '600' },
+  welcomeSection: { padding: "40px 25px 0px", background: "#ffffff" },
+  mainTitle: { color: "#000", margin: "0 0 8px 0", fontSize: "28px", fontWeight: "900", letterSpacing: "-0.5px" },
+  subTitle: { color: "#666", margin: 0, fontSize: "16px", fontWeight: "500" },
+  textHalf: { padding: "12px 0px", display: "flex", flexDirection: "column", flex: 1 },
+  productTitle: { fontSize: "16px", fontWeight: "700", color: "#111", margin: 0 },
+  priceRow: { display: "flex", alignItems: "baseline", gap: "5px", margin: "8px 0 4px" },
+  priceMain: { fontSize: "20px", fontWeight: "800", color: "#000" },
+  unit: { fontSize: "13px", color: "#666", fontWeight: "600" },
+  infoRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#444' },
+  location: { fontSize: "11px", color: "#999", display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px', marginBottom: '12px' },
   ratingRow: { display: "flex", alignItems: 'center', gap: "3px" },
-  contactBtn: { 
-    width: "100%", marginTop: "auto", padding: "15px", borderRadius: "30px", border: "none", 
-    color: "#fff", background: "linear-gradient(90deg, #ff9000 0%, #ff5000 100%)", fontWeight: "900", fontSize: "15px", cursor: 'pointer', outline: 'none',
-    boxShadow: "0 10px 20px rgba(255, 80, 0, 0.2)"
-  },
-  loader: { textAlign: 'center', padding: '100px', fontSize: '20px', color: '#111', fontWeight: '900' }
+  loader: { textAlign: 'center', padding: '100px', fontSize: '18px', fontWeight: '800' }
 };
 
 export default BuyerMarketplace;
