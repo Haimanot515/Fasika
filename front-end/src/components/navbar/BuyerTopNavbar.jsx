@@ -1,263 +1,137 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaSearch, FaMapMarkerAlt, FaShoppingCart, FaCaretDown } from "react-icons/fa";
-import { MdOutlineAccountCircle } from "react-icons/md";
-import api from "../../api/axios";
-import DraggablePromotionPage from "../../pages/dashboard/BuyerPromotionPage";
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { FaBars } from "react-icons/fa";
+import { MdDashboard } from "react-icons/md"; 
 
-const BuyerTopNavbar = () => {
-  const navigate = useNavigate();
-  const [region, setRegion] = useState(localStorage.getItem("userRegion") || "Locating...");
-  const [showRegionMenu, setShowRegionMenu] = useState(false);
-  const [showPromo, setShowPromo] = useState(false);
-  const [userData, setUserData] = useState({ name: "", photo: null });
+// IMPORT THE SIDEBAR
+import BuyerDashboardSidebar from "../sidebars/BuyerDashboardSidebar"; 
+
+const SecondaryNavbar = () => {
+  const location = useLocation();
   
-  const regionRef = useRef(null);
+  // STATE TO CONTROL SIDEBAR VISIBILITY
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const ethiopianRegions = [
-    "Addis Ababa", "Afar", "Amhara", "Benishangul-Gumuz", "Dire Dawa", 
-    "Gambela", "Harari", "Oromia", "Sidama", "Somali", "South Ethiopia", 
-    "South West Ethiopia", "Tigray"
-  ];
-
-  const handleLogoClick = () => {
-    setShowPromo(!showPromo);
-    navigate("/dashboard");
-  };
-
-  useEffect(() => {
-    if (!localStorage.getItem("userRegion") && "geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          try {
-            const response = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-            );
-            const data = await response.json();
-            const placeName = data.city || data.locality || data.principalSubdivision || "Addis Ababa";
-            setRegion(placeName);
-            localStorage.setItem("userRegion", placeName);
-          } catch (error) {
-            setRegion("Addis Ababa");
-          }
-        },
-        () => setRegion("Addis Ababa")
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get('/farmers/profile');
-        if (res.data && res.data.success) {
-          const profile = res.data.data;
-          setUserData({
-            name: profile.full_name || profile.farm_name || "Buyer",
-            photo: profile.photo_url || null 
-          });
-        }
-      } catch (err) {
-        console.error("Could not load nav profile data", err);
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (regionRef.current && !regionRef.current.contains(event.target)) {
-        setShowRegionMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleRegionSelect = (selected) => {
-    setRegion(selected);
-    localStorage.setItem("userRegion", selected);
-    setShowRegionMenu(false);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
     <>
-      <nav style={amazonStyles.navbar}>
+      <nav style={styles.navBar}>
         <style>{`
-          .nav-hover:hover { border: 1px solid #fff !important; border-radius: 2px; }
-          .search-focus:focus-within { box-shadow: 0 0 0 2px #f08804; }
-          .logo-btn { cursor: pointer; user-select: none; }
-          .region-item { color: #111; font-size: 13px; transition: background 0.1s; }
-          .region-item:hover { background: #F0F2F2; color: #c45500 !important; }
-          
-          /* Amazon Dropdown Arrow */
-          .amazon-arrow {
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            width: 0; 
-            height: 0; 
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 10px solid white;
-            z-index: 1000000;
+          .secondary-link:hover {
+            border: 1px solid #fff !important;
+            background-color: rgba(255, 255, 255, 0.2);
+          }
+          /* Hide scrollbar */
+          .nav-scroll::-webkit-scrollbar {
+            display: none;
           }
         `}</style>
 
-        {/* Logo */}
-        <div onClick={handleLogoClick} className="nav-hover logo-btn" style={amazonStyles.logo}>
-          fasika<span style={{ color: "#febd69" }}>.et</span>
-        </div>
-
-        {/* Location Section */}
+        {/* "ALL" BUTTON - TOGGLES SIDEBAR ON CLICK */}
         <div 
-          className="nav-hover" 
-          style={{ ...amazonStyles.navSection, position: 'relative' }} 
-          ref={regionRef}
-          onClick={() => setShowRegionMenu(!showRegionMenu)}
+          onClick={toggleSidebar} 
+          className="secondary-link"
+          style={isSidebarOpen ? styles.activeLink : styles.link}
         >
-          <FaMapMarkerAlt style={amazonStyles.locationIcon} />
-          <div style={amazonStyles.navTextContainer}>
-            <span style={amazonStyles.lineOne}>Deliver to</span>
-            <span style={amazonStyles.lineTwo}>{region}</span>
-          </div>
-
-          {showRegionMenu && (
-            <div style={amazonStyles.customDropdown}>
-              <div className="amazon-arrow"></div>
-              <div style={amazonStyles.dropdownHeader}>
-                Choose your location
-              </div>
-              <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
-                {ethiopianRegions.map(reg => (
-                  <div 
-                    key={reg} 
-                    className="region-item"
-                    style={amazonStyles.dropdownItem}
-                    onClick={(e) => { e.stopPropagation(); handleRegionSelect(reg); }}
-                  >
-                    {reg}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <FaBars style={{ marginRight: "8px" }} /> All
+        </div>
+        
+        <Link to="/marketplace" className="secondary-link" style={styles.link}>Marketplace</Link>
+        <Link to="/market-prices" className="secondary-link" style={styles.link}>Market Prices</Link>
+        <Link to="/trending" className="secondary-link" style={styles.link}>Trending</Link>
+        <Link to="/recommended" className="secondary-link" style={styles.link}>Recommended</Link>
+        
+        {/* DASHBOARD LINK - ALSO TOGGLES SIDEBAR */}
+        <div 
+          onClick={toggleSidebar}
+          className="secondary-link"
+          style={isSidebarOpen || location.pathname.includes("/dashboard") ? styles.activeLink : styles.link}
+        >
+          <MdDashboard style={{ marginRight: "8px", fontSize: "20px" }} /> Dashboard
         </div>
 
-        {/* Search Bar */}
-        <div className="search-focus" style={amazonStyles.searchContainer}>
-          <div style={amazonStyles.searchCategory}>
-            <select style={amazonStyles.categorySelect}>
-              <option>All</option>
-              <option>Livestock</option>
-              <option>Grains</option>
-            </select>
-            <FaCaretDown style={amazonStyles.caretIcon} />
-          </div>
-          <input type="text" style={amazonStyles.searchInput} placeholder="Search for bulls, teff, or honey..." />
-          <button style={amazonStyles.searchButton}><FaSearch style={{ fontSize: "18px" }} /></button>
-        </div>
-
-        {/* Profile Section */}
-        <div className="nav-hover" style={amazonStyles.navSection}>
-          <div style={amazonStyles.navTextContainer}>
-            <span style={amazonStyles.lineOne}>Hello, {userData.name ? userData.name.split(' ')[0] : "Sign in"}</span>
-            <span style={amazonStyles.lineTwo}>Account & Lists <FaCaretDown style={{ fontSize: "10px" }} /></span>
-          </div>
-          <div style={amazonStyles.avatarCircle}>
-            {userData.photo ? (
-              <img src={userData.photo} alt="User" style={amazonStyles.avatarImg} />
-            ) : (
-              <MdOutlineAccountCircle size={30} color="white" />
-            )}
-          </div>
-        </div>
-
-        {/* Orders & Cart */}
-        <Link to="/orders" className="nav-hover" style={amazonStyles.navSectionLink}>
-          <div style={amazonStyles.navTextContainer}>
-            <span style={amazonStyles.lineOne}>Returns</span>
-            <span style={amazonStyles.lineTwo}>& Orders</span>
-          </div>
-        </Link>
-
-        <Link to="/cart" className="nav-hover" style={amazonStyles.cartSection}>
-          <div style={{ position: "relative" }}>
-            <FaShoppingCart style={{ fontSize: "32px" }} />
-            <span style={amazonStyles.cartCount}>3</span>
-          </div>
-          <span style={{ ...amazonStyles.lineTwo, marginTop: "12px" }}>Cart</span>
-        </Link>
+        <Link to="/support" className="secondary-link" style={styles.link}>Help/Support</Link>
       </nav>
 
-      {/* Promo Overlay */}
-      {showPromo && (
-        <div style={overlayStyles.wrapper}>
-          <div style={overlayStyles.header}>
-            <span>Marketplace Promotions</span>
-            <button style={overlayStyles.closeBtn} onClick={() => setShowPromo(false)}>CLOSE [DROP]</button>
-          </div>
-          <DraggablePromotionPage />
-        </div>
+      {/* THE SIDEBAR COMPONENT */}
+      <BuyerDashboardSidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
+
+      {/* DARK OVERLAY (DROPS when sidebar closes) */}
+      {isSidebarOpen && (
+        <div 
+          style={styles.overlay} 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
       )}
     </>
   );
 };
 
-const overlayStyles = {
-    wrapper: { position: 'fixed', top: '60px', left: 0, width: '100%', height: 'calc(100vh - 60px)', zIndex: 100003, backgroundColor: '#f0f2f2', overflowY: 'auto' },
-    header: { background: '#232f3e', color: 'white', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', fontWeight: 'bold' },
-    closeBtn: { background: '#e74c3c', border: 'none', color: 'white', padding: '5px 15px', borderRadius: '4px', cursor: 'pointer' }
-};
-
-const amazonStyles = {
-  navbar: { display: "flex", alignItems: "center", backgroundColor: "#131921", padding: "8px 20px", gap: "15px", height: "60px", color: "#fff", position: "fixed", top: 0, left: 0, right: 0, zIndex: 10000 },
-  logo: { textDecoration: "none", color: "#fff", fontSize: "24px", fontWeight: "bold", padding: "6px 12px", border: "1px solid transparent" },
-  navSection: { display: "flex", alignItems: "center", padding: "6px 10px", cursor: "pointer", border: "1px solid transparent", gap: "8px" },
-  navSectionLink: { textDecoration: "none", color: "#fff", padding: "6px 10px", border: "1px solid transparent" },
-  locationIcon: { fontSize: "18px", marginTop: "8px" },
-  navTextContainer: { display: "flex", flexDirection: "column" },
-  lineOne: { fontSize: "12px", color: "#ccc" },
-  lineTwo: { fontSize: "14px", fontWeight: "bold" },
-  searchContainer: { display: "flex", flex: 1, height: "40px", borderRadius: "4px", overflow: "hidden", backgroundColor: "#fff", margin: "0 10px" },
-  searchCategory: { display: "flex", alignItems: "center", backgroundColor: "#f3f3f3", padding: "0 10px", borderRight: "1px solid #bbb", position: "relative" },
-  categorySelect: { appearance: "none", backgroundColor: "transparent", border: "none", fontSize: "12px", paddingRight: "15px", outline: "none", cursor: "pointer" },
-  caretIcon: { position: "absolute", right: "5px", fontSize: "10px", color: "#555" },
-  searchInput: { flex: 1, border: "none", padding: "0 10px", outline: "none", fontSize: "15px" },
-  searchButton: { backgroundColor: "#febd69", border: "none", width: "45px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
-  cartSection: { display: "flex", alignItems: "center", textDecoration: "none", color: "#fff", padding: "0 10px", gap: "5px" },
-  cartCount: { position: "absolute", top: "-5px", right: "10px", backgroundColor: "#131921", color: "#f08804", fontSize: "16px", fontWeight: "bold", borderRadius: "50%", width: "20px", textAlign: "center" },
-  avatarCircle: { width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.15)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.3)" },
-  avatarImg: { width: "100%", height: "100%", objectFit: "cover" },
-  
-  // UPDATED: AMAZON-LIKE LOCATION DROPDOWN
-  customDropdown: { 
-    position: 'absolute', 
-    top: '55px', 
-    left: '-10px', 
-    backgroundColor: 'white', 
-    minWidth: '240px', 
-    boxShadow: '0 4px 20px rgba(0,0,0,0.35)', 
-    borderRadius: '8px', 
-    zIndex: 999999, // HIGHEST TO BE ABOVE ALL
-    padding: '0 0 10px 0',
-    border: '1px solid #D5D9D9'
+const styles = {
+  navBar: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    backgroundColor: "#10b981", // BRIGHTER EMERALD GREEN
+    padding: "8px 25px",
+    paddingLeft: "45px", // CONTENT SHIFTED TO THE RIGHT
+    fontFamily: "'Segoe UI', Roboto, sans-serif",
+    fontSize: "16px", // BIGGER FONT
+    overflowX: "auto",
+    whiteSpace: "nowrap",
+    msOverflowStyle: "none",
+    scrollbarWidth: "none",
+    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    cursor: "pointer",
+    
+    // FIXED POSITIONING
+    position: "fixed",
+    top: "70px", // Updated to match your TopNavbar's new height
+    left: 0,
+    right: 0,
+    zIndex: 100000 
   },
-  dropdownHeader: {
-    padding: '12px 15px',
-    backgroundColor: '#F0F2F2',
-    borderBottom: '1px solid #D5D9D9',
-    borderRadius: '8px 8px 0 0',
-    color: '#111',
-    fontWeight: '700',
-    fontSize: '14px'
+  link: {
+    textDecoration: "none",
+    color: "#ffffff", // CRISP WHITE
+    padding: "8px 14px",
+    display: "flex",
+    alignItems: "center",
+    border: "1px solid transparent",
+    borderRadius: "4px",
+    transition: "0.2s",
+    userSelect: "none",
+    fontWeight: "700", // EXTRA BOLD TO MATCH TOP
+    textShadow: "0px 1px 2px rgba(0,0,0,0.1)" // LIGHT SHADOW FOR READABILITY
   },
-  dropdownItem: { 
-    padding: '12px 15px', 
-    cursor: 'pointer',
-    borderBottom: '1px solid #f3f3f3'
+  activeLink: {
+    textDecoration: "none",
+    color: "#fff",
+    fontWeight: "800",
+    padding: "8px 14px",
+    display: "flex",
+    alignItems: "center",
+    border: "1px solid #fff", 
+    borderRadius: "4px",
+    backgroundColor: "rgba(255, 255, 255, 0.25)", // BRIGHTER ACTIVE STATE
+    userSelect: "none"
+  },
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0,0,0,0.6)", 
+    zIndex: 99999, 
+    transition: "0.3s opacity ease"
   }
 };
 
-export default BuyerTopNavbar;
+export default SecondaryNavbar;
