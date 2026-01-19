@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom"; // Added useNavigate
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaMapMarkerAlt, FaShoppingCart, FaCaretDown } from "react-icons/fa";
 import { MdOutlineAccountCircle } from "react-icons/md";
 import api from "../../api/axios";
 import DraggablePromotionPage from "../../pages/dashboard/BuyerPromotionPage";
 
 const BuyerTopNavbar = () => {
-  const navigate = useNavigate(); // Hook for programmatic navigation
+  const navigate = useNavigate();
   const [region, setRegion] = useState(localStorage.getItem("userRegion") || "Locating...");
   const [showRegionMenu, setShowRegionMenu] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
@@ -20,13 +20,11 @@ const BuyerTopNavbar = () => {
     "South West Ethiopia", "Tigray"
   ];
 
-  // Function to handle Logo Click
   const handleLogoClick = () => {
-    setShowPromo(!showPromo); // Toggle Promotion Page
-    navigate("/dashboard");   // Redirect to Dashboard
+    setShowPromo(!showPromo);
+    navigate("/dashboard");
   };
 
-  // 1. Auto-Location Logic
   useEffect(() => {
     if (!localStorage.getItem("userRegion") && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -49,7 +47,6 @@ const BuyerTopNavbar = () => {
     }
   }, []);
 
-  // 2. Profile Logic
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -68,7 +65,6 @@ const BuyerTopNavbar = () => {
     fetchProfile();
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (regionRef.current && !regionRef.current.contains(event.target)) {
@@ -95,12 +91,8 @@ const BuyerTopNavbar = () => {
           .region-item:hover { background: #f3f3f3; color: #131921; }
         `}</style>
 
-        {/* Logo - Navigates to Dashboard & Toggles Promo */}
-        <div 
-          onClick={handleLogoClick} 
-          className="nav-hover logo-btn" 
-          style={amazonStyles.logo}
-        >
+        {/* Logo */}
+        <div onClick={handleLogoClick} className="nav-hover logo-btn" style={amazonStyles.logo}>
           fasika<span style={{ color: "#febd69" }}>.et</span>
         </div>
 
@@ -197,13 +189,13 @@ const BuyerTopNavbar = () => {
 };
 
 const overlayStyles = {
-    wrapper: { position: 'fixed', top: '60px', left: 0, width: '100%', height: 'calc(100vh - 60px)', zIndex: 15000, backgroundColor: '#f0f2f2', overflowY: 'auto' },
+    wrapper: { position: 'fixed', top: '60px', left: 0, width: '100%', height: 'calc(100vh - 60px)', zIndex: 100003, backgroundColor: '#f0f2f2', overflowY: 'auto' },
     header: { background: '#232f3e', color: 'white', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', fontWeight: 'bold' },
     closeBtn: { background: '#e74c3c', border: 'none', color: 'white', padding: '5px 15px', borderRadius: '4px', cursor: 'pointer' }
 };
 
 const amazonStyles = {
-  navbar: { display: "flex", alignItems: "center", backgroundColor: "#131921", padding: "8px 20px", gap: "15px", height: "60px", color: "#fff", position: "sticky", top: 0, zIndex: 11000 },
+  navbar: { display: "flex", alignItems: "center", backgroundColor: "#131921", padding: "8px 20px", gap: "15px", height: "60px", color: "#fff", position: "fixed", top: 0, left: 0, right: 0, zIndex: 100001 },
   logo: { textDecoration: "none", color: "#fff", fontSize: "24px", fontWeight: "bold", padding: "6px 12px", border: "1px solid transparent" },
   navSection: { display: "flex", alignItems: "center", padding: "6px 10px", cursor: "pointer", border: "1px solid transparent", gap: "8px" },
   navSectionLink: { textDecoration: "none", color: "#fff", padding: "6px 10px", border: "1px solid transparent" },
@@ -221,7 +213,7 @@ const amazonStyles = {
   cartCount: { position: "absolute", top: "-5px", right: "10px", backgroundColor: "#131921", color: "#f08804", fontSize: "16px", fontWeight: "bold", borderRadius: "50%", width: "20px", textAlign: "center" },
   avatarCircle: { width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.15)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.3)" },
   avatarImg: { width: "100%", height: "100%", objectFit: "cover" },
-  customDropdown: { position: 'absolute', top: '55px', left: '0', backgroundColor: 'white', color: '#333', minWidth: '180px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', borderRadius: '4px', zIndex: 20000, maxHeight: '300px', overflowY: 'auto' },
+  customDropdown: { position: 'absolute', top: '55px', left: '0', backgroundColor: 'white', color: '#333', minWidth: '180px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', borderRadius: '4px', zIndex: 100002, maxHeight: '300px', overflowY: 'auto' },
   dropdownItem: { padding: '10px 15px', fontSize: '13px', cursor: 'pointer', transition: 'background 0.2s' }
 };
 
