@@ -40,7 +40,7 @@ const SecondaryNavbar = () => {
           <MdDashboard style={{ marginRight: "8px", fontSize: "18px" }} /> Dashboard
         </div>
 
-        <Link to="/help-support" style={styles.link}>Help/Support</Link>
+        <Link to="/support" style={styles.link}>Help/Support</Link>
       </nav>
 
       {/* THE SIDEBAR COMPONENT */}
