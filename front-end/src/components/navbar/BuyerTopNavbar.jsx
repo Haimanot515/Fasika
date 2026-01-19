@@ -195,7 +195,7 @@ const overlayStyles = {
 };
 
 const amazonStyles = {
-  navbar: { display: "flex", alignItems: "center", backgroundColor: "#131921", padding: "8px 20px", gap: "15px", height: "60px", color: "#fff", position: "fixed", top: 0, left: 0, right: 0, zIndex: 100001 },
+  navbar: { display: "flex", alignItems: "center", backgroundColor: "#131921", padding: "8px 20px", gap: "15px", height: "60px", color: "#fff", position: "fixed", top: 0, left: 0, right: 0, zIndex: 10000 },
   logo: { textDecoration: "none", color: "#fff", fontSize: "24px", fontWeight: "bold", padding: "6px 12px", border: "1px solid transparent" },
   navSection: { display: "flex", alignItems: "center", padding: "6px 10px", cursor: "pointer", border: "1px solid transparent", gap: "8px" },
   navSectionLink: { textDecoration: "none", color: "#fff", padding: "6px 10px", border: "1px solid transparent" },
