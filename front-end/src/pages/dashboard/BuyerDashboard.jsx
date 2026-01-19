@@ -8,7 +8,8 @@ import {
 } from "react-icons/fa";
 import { GiWheat, GiSheep } from "react-icons/gi";
 
-const BuyerMarketplace = () => {
+// 1. Accept 'searchTerm' as a prop
+const BuyerMarketplace = ({ searchTerm = "" }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("for-you");
@@ -16,8 +17,9 @@ const BuyerMarketplace = () => {
   useEffect(() => {
     const fetchMarketplace = async () => {
       try {
-        // Fetching data - ensure 'description' is included in your database query
-        const { data } = await api.get("/buyer/marketplace/public");
+        setLoading(true);
+        // 2. Pass the searchTerm to your database via query params
+        const { data } = await api.get(`/buyer/marketplace/public?search=${searchTerm}`);
         setProducts(data.data || []);
       } catch (err) {
         console.error("Marketplace Fetch Error:", err);
@@ -25,8 +27,9 @@ const BuyerMarketplace = () => {
         setLoading(false);
       }
     };
+    
     fetchMarketplace();
-  }, []);
+  }, [searchTerm]); // 3. Re-run whenever the search term changes
 
   if (loading) return <div style={styles.loader}>Loading Fasika Marketplace...</div>;
 
@@ -144,7 +147,7 @@ const BuyerMarketplace = () => {
       <div className="welcome-section" style={styles.welcomeSection}>
         <h1 style={styles.mainTitle}>Digital Gebeya Market</h1>
         <p style={styles.subTitle}>Premium fresh produce and livestock directly from verified sources.</p>
-        <br />
+        <br /><br />
         <div className="tab-wrapper">
           <div className={`market-tab ${activeTab === "for-you" ? "active" : ""}`} onClick={() => setActiveTab("for-you")}>For You</div>
           
@@ -216,8 +219,7 @@ const BuyerMarketplace = () => {
 
             <div style={styles.textHalf}>
               <h2 style={styles.productTitle}>{item.product_name}</h2>
-              <br />
-              {/* Description fetched from database */}
+              <br /><br />
               <p className="product-description">
                 {item.description || "Premium quality product sourced from verified local suppliers. Guaranteed freshness for all orders."}
               </p>
