@@ -64,57 +64,42 @@ const BuyerMarketplace = () => {
   return (
     <div style={premiumStyles.pageWrapper}>
       <style>{`
-        /* 1. Pure White Background & No Corners */
-        body, html { 
-          margin: 0; 
-          padding: 0; 
-          overflow-x: hidden; 
-          background: #ffffff !important; 
-          font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-        }
+        /* High Brightness Background */
+        body, html { margin: 0; padding: 0; overflow-x: hidden; background: #f0f2f5; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         
-        /* Keep Header Unchanged but Remove Corners from Search */
-        .amazon-header { background-color: #000000; padding: 12px 20px; display: flex; align-items: center; gap: 30px; position: sticky; top: 0; z-index: 1001; }
-        
-        .search-container-amazon { 
-          display: flex; flex: 1; max-width: 700px; height: 42px; 
-          border-radius: 0px; /* Removed corners */
-          overflow: hidden; background-color: #ffffff; border: 1px solid #000; 
-        }
-        .search-input-amazon { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 16px; color: #000; font-weight: 600; }
+        .amazon-header { background-color: #000000; padding: 12px 20px; display: flex; align-items: center; gap: 30px; position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .search-container-amazon { display: flex; flex: 1; max-width: 700px; height: 42px; border-radius: 6px; overflow: hidden; background-color: #ffffff; border: 1px solid #ddd; }
+        .search-input-amazon { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; color: #111; }
         .search-button-amazon { background-color: #ff9900; border: none; width: 55px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #fff; }
         
-        .category-scroll-wrapper { background: #ffffff; padding: 15px 20px; overflow-x: auto; white-space: nowrap; display: flex; gap: 30px; border-bottom: 2px solid #f0f0f0; }
+        .category-scroll-wrapper { background: #ffffff; padding: 14px 20px; overflow-x: auto; white-space: nowrap; display: flex; gap: 30px; border-bottom: 1px solid #e5e5e5; }
         .category-scroll-wrapper::-webkit-scrollbar { display: none; }
 
-        /* Sharp Grid */
         .full-edge-grid { 
           display: grid; 
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-          gap: 1px; /* Minimal gap for a high-density market look */
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+          gap: 16px; 
           width: 100%;
-          padding: 0px; 
-          background-color: #f0f0f0; /* Creates fine lines between white cards */
+          padding: 20px; 
           box-sizing: border-box;
         }
 
-        /* 2. Sharp Corners (avoid corners) & Pure White */
         .alibaba-card { 
           background: #ffffff; 
           display: flex; 
           flex-direction: column; 
-          border-radius: 0px; /* Sharp edges */
+          border-radius: 12px; 
           position: relative; 
           overflow: hidden;
-          transition: background 0.2s;
-          border: none;
+          transition: all 0.2s ease-in-out;
+          border: 1px solid #eef0f2;
           cursor: pointer;
         }
         
         .alibaba-card:hover { 
-          background: #fdfdfd;
-          outline: 2px solid #ff6600;
-          z-index: 10;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+          transform: translateY(-3px);
+          border: 1px solid #ff6600;
         }
 
         .image-container { 
@@ -122,46 +107,47 @@ const BuyerMarketplace = () => {
           width: 100%; 
           overflow: hidden; 
           position: relative; 
-          background: #ffffff; 
+          background: #f9f9f9; 
         }
         
         .product-img { width: 100%; height: 100%; object-fit: cover; }
 
         .verified-badge { 
           position: absolute; 
-          top: 0; 
-          left: 0; 
-          background: #00b411; 
-          color: #ffffff; 
-          padding: 4px 10px; 
-          font-size: 12px; 
+          top: 10px; 
+          left: 10px; 
+          background: #ffffff; 
+          color: #00b411; 
+          padding: 3px 8px; 
+          font-size: 11px; 
           font-weight: 900; 
-          border-radius: 0px; /* Sharp edge */
+          border-radius: 4px; 
           z-index: 2; 
+          border: 1px solid #00b411;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* 3. High Brightness Contact Button */
         .alibaba-contact-btn {
             width: 100%;
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 0px; /* Sharp edge */
-            border: none;
-            background: #ff6600;
-            color: #ffffff;
-            font-weight: 900;
-            font-size: 15px;
-            text-transform: uppercase;
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 25px;
+            border: 2px solid #ff6600;
+            background: #ffffff;
+            color: #ff6600;
+            font-weight: 800;
+            font-size: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            transition: all 0.2s;
         }
-        .alibaba-contact-btn:hover { background: #e65c00; }
+        .alibaba-contact-btn:hover { background: #ff6600; color: #ffffff; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-spinner { width: 40px; height: 40px; border: 5px solid #f3f3f3; border-top: 5px solid #ff6600; border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-spinner { width: 32px; height: 32px; border: 4px solid #f3f3f3; border-top: 4px solid #ff5000; border-radius: 50%; animation: spin 1s linear infinite; }
       `}</style>
       
       <div className="amazon-header">
@@ -196,7 +182,7 @@ const BuyerMarketplace = () => {
                 alt={item.product_name} 
                 className="product-img" 
               />
-              <div className="verified-badge"><FaShieldAlt size={14} /> VERIFIED</div>
+              <div className="verified-badge"><FaShieldAlt size={12} /> VERIFIED</div>
             </div>
 
             <div style={premiumStyles.textHalf}>
@@ -205,10 +191,10 @@ const BuyerMarketplace = () => {
                 <span style={premiumStyles.priceMain}>ETB {item.price_per_unit}</span>
                 <span style={premiumStyles.unit}>/{item.unit || 'Qtl'}</span>
               </div>
-              <div style={premiumStyles.stockInfo}>STOCK: {item.quantity} UNITS</div>
-              <div style={premiumStyles.location}><FaMapMarkerAlt size={13} /> ETHIOPIA</div>
+              <div style={premiumStyles.stockInfo}>Stock: {item.quantity} units</div>
+              <div style={premiumStyles.location}><FaMapMarkerAlt size={12} /> Ethiopia</div>
               <button className="alibaba-contact-btn">
-                <FaEnvelope /> CONTACT SUPPLIER
+                <FaEnvelope /> Contact Supplier
               </button>
             </div>
           </div>
@@ -218,7 +204,7 @@ const BuyerMarketplace = () => {
       <div style={premiumStyles.bottomArea}>
         {loading && <div className="loading-spinner"></div>}
         {!hasMore && products.length > 0 && (
-          <span style={{color: '#000', fontSize: '18px', fontWeight: '900'}}>END OF RESULTS</span>
+          <span style={{color: '#888', fontSize: '16px', fontWeight: '700'}}>End of results</span>
         )}
       </div>
     </div>
@@ -226,17 +212,17 @@ const BuyerMarketplace = () => {
 };
 
 const premiumStyles = {
-  pageWrapper: { width: "100vw", minHeight: "100vh", background: "#ffffff" },
+  pageWrapper: { width: "100vw", minHeight: "100vh" },
   logo: { fontSize: "28px", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap", letterSpacing: "1px" },
-  categoryItem: { fontSize: "16px", fontWeight: "800", color: "#000", cursor: "pointer", textTransform: "uppercase" },
-  textHalf: { padding: "20px", display: "flex", flexDirection: "column", background: "#ffffff" },
-  productTitle: { fontSize: "20px", fontWeight: "800", color: "#000", height: "52px", overflow: "hidden", lineHeight: "1.3", marginBottom: "8px", textTransform: "uppercase" },
-  priceRow: { display: "flex", alignItems: "baseline", gap: "4px", margin: "8px 0" },
-  priceMain: { fontSize: "26px", fontWeight: "900", color: "#ff6600" }, // Bright orange price
-  unit: { fontSize: "16px", color: "#000", fontWeight: "700" },
-  stockInfo: { fontSize: "14px", color: "#000", fontWeight: "800", marginTop: "4px" },
-  location: { fontSize: "14px", color: "#666", fontWeight: "700", marginTop: "12px" },
-  bottomArea: { width: "100%", padding: "60px 0", display: "flex", justifyContent: "center", background: "#ffffff" }
+  categoryItem: { fontSize: "15px", fontWeight: "700", color: "#222", cursor: "pointer" },
+  textHalf: { padding: "16px", display: "flex", flexDirection: "column" },
+  productTitle: { fontSize: "18px", fontWeight: "700", color: "#111", height: "48px", overflow: "hidden", lineHeight: "1.3", marginBottom: "6px" },
+  priceRow: { display: "flex", alignItems: "baseline", gap: "3px", margin: "6px 0" },
+  priceMain: { fontSize: "22px", fontWeight: "900", color: "#000" },
+  unit: { fontSize: "14px", color: "#444", fontWeight: "600" },
+  stockInfo: { fontSize: "14px", color: "#222", fontWeight: "700", marginTop: "2px" },
+  location: { fontSize: "13px", color: "#666", fontWeight: "600", marginTop: "10px" },
+  bottomArea: { width: "100%", padding: "50px 0", display: "flex", justifyContent: "center" }
 };
 
 export default BuyerMarketplace;
