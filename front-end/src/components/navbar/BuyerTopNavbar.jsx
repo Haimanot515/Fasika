@@ -1,14 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaSearch, FaMapMarkerAlt, FaShoppingCart, FaCaretDown } from "react-icons/fa";
-// 1. Your imported page
+import { MdOutlineAccountCircle } from "react-icons/md";
+// 1. Import your central api instance
+import api from "../../api/axios";
 import DraggablePromotionPage from "../../pages/dashboard/BuyerPromotionPage";
 
 const BuyerTopNavbar = () => {
   const [region, setRegion] = useState("Addis Ababa");
-  // 2. Toggle State
   const [showPromo, setShowPromo] = useState(false);
   const location = useLocation();
+
+  // 2. Profile state logic from FarmerNavbar
+  const [userData, setUserData] = useState({ name: "", photo: null });
+
+  // 3. Fetch Profile logic on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get('/farmers/profile');
+        if (res.data && res.data.success) {
+          const profile = res.data.data;
+          setUserData({
+            name: profile.full_name || profile.farm_name || "Buyer",
+            photo: profile.photo_url || null 
+          });
+        }
+      } catch (err) {
+        console.error("Could not load nav profile data", err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   return (
     <>
@@ -19,7 +42,7 @@ const BuyerTopNavbar = () => {
           .logo-btn { cursor: pointer; user-select: none; }
         `}</style>
 
-        {/* 3. Logo - Clicking this now toggles showPromo */}
+        {/* Logo - Toggles showPromo */}
         <div 
           onClick={() => setShowPromo(!showPromo)} 
           className="nav-hover logo-btn" 
@@ -28,7 +51,7 @@ const BuyerTopNavbar = () => {
           fasika<span style={{ color: "#febd69" }}>.et</span>
         </div>
 
-        {/* 2. Deliver To Section */}
+        {/* Deliver To Section */}
         <div className="nav-hover" style={amazonStyles.navSection}>
           <FaMapMarkerAlt style={amazonStyles.locationIcon} />
           <div style={amazonStyles.navTextContainer}>
@@ -37,7 +60,7 @@ const BuyerTopNavbar = () => {
           </div>
         </div>
 
-        {/* 3. Search Bar */}
+        {/* Search Bar */}
         <div className="search-focus" style={amazonStyles.searchContainer}>
           <div style={amazonStyles.searchCategory}>
             <select style={amazonStyles.categorySelect}>
@@ -58,17 +81,28 @@ const BuyerTopNavbar = () => {
           </button>
         </div>
 
-        {/* 4. Accounts & Lists */}
+        {/* 4. Accounts & Lists - Now Dynamic */}
         <div className="nav-hover" style={amazonStyles.navSection}>
           <div style={amazonStyles.navTextContainer}>
-            <span style={amazonStyles.lineOne}>Hello, User</span>
+            <span style={amazonStyles.lineOne}>
+              Hello, {userData.name ? userData.name.split(' ')[0] : "Sign in"}
+            </span>
             <span style={amazonStyles.lineTwo}>
               Account & Lists <FaCaretDown style={{ fontSize: "10px" }} />
             </span>
           </div>
+          
+          {/* Avatar / Profile Image Logic */}
+          <div style={amazonStyles.avatarCircle}>
+            {userData.photo ? (
+              <img src={userData.photo} alt="User" style={amazonStyles.avatarImg} />
+            ) : (
+              <MdOutlineAccountCircle size={30} color="white" />
+            )}
+          </div>
         </div>
 
-        {/* 5. Returns & Orders */}
+        {/* Returns & Orders */}
         <Link to="/orders" className="nav-hover" style={amazonStyles.navSectionLink}>
           <div style={amazonStyles.navTextContainer}>
             <span style={amazonStyles.lineOne}>Returns</span>
@@ -76,7 +110,7 @@ const BuyerTopNavbar = () => {
           </div>
         </Link>
 
-        {/* 6. Cart */}
+        {/* Cart */}
         <Link to="/cart" className="nav-hover" style={amazonStyles.cartSection}>
           <div style={{ position: "relative" }}>
             <FaShoppingCart style={{ fontSize: "32px" }} />
@@ -86,7 +120,7 @@ const BuyerTopNavbar = () => {
         </Link>
       </nav>
 
-      {/* 4. The Toggled Promotion Page Overlay */}
+      {/* Toggled Promotion Page Overlay */}
       {showPromo && (
         <div style={overlayStyles.wrapper}>
           <div style={overlayStyles.header}>
@@ -165,7 +199,7 @@ const amazonStyles = {
     padding: "6px 10px",
     cursor: "pointer",
     border: "1px solid transparent",
-    gap: "2px",
+    gap: "8px", // Increased gap for the avatar
   },
   navSectionLink: {
     textDecoration: "none",
@@ -198,7 +232,6 @@ const amazonStyles = {
     overflow: "hidden",
     backgroundColor: "#fff",
     margin: "0 10px", 
-
   },
   searchCategory: {
     display: "flex",
@@ -263,6 +296,23 @@ const amazonStyles = {
     width: "20px",
     textAlign: "center",
   },
+  // New styles for the Profile Avatar
+  avatarCircle: {
+    width: "34px",
+    height: "34px",
+    borderRadius: "50%",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "1px solid rgba(255,255,255,0.3)"
+  },
+  avatarImg: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover"
+  }
 };
 
 export default BuyerTopNavbar;
