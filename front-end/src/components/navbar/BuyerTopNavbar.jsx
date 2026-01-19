@@ -88,7 +88,21 @@ const BuyerTopNavbar = () => {
           .nav-hover:hover { border: 1px solid #fff !important; border-radius: 2px; }
           .search-focus:focus-within { box-shadow: 0 0 0 2px #f08804; }
           .logo-btn { cursor: pointer; user-select: none; }
-          .region-item:hover { background: #f3f3f3; color: #131921; }
+          .region-item { color: #111; font-size: 13px; transition: background 0.1s; }
+          .region-item:hover { background: #F0F2F2; color: #c45500 !important; }
+          
+          /* Amazon Dropdown Arrow */
+          .amazon-arrow {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            width: 0; 
+            height: 0; 
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+            z-index: 1000000;
+          }
         `}</style>
 
         {/* Logo */}
@@ -111,19 +125,22 @@ const BuyerTopNavbar = () => {
 
           {showRegionMenu && (
             <div style={amazonStyles.customDropdown}>
-              <div style={{ padding: '8px', borderBottom: '1px solid #ddd', fontWeight: 'bold', color: '#555' }}>
-                Select Region
+              <div className="amazon-arrow"></div>
+              <div style={amazonStyles.dropdownHeader}>
+                Choose your location
               </div>
-              {ethiopianRegions.map(reg => (
-                <div 
-                  key={reg} 
-                  className="region-item"
-                  style={amazonStyles.dropdownItem}
-                  onClick={(e) => { e.stopPropagation(); handleRegionSelect(reg); }}
-                >
-                  {reg}
-                </div>
-              ))}
+              <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                {ethiopianRegions.map(reg => (
+                  <div 
+                    key={reg} 
+                    className="region-item"
+                    style={amazonStyles.dropdownItem}
+                    onClick={(e) => { e.stopPropagation(); handleRegionSelect(reg); }}
+                  >
+                    {reg}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -213,8 +230,34 @@ const amazonStyles = {
   cartCount: { position: "absolute", top: "-5px", right: "10px", backgroundColor: "#131921", color: "#f08804", fontSize: "16px", fontWeight: "bold", borderRadius: "50%", width: "20px", textAlign: "center" },
   avatarCircle: { width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.15)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.3)" },
   avatarImg: { width: "100%", height: "100%", objectFit: "cover" },
-  customDropdown: { position: 'absolute', top: '55px', left: '0', backgroundColor: 'white', color: '#333', minWidth: '180px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', borderRadius: '4px', zIndex: 100002, maxHeight: '300px', overflowY: 'auto' },
-  dropdownItem: { padding: '10px 15px', fontSize: '13px', cursor: 'pointer', transition: 'background 0.2s' }
+  
+  // UPDATED: AMAZON-LIKE LOCATION DROPDOWN
+  customDropdown: { 
+    position: 'absolute', 
+    top: '55px', 
+    left: '-10px', 
+    backgroundColor: 'white', 
+    minWidth: '240px', 
+    boxShadow: '0 4px 20px rgba(0,0,0,0.35)', 
+    borderRadius: '8px', 
+    zIndex: 999999, // HIGHEST TO BE ABOVE ALL
+    padding: '0 0 10px 0',
+    border: '1px solid #D5D9D9'
+  },
+  dropdownHeader: {
+    padding: '12px 15px',
+    backgroundColor: '#F0F2F2',
+    borderBottom: '1px solid #D5D9D9',
+    borderRadius: '8px 8px 0 0',
+    color: '#111',
+    fontWeight: '700',
+    fontSize: '14px'
+  },
+  dropdownItem: { 
+    padding: '12px 15px', 
+    cursor: 'pointer',
+    borderBottom: '1px solid #f3f3f3'
+  }
 };
 
 export default BuyerTopNavbar;
