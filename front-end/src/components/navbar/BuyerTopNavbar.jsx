@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaSearch, FaMapMarkerAlt, FaShoppingCart, FaCaretDown } from "react-icons/fa";
 import { MdOutlineAccountCircle } from "react-icons/md";
@@ -7,20 +6,23 @@ import api from "../../api/axios";
 import DraggablePromotionPage from "../../pages/dashboard/BuyerPromotionPage";
 
 const BuyerTopNavbar = () => {
-  const [region, setRegion] = useState("Locating...");
+  // Initialize from localStorage if available
+  const [region, setRegion] = useState(localStorage.getItem("userRegion") || "Locating...");
+  const [showRegionMenu, setShowRegionMenu] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
   const [userData, setUserData] = useState({ name: "", photo: null });
   
-  // List of Ethiopian Regions for the dropdown
+  const regionRef = useRef(null);
+
   const ethiopianRegions = [
     "Addis Ababa", "Afar", "Amhara", "Benishangul-Gumuz", "Dire Dawa", 
     "Gambela", "Harari", "Oromia", "Sidama", "Somali", "South Ethiopia", 
     "South West Ethiopia", "Tigray"
   ];
 
-  // 1. Auto-Location Logic
+  // 1. Auto-Location Logic (only runs if no region is saved)
   useEffect(() => {
-    if ("geolocation" in navigator) {
+    if (!localStorage.getItem("userRegion") && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
@@ -31,14 +33,13 @@ const BuyerTopNavbar = () => {
             const data = await response.json();
             const placeName = data.city || data.locality || data.principalSubdivision || "Addis Ababa";
             setRegion(placeName);
+            localStorage.setItem("userRegion", placeName);
           } catch (error) {
             setRegion("Addis Ababa");
           }
         },
-        () => setRegion("Addis Ababa") // Fallback on permission denied
+        () => setRegion("Addis Ababa")
       );
-    } else {
-      setRegion("Addis Ababa");
     }
   }, []);
 
@@ -61,6 +62,23 @@ const BuyerTopNavbar = () => {
     fetchProfile();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (regionRef.current && !regionRef.current.contains(event.target)) {
+        setShowRegionMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleRegionSelect = (selected) => {
+    setRegion(selected);
+    localStorage.setItem("userRegion", selected);
+    setShowRegionMenu(false);
+  };
+
   return (
     <>
       <nav style={amazonStyles.navbar}>
@@ -68,17 +86,7 @@ const BuyerTopNavbar = () => {
           .nav-hover:hover { border: 1px solid #fff !important; border-radius: 2px; }
           .search-focus:focus-within { box-shadow: 0 0 0 2px #f08804; }
           .logo-btn { cursor: pointer; user-select: none; }
-          .location-select {
-            background: transparent;
-            border: none;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-            width: 100%;
-          }
-          .location-select option { color: black; }
+          .region-item:hover { background: #f3f3f3; color: #131921; }
         `}</style>
 
         {/* Logo */}
@@ -86,23 +94,37 @@ const BuyerTopNavbar = () => {
           fasika<span style={{ color: "#febd69" }}>.et</span>
         </div>
 
-        {/* 3. Location Section with Dropdown */}
-        <div className="nav-hover" style={amazonStyles.navSection}>
+        {/* 3. Location Section - Clickable Text (No Dropdown Arrow) */}
+        <div 
+          className="nav-hover" 
+          style={{ ...amazonStyles.navSection, position: 'relative' }} 
+          ref={regionRef}
+          onClick={() => setShowRegionMenu(!showRegionMenu)}
+        >
           <FaMapMarkerAlt style={amazonStyles.locationIcon} />
           <div style={amazonStyles.navTextContainer}>
             <span style={amazonStyles.lineOne}>Deliver to</span>
-            <select 
-              className="location-select" 
-              value={ethiopianRegions.includes(region) ? region : ""}
-              onChange={(e) => setRegion(e.target.value)}
-            >
-              {/* If autolocated a specific city, show it as first option */}
-              {!ethiopianRegions.includes(region) && <option value={region}>{region}</option>}
-              {ethiopianRegions.map(reg => (
-                <option key={reg} value={reg}>{reg}</option>
-              ))}
-            </select>
+            <span style={amazonStyles.lineTwo}>{region}</span>
           </div>
+
+          {/* Custom Choices Menu */}
+          {showRegionMenu && (
+            <div style={amazonStyles.customDropdown}>
+              <div style={{ padding: '8px', borderBottom: '1px solid #ddd', fontWeight: 'bold', color: '#555' }}>
+                Select Region
+              </div>
+              {ethiopianRegions.map(reg => (
+                <div 
+                  key={reg} 
+                  className="region-item"
+                  style={amazonStyles.dropdownItem}
+                  onClick={(e) => { e.stopPropagation(); handleRegionSelect(reg); }}
+                >
+                  {reg}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -134,7 +156,7 @@ const BuyerTopNavbar = () => {
           </div>
         </div>
 
-        {/* Orders */}
+        {/* Orders & Cart */}
         <Link to="/orders" className="nav-hover" style={amazonStyles.navSectionLink}>
           <div style={amazonStyles.navTextContainer}>
             <span style={amazonStyles.lineOne}>Returns</span>
@@ -142,7 +164,6 @@ const BuyerTopNavbar = () => {
           </div>
         </Link>
 
-        {/* Cart */}
         <Link to="/cart" className="nav-hover" style={amazonStyles.cartSection}>
           <div style={{ position: "relative" }}>
             <FaShoppingCart style={{ fontSize: "32px" }} />
@@ -166,19 +187,20 @@ const BuyerTopNavbar = () => {
   );
 };
 
+// ... Styles
 const overlayStyles = {
     wrapper: { position: 'fixed', top: '60px', left: 0, width: '100%', height: 'calc(100vh - 60px)', zIndex: 15000, backgroundColor: '#f0f2f2', overflowY: 'auto' },
     header: { background: '#232f3e', color: 'white', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', fontWeight: 'bold' },
     closeBtn: { background: '#e74c3c', border: 'none', color: 'white', padding: '5px 15px', borderRadius: '4px', cursor: 'pointer' }
-}
+};
 
 const amazonStyles = {
   navbar: { display: "flex", alignItems: "center", backgroundColor: "#131921", padding: "8px 20px", gap: "15px", height: "60px", color: "#fff", position: "sticky", top: 0, zIndex: 11000 },
   logo: { textDecoration: "none", color: "#fff", fontSize: "24px", fontWeight: "bold", padding: "6px 12px", border: "1px solid transparent" },
-  navSection: { display: "flex", alignItems: "center", padding: "6px 10px", cursor: "pointer", border: "1px solid transparent", gap: "8px", minWidth: "120px" },
+  navSection: { display: "flex", alignItems: "center", padding: "6px 10px", cursor: "pointer", border: "1px solid transparent", gap: "8px" },
   navSectionLink: { textDecoration: "none", color: "#fff", padding: "6px 10px", border: "1px solid transparent" },
   locationIcon: { fontSize: "18px", marginTop: "8px" },
-  navTextContainer: { display: "flex", flexDirection: "column", width: "100%" },
+  navTextContainer: { display: "flex", flexDirection: "column" },
   lineOne: { fontSize: "12px", color: "#ccc" },
   lineTwo: { fontSize: "14px", fontWeight: "bold" },
   searchContainer: { display: "flex", flex: 1, height: "40px", borderRadius: "4px", overflow: "hidden", backgroundColor: "#fff", margin: "0 10px" },
@@ -190,7 +212,28 @@ const amazonStyles = {
   cartSection: { display: "flex", alignItems: "center", textDecoration: "none", color: "#fff", padding: "0 10px", gap: "5px" },
   cartCount: { position: "absolute", top: "-5px", right: "10px", backgroundColor: "#131921", color: "#f08804", fontSize: "16px", fontWeight: "bold", borderRadius: "50%", width: "20px", textAlign: "center" },
   avatarCircle: { width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.15)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.3)" },
-  avatarImg: { width: "100%", height: "100%", objectFit: "cover" }
+  avatarImg: { width: "100%", height: "100%", objectFit: "cover" },
+  
+  // Custom Choices Styling
+  customDropdown: {
+    position: 'absolute',
+    top: '55px',
+    left: '0',
+    backgroundColor: 'white',
+    color: '#333',
+    minWidth: '180px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+    borderRadius: '4px',
+    zIndex: 20000,
+    maxHeight: '300px',
+    overflowY: 'auto'
+  },
+  dropdownItem: {
+    padding: '10px 15px',
+    fontSize: '13px',
+    cursor: 'pointer',
+    transition: 'background 0.2s'
+  }
 };
 
 export default BuyerTopNavbar;
