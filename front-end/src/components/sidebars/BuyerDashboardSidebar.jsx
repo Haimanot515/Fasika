@@ -39,7 +39,8 @@ const BuyerDashboardSidebar = ({ isOpen, onClose }) => {
     top: 0,
     height: "100vh",
     left: 0,
-    zIndex: 99999, // Increased z-index to stay above navbars
+    // UPDATED Z-INDEX TO 99999
+    zIndex: 99999, 
     overflowY: "auto",
     overflowX: "hidden",
     boxShadow: collapsed ? "none" : "15px 0 30px rgba(0,0,0,0.08)",
@@ -163,6 +164,7 @@ const BuyerDashboardSidebar = ({ isOpen, onClose }) => {
         </NavLink>
 
         <div style={sectionHeader}>Privacy & Safety</div>
+        {/* Maintained DROP schemas as requested */}
         <NavLink to="/dashboard/wishlist/drop" style={{...navLinkStyle(), color: colors.danger}} className="hover-effect">
           <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}><FaTrashAlt /> <span className="sentence-case">DROP Wishlist</span></div>
         </NavLink>
