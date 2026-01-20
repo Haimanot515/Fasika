@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { 
   HiOutlineUser, HiOutlinePhotograph, HiOutlineTag, 
   HiOutlinePlusCircle, HiOutlineShieldCheck, HiOutlineSearch,
-  HiOutlineCheckCircle, HiOutlineMail, HiOutlinePhone, HiOutlineX
+  HiOutlineCheckCircle, HiOutlineMail, HiOutlinePhone, HiOutlineX,
+  HiOutlineRefresh
 } from "react-icons/hi";
 
 const AdminAddListing = () => {
@@ -33,25 +34,28 @@ const AdminAddListing = () => {
   const [primaryPreview, setPrimaryPreview] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
 
-  // Live Search Logic (Debounced)
+  // --- LIVE SEARCH LOGIC ---
+  // This triggers automatically while the admin is typing
   useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (searchTerm.length > 2) {
-        setIsSearching(true);
-        try {
-          // Queries registry for name, email, or phone
-          const { data } = await api.get(`/admin/farmers/search?query=${searchTerm}`);
-          setSearchResults(data.farmers || []);
-        } catch (err) {
-          console.error("Search error", err);
-        } finally {
-          setIsSearching(false);
-        }
-      } else {
+    const fetchFarmers = async () => {
+      if (searchTerm.trim().length < 2) {
         setSearchResults([]);
+        return;
       }
-    }, 400);
 
+      setIsSearching(true);
+      try {
+        // This hits your backend search endpoint (e.g., searchFarmers controller)
+        const { data } = await api.get(`/admin/farmers/search?query=${searchTerm}`);
+        setSearchResults(data.farmers || []);
+      } catch (err) {
+        console.error("Database search failed:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const delayDebounceFn = setTimeout(fetchFarmers, 300); // 300ms delay to prevent spamming the DB
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
@@ -74,7 +78,7 @@ const AdminAddListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.seller_internal_id) return alert("You must select a Farmer first.");
+    if (!form.seller_internal_id) return alert("Validation Error: No Farmer Identity Linked.");
     setLoading(true);
     
     try {
@@ -89,7 +93,7 @@ const AdminAddListing = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("REGISTRY NODE CREATED: DROP action successful.");
+      alert("REGISTRY DROP SUCCESSFUL: Node published.");
       navigate("/admin/farmers/market/view");
     } catch (err) {
       alert(err.response?.data?.message || "Authority connection error");
@@ -127,19 +131,36 @@ const AdminAddListing = () => {
           
           {!selectedFarmer ? (
             <div style={{ position: "relative", marginBottom: "30px" }}>
-              <label style={theme.label}><HiOutlineSearch /> Search Farmer (Name, Email, or Phone)</label>
-              <input 
-                style={{...theme.inputField, borderColor: isSearching ? "#3b82f6" : "#cbd5e1"}}
-                placeholder="Type to search the DROP registry..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <label style={theme.label}>
+                <HiOutlineSearch /> 
+                Search Farmer Registry
+                {isSearching && <span style={{color: '#3b82f6', fontSize: '10px', marginLeft: '10px'}}>Querying Database...</span>}
+              </label>
+              
+              <div style={{ position: "relative" }}>
+                <input 
+                  style={{...theme.inputField, paddingRight: '40px', borderColor: isSearching ? "#3b82f6" : "#cbd5e1"}}
+                  placeholder="Type Name, Email, or Phone number..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {isSearching ? (
+                  <HiOutlineRefresh className="animate-spin" style={{ position: "absolute", right: "12px", top: "12px", color: "#3b82f6" }} />
+                ) : (
+                  <HiOutlineSearch style={{ position: "absolute", right: "12px", top: "12px", color: "#94a3b8" }} />
+                )}
+              </div>
+
+              {/* SEARCH RESULTS DROPDOWN */}
               {searchResults.length > 0 && (
-                <div style={{ position: "absolute", width: "100%", background: "white", zIndex: 10, boxShadow: "0 10px 15px rgba(0,0,0,0.1)", borderRadius: "8px", marginTop: "5px", maxHeight: "250px", overflowY: "auto", border: "1px solid #e2e8f0" }}>
+                <div style={{ position: "absolute", width: "100%", background: "white", zIndex: 10, boxShadow: "0 10px 25px rgba(0,0,0,0.15)", borderRadius: "8px", marginTop: "5px", maxHeight: "250px", overflowY: "auto", border: "1px solid #e2e8f0" }}>
                   {searchResults.map(f => (
-                    <div key={f.id} onClick={() => handleSelectFarmer(f)} style={theme.searchResultItem} onMouseOver={(e) => e.target.style.background = "#f8fafc"} onMouseOut={(e) => e.target.style.background = "transparent"}>
-                      <div style={{ fontWeight: "700", color: "#1e293b" }}>{f.full_name}</div>
-                      <div style={{ fontSize: "12px", color: "#64748b", display: "flex", gap: "10px" }}>
+                    <div key={f.id} onClick={() => handleSelectFarmer(f)} style={theme.searchResultItem} onMouseOver={(e) => e.currentTarget.style.background = "#f8fafc"} onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
+                      <div style={{ fontWeight: "700", color: "#1e293b", display: 'flex', justifyContent: 'space-between' }}>
+                        {f.full_name}
+                        <span style={{fontSize: '10px', color: '#10b981', background: '#dcfce7', padding: '2px 6px', borderRadius: '4px'}}>FOUND</span>
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#64748b", display: "flex", gap: "10px", marginTop: '4px' }}>
                         <span><HiOutlineMail style={{verticalAlign: 'middle'}}/> {f.email}</span>
                         <span><HiOutlinePhone style={{verticalAlign: 'middle'}}/> {f.phone}</span>
                       </div>
@@ -152,7 +173,7 @@ const AdminAddListing = () => {
             <div style={theme.farmerBadge}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#065f46", fontWeight: "800" }}>
-                  <HiOutlineCheckCircle size={20} /> SELECTED FARMER
+                  <HiOutlineCheckCircle size={20} /> IDENTITY LINKED
                 </div>
                 <div style={{ fontSize: "18px", fontWeight: "700", marginTop: "5px" }}>{selectedFarmer.full_name}</div>
                 <div style={{ fontSize: "13px", color: "#374151" }}>{selectedFarmer.phone} | {selectedFarmer.email}</div>
@@ -163,10 +184,10 @@ const AdminAddListing = () => {
             </div>
           )}
 
-          {/* STEP 2: PRODUCT DETAILS (Only enabled if farmer is selected) */}
+          {/* STEP 2: PRODUCT DETAILS */}
           <form onSubmit={handleSubmit} style={{ opacity: selectedFarmer ? 1 : 0.4, pointerEvents: selectedFarmer ? "auto" : "none" }}>
             <h3 style={{ fontSize: "14px", color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px" }}>
-              2. Product Specifications
+              2. Product Registry Details
             </h3>
             
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
@@ -181,7 +202,7 @@ const AdminAddListing = () => {
               </div>
               <div>
                 <label style={theme.label}><HiOutlinePlusCircle /> Product Name</label>
-                <input name="product_name" style={theme.inputField} placeholder="e.g. Red Onions" value={form.product_name} onChange={handleChange} required />
+                <input name="product_name" style={theme.inputField} placeholder="e.g. Teff" value={form.product_name} onChange={handleChange} required />
               </div>
             </div>
 
@@ -209,30 +230,7 @@ const AdminAddListing = () => {
               <textarea name="description" style={{...theme.inputField, height: "80px", resize: "none"}} value={form.description} onChange={handleChange} />
             </div>
 
-            <label style={theme.label}><HiOutlinePhotograph /> Node Media</label>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "30px" }}>
-              <div 
-                style={{ border: "2px dashed #3b82f6", borderRadius: "12px", padding: "20px", textAlign: "center", cursor: "pointer", background: "#eff6ff" }}
-                onClick={() => document.getElementById("p_img").click()}
-              >
-                {primaryPreview ? (
-                  <img src={primaryPreview} alt="Preview" style={{ width: "100%", height: "100px", objectFit: "cover", borderRadius: "8px" }} />
-                ) : (
-                  <div style={{ color: "#3b82f6", fontSize: "12px" }}>+ Add Primary Image</div>
-                )}
-                <input id="p_img" type="file" hidden accept="image/*" onChange={(e) => {
-                  const file = e.target.files[0];
-                  if(file) { setPrimaryImage(file); setPrimaryPreview(URL.createObjectURL(file)); }
-                }} />
-              </div>
-              <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", color: "#64748b" }}>
-                Gallery: {galleryImages.length} images selected
-                <input type="file" multiple hidden id="g_img" onChange={(e) => setGalleryImages(Array.from(e.target.files))} />
-                <button type="button" onClick={() => document.getElementById("g_img").click()} style={{ marginLeft: "10px", border: "none", background: "none", color: "#3b82f6", fontWeight: "bold", cursor: "pointer" }}>Browse</button>
-              </div>
-            </div>
-
-            <button type="submit" disabled={loading || !selectedFarmer} style={{ width: "100%", padding: "16px", background: loading ? "#94a3b8" : "#1e40af", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: "pointer" }}>
+            <button type="submit" disabled={loading || !selectedFarmer} style={{ width: "100%", padding: "16px", background: loading ? "#94a3b8" : "#1e40af", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", transition: '0.3s' }}>
               {loading ? "COMMITTING TO REGISTRY..." : "PUBLISH REGISTRY NODE"}
             </button>
           </form>
