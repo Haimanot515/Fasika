@@ -43,7 +43,7 @@ exports.searchFarmers = async (req, res) => {
             [searchVal]
         );
 
-        // SYNC: Returning 'farmers' key to match frontend AdminAddListing.jsx
+        // SYNC: Returns 'farmers' key to match AdminAddListing frontend
         res.status(200).json({ success: true, farmers: result.rows });
     } catch (err) {
         console.error("SEARCH ERROR:", err.message);
@@ -62,6 +62,7 @@ exports.getAllListings = async (req, res) => {
              LEFT JOIN farmers f ON u.id = f.user_internal_id
              ORDER BY ml.created_at DESC`
         );
+        // SYNC: Returns 'listings' key to match AdminViewListing frontend
         res.json({ success: true, listings: rows });
     } catch (err) {
         res.status(500).json({ error: "Registry Fetch Error" });
