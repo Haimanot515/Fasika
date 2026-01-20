@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import { 
   HiOutlineDatabase, HiOutlineUser, HiOutlinePhotograph, 
-  HiOutlineTag, HiOutlinePlusCircle, HiOutlineShieldCheck 
+  HiOutlineTag, HiOutlinePlusCircle, HiOutlineShieldCheck,
+  HiOutlineSearch, HiOutlineCheckCircle
 } from "react-icons/hi";
 
 const AdminAddListing = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Search States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedFarmer, setSelectedFarmer] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+
   const [form, setForm] = useState({
-    seller_internal_id: "", // REQUIRED for Admin to link to a farmer
+    seller_internal_id: "", 
     product_category: "CROPS",
     product_name: "",
     quantity: "",
@@ -25,14 +32,33 @@ const AdminAddListing = () => {
   const [primaryPreview, setPrimaryPreview] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
 
-  const theme = {
-    container: { minHeight: "100vh", background: "#f1f5f9", padding: "40px 20px", display: "flex", justifyContent: "center", fontFamily: "'Inter', sans-serif" },
-    glassCard: { width: "100%", maxWidth: "850px", background: "#ffffff", borderRadius: "16px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", overflow: "hidden", border: "1px solid #e2e8f0" },
-    header: { background: "#1e40af", padding: "30px", color: "white", textAlign: "left", display: "flex", alignItems: "center", gap: "15px" },
-    inputField: { width: "100%", padding: "12px 16px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "15px", outline: "none", boxSizing: "border-box" },
-    label: { display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "8px", textTransform: "uppercase" },
-    uploadBox: { border: "2px dashed #3b82f6", borderRadius: "12px", padding: "20px", textAlign: "center", cursor: "pointer", background: "#eff6ff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" },
-    submitBtn: { width: "100%", padding: "16px", background: loading ? "#94a3b8" : "#1e40af", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: loading ? "not-allowed" : "pointer", marginTop: "20px" }
+  // Handle Search for Farmers
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchTerm.length > 2) {
+        setIsSearching(true);
+        try {
+          // Adjust this endpoint based on your backend search route
+          const { data } = await api.get(`/admin/farmers/search?query=${searchTerm}`);
+          setSearchResults(data.farmers || []);
+        } catch (err) {
+          console.error("Search error", err);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const selectFarmer = (farmer) => {
+    setSelectedFarmer(farmer);
+    setForm({ ...form, seller_internal_id: farmer.id || farmer.user_id });
+    setSearchTerm("");
+    setSearchResults([]);
   };
 
   const handleChange = (e) => {
@@ -42,7 +68,7 @@ const AdminAddListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.seller_internal_id) return alert("You must provide a Farmer Internal ID");
+    if (!form.seller_internal_id) return alert("You must select a Farmer from the registry.");
     setLoading(true);
     
     try {
@@ -53,18 +79,29 @@ const AdminAddListing = () => {
         galleryImages.forEach(img => fd.append("gallery_images", img));
       }
 
-      // ADMIN ROUTE MOUNTED IN server.js
       await api.post("/admin/marketplace/listings", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       alert("REGISTRY NODE CREATED: DROP action successful.");
-      navigate("/admin/marketplace");
+      // FIXED PATH: Synced with App.jsx
+      navigate("/admin/farmers/market/view");
     } catch (err) {
       alert(err.response?.data?.message || "Authority connection error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const theme = {
+    container: { minHeight: "100vh", background: "#f1f5f9", padding: "40px 20px", display: "flex", justifyContent: "center", fontFamily: "'Inter', sans-serif" },
+    glassCard: { width: "100%", maxWidth: "850px", background: "#ffffff", borderRadius: "16px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", overflow: "hidden", border: "1px solid #e2e8f0" },
+    header: { background: "#1e40af", padding: "30px", color: "white", textAlign: "left", display: "flex", alignItems: "center", gap: "15px" },
+    inputField: { width: "100%", padding: "12px 16px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "15px", outline: "none", boxSizing: "border-box" },
+    label: { display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "8px", textTransform: "uppercase" },
+    uploadBox: { border: "2px dashed #3b82f6", borderRadius: "12px", padding: "20px", textAlign: "center", cursor: "pointer", background: "#eff6ff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" },
+    submitBtn: { width: "100%", padding: "16px", background: loading ? "#94a3b8" : "#1e40af", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: loading ? "not-allowed" : "pointer", marginTop: "20px" },
+    searchDropdown: { position: "absolute", width: "100%", background: "white", border: "1px solid #e2e8f0", borderRadius: "8px", boxShadow: "0 10px 15px rgba(0,0,0,0.1)", zIndex: 10, marginTop: "5px", maxHeight: "200px", overflowY: "auto" }
   };
 
   return (
@@ -79,22 +116,51 @@ const AdminAddListing = () => {
         </div>
 
         <form onSubmit={handleSubmit} style={{ padding: "40px" }}>
-          {/* SECTION 1: AUTHORITY & OWNER */}
           <h3 style={{ fontSize: "14px", color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px" }}>Identity Assignment</h3>
-          <div style={{ marginBottom: "30px" }}>
-            <label style={theme.label}><HiOutlineUser /> Farmer Internal ID (Target ID)</label>
-            <input 
-              name="seller_internal_id" 
-              style={{...theme.inputField, borderColor: "#1e40af", background: "#f0f7ff"}} 
-              placeholder="Enter User ID (e.g. 102)" 
-              value={form.seller_internal_id} 
-              onChange={handleChange} 
-              required 
-            />
-            <small style={{color: "#64748b"}}>Assign this product node to a specific registry user.</small>
+          
+          {/* SEARCH FARMER SECTION */}
+          <div style={{ marginBottom: "30px", position: "relative" }}>
+            <label style={theme.label}><HiOutlineUser /> Link Farmer (Search Name, Email, or Phone)</label>
+            
+            {selectedFarmer ? (
+              <div style={{ ...theme.inputField, background: "#ecfdf5", borderColor: "#10b981", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span><HiOutlineCheckCircle color="#10b981" /> <strong>{selectedFarmer.full_name}</strong> ({selectedFarmer.phone})</span>
+                <button type="button" onClick={() => setSelectedFarmer(null)} style={{ border: "none", background: "none", color: "#ef4444", cursor: "pointer", fontWeight: "bold" }}>Change</button>
+              </div>
+            ) : (
+              <>
+                <div style={{ position: "relative" }}>
+                  <input 
+                    style={theme.inputField} 
+                    placeholder="Start typing farmer details..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <HiOutlineSearch style={{ position: "absolute", right: "15px", top: "15px", color: "#94a3b8" }} />
+                </div>
+                {isSearching && <small>Searching DROP registry...</small>}
+                {searchResults.length > 0 && (
+                  <div style={theme.searchDropdown}>
+                    {searchResults.map(f => (
+                      <div 
+                        key={f.id} 
+                        onClick={() => selectFarmer(f)}
+                        style={{ padding: "12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer" }}
+                        onMouseOver={(e) => e.target.style.background = "#f8fafc"}
+                        onMouseOut={(e) => e.target.style.background = "transparent"}
+                      >
+                        <div style={{ fontWeight: "700", fontSize: "14px" }}>{f.full_name}</div>
+                        <div style={{ fontSize: "11px", color: "#64748b" }}>{f.email} | {f.phone}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            <input type="hidden" name="seller_internal_id" value={form.seller_internal_id} required />
           </div>
 
-          {/* SECTION 2: PRODUCT DATA */}
+          {/* PRODUCT DATA SECTION */}
           <h3 style={{ fontSize: "14px", color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px" }}>Product Specifications</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
             <div>
@@ -131,17 +197,8 @@ const AdminAddListing = () => {
             </div>
           </div>
 
-          <div style={{ marginBottom: "20px" }}>
-            <label style={theme.label}>Node Status</label>
-            <select name="status" style={theme.inputField} value={form.status} onChange={handleChange}>
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="PENDING">PENDING</option>
-              <option value="PAUSED">PAUSED</option>
-            </select>
-          </div>
-
-          {/* SECTION 3: MEDIA */}
-          <label style={theme.label}><HiOutlinePhotograph /> Node Media (Images)</label>
+          {/* MEDIA SECTION */}
+          <label style={theme.label}><HiOutlinePhotograph /> Node Media</label>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "30px" }}>
             <div style={theme.uploadBox} onClick={() => document.getElementById("p_img").click()}>
               {primaryPreview ? (
