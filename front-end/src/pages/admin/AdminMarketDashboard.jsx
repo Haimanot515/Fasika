@@ -7,7 +7,7 @@ import {
   FaUserShield, FaIdBadge, FaDatabase
 } from "react-icons/fa";
 
-const AdminProductListingView = () => {
+const AdminViewListing = () => {
   const [listings, setListings] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
