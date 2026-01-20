@@ -1,129 +1,181 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import api from "../../api/axios";
+import { 
+    ShieldCheck, Leaf, Ruler, Loader2, User, Search, MapPin, 
+    PlusCircle, Trash2, Camera, Info, Save
+} from "lucide-react";
 
 const AdminAddLand = () => {
-    // 1. Identity & Search State
-    const [targetFarmerIdentity, setTargetFarmerIdentity] = useState(''); 
-    const [farmerProfile, setFarmerProfile] = useState(null); // Stores fetched info
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [farmerProfile, setFarmerProfile] = useState(null);
+  
+  // Registry Node State
+  const [formData, setFormData] = useState({
+    plot_name: '', area_size: '', soil_type: '', climate_zone: '',
+    region: '', zone: '', woreda: '', kebele: ''
+  });
+  const [landImage, setLandImage] = useState(null);
+  const [crops, setCrops] = useState([{ crop_name: '', quantity: '' }]);
+
+  // --- IDENTITY DISCOVERY ---
+  const lookupFarmer = async () => {
+    if (!searchTerm) return alert("ENTER IDENTITY KEY (Email/Phone/ID)");
+    try {
+      setLoading(true);
+      const res = await api.get(`/admin/farmers/search?query=${searchTerm}`);
+      if (res.data.success && res.data.data.length > 0) {
+        setFarmerProfile(res.data.data[0]);
+      } else {
+        alert("IDENTITY NOT FOUND IN GLOBAL REGISTRY");
+        setFarmerProfile(null);
+      }
+    } catch (err) {
+      alert("REGISTRY SYNC FAILED");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- REGISTRY DROP EXECUTION ---
+  const handleDropRegistry = async (e) => {
+    e.preventDefault();
+    if (!farmerProfile) return;
     
-    // 2. Land Form State
-    const [formData, setFormData] = useState({
-        plot_name: '', area_size: '', soil_type: '', climate_zone: '',
-        region: '', zone: '', woreda: '', kebele: ''
-    });
+    const data = new FormData();
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+    data.append('crops', JSON.stringify(crops));
+    if (landImage) data.append('image', landImage);
 
-    const [landImage, setLandImage] = useState(null);
-    const [crops, setCrops] = useState([{ crop_name: '', quantity: '' }]);
-    const [animals, setAnimals] = useState([{ animal_type: '', head_count: '', tag_number: '' }]);
+    try {
+      setLoading(true);
+      await api.post(`/admin/farmers/add-land/${farmerProfile.id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      alert("NODE SUCCESSFULLY DROPPED INTO REGISTRY");
+      window.location.reload(); 
+    } catch (err) {
+      alert("AUTHORITY REJECTION: DROP FAILED");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // --- SEARCH LOGIC ---
-    const lookupFarmer = async () => {
-        if (!targetFarmerIdentity) return alert("Enter Email, Phone or UUID first");
-        setLoading(true);
-        try {
-            // This endpoint should return { success: true, data: { name, phone, photo, etc } }
-            const res = await axios.get(`/api/admin/farmers/search/${targetFarmerIdentity}`);
-            setFarmerProfile(res.data.data);
-        } catch (err) {
-            alert("Farmer not found in registry.");
-            setFarmerProfile(null);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // --- DROP LOGIC ---
-    const handleDropRegistry = async (e) => {
-        e.preventDefault();
-        if (!farmerProfile) return alert("Please search and verify a farmer first.");
-        
-        const data = new FormData();
-        Object.keys(formData).forEach(key => data.append(key, formData[key]));
-        data.append('crops', JSON.stringify(crops));
-        data.append('animals', JSON.stringify(animals));
-        if (landImage) data.append('land_image', landImage);
-
-        try {
-            await axios.post(`/api/admin/farmer/${targetFarmerIdentity}/land`, data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            alert("Authority Record successfully DROPPED!");
-        } catch (err) {
-            alert("DROP Failed: " + err.response?.data?.message);
-        }
-    };
-
-    return (
-        <div className="admin-container" style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-            <h2>Admin Authority: Register Land</h2>
-            
-            {/* SEARCH SECTION */}
-            <div className="search-box" style={{ background: '#f4f4f4', padding: '15px', borderRadius: '8px' }}>
-                <label>Find Farmer (Email/Phone/UUID):</label>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <input 
-                        type="text" 
-                        value={targetFarmerIdentity} 
-                        onChange={(e) => setTargetFarmerIdentity(e.target.value)}
-                        placeholder="e.g. farmer@email.com"
-                        style={{ flex: 1, padding: '10px' }}
-                    />
-                    <button onClick={lookupFarmer} disabled={loading}>
-                        {loading ? 'Searching...' : 'Search Farmer'}
-                    </button>
-                </div>
-            </div>
-
-            {/* FARMER INFO DISPLAY (Shows after search) */}
-            {farmerProfile && (
-                <div className="farmer-card" style={{ display: 'flex', alignItems: 'center', gap: '20px', margin: '20px 0', padding: '15px', border: '2px solid #2ecc71', borderRadius: '8px' }}>
-                    <img src={farmerProfile.photo_url || 'https://via.placeholder.com/80'} alt="Farmer" style={{ width: '80px', height: '80px', borderRadius: '50%' }} />
-                    <div>
-                        <h3 style={{ margin: 0 }}>{farmerProfile.full_name}</h3>
-                        <p style={{ margin: 0, color: '#666' }}>ID: {farmerProfile.user_internal_id}</p>
-                        <p style={{ margin: 0 }}><strong>Phone:</strong> {farmerProfile.phone}</p>
-                    </div>
-                </div>
-            )}
-
-            {/* LAND FORM (Enabled only if farmer found) */}
-            <form onSubmit={handleDropRegistry} style={{ opacity: farmerProfile ? 1 : 0.5, pointerEvents: farmerProfile ? 'all' : 'none' }}>
-                <hr />
-                <h3>Step 2: Plot Details</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <input type="text" placeholder="Plot Name" required onChange={(e) => setFormData({...formData, plot_name: e.target.value})} />
-                    <input type="number" placeholder="Area Size (Hectares)" required onChange={(e) => setFormData({...formData, area_size: e.target.value})} />
-                    <select required onChange={(e) => setFormData({...formData, soil_type: e.target.value})}>
-                        <option value="">Select Soil Type</option>
-                        <option value="Black Soil">Black Soil</option>
-                        <option value="Red Soil">Red Soil</option>
-                    </select>
-                    <input type="text" placeholder="Climate Zone" onChange={(e) => setFormData({...formData, climate_zone: e.target.value})} />
-                </div>
-
-                <h3>Biological Assets</h3>
-                <button type="button" onClick={() => setCrops([...crops, { crop_name: '', quantity: '' }])}>+ Add Crop</button>
-                {crops.map((c, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
-                        <input type="text" placeholder="Crop Name" onChange={(e) => {
-                            let nc = [...crops]; nc[i].crop_name = e.target.value; setCrops(nc);
-                        }} />
-                        <input type="number" placeholder="Qty" onChange={(e) => {
-                            let nc = [...crops]; nc[i].quantity = e.target.value; setCrops(nc);
-                        }} />
-                    </div>
-                ))}
-
-                <h3 style={{ marginTop: '20px' }}>Land Image</h3>
-                <input type="file" onChange={(e) => setLandImage(e.target.files[0])} />
-
-                <button type="submit" className="drop-btn" style={{ width: '100%', marginTop: '30px', padding: '15px', background: '#27ae60', color: 'white', fontWeight: 'bold' }}>
-                    EXECUTE REGISTRY DROP FOR {farmerProfile?.full_name?.toUpperCase()}
-                </button>
-            </form>
+  return (
+    <div style={styles.container}>
+      {/* HEADER */}
+      <div style={styles.header}>
+        <div>
+          <h1 style={styles.mainTitle}>ADD LAND REGISTRY</h1>
+          <p style={styles.subTitle}>Registering New Asset Nodes to Global Authority</p>
         </div>
-    );
+      </div>
+
+      {/* PHASE 1: IDENTITY SEARCH */}
+      <div style={styles.searchSection}>
+        <div style={styles.sectionHeader}><Search size={18}/> 1. IDENTITY DISCOVERY</div>
+        <div style={styles.searchWrapper}>
+          <input 
+            style={styles.searchInput}
+            placeholder="Search by Email, Phone, or UUID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button onClick={lookupFarmer} style={styles.lookupBtn} disabled={loading}>
+            {loading ? <Loader2 className="animate-spin" size={18}/> : "VERIFY IDENTITY"}
+          </button>
+        </div>
+      </div>
+
+      {/* FARMER PREVIEW BADGE */}
+      {farmerProfile && (
+        <div style={styles.farmerBadge}>
+          <div style={styles.badgeAvatar}>
+            <User size={24} color="#166534"/>
+          </div>
+          <div style={styles.badgeInfo}>
+            <h3 style={{margin: 0}}>{farmerProfile.full_name?.toUpperCase()}</h3>
+            <p style={{margin: 0, fontSize: '12px', color: '#64748b'}}>REG_ID: {farmerProfile.id} | {farmerProfile.email}</p>
+          </div>
+          <ShieldCheck color="#16a34a" size={24}/>
+        </div>
+      )}
+
+      {/* PHASE 2: DATA INPUT */}
+      <form onSubmit={handleDropRegistry} style={{...styles.form, opacity: farmerProfile ? 1 : 0.4}}>
+        <div style={styles.sectionHeader}><Info size={18}/> 2. PLOT & SOIL CHARACTERISTICS</div>
+        <div style={styles.grid}>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>PLOT NAME</label>
+            <input required style={styles.input} onChange={e => setFormData({...formData, plot_name: e.target.value})} />
+          </div>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>AREA SIZE (HA)</label>
+            <input required type="number" style={styles.input} onChange={e => setFormData({...formData, area_size: e.target.value})} />
+          </div>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>SOIL TYPE</label>
+            <select required style={styles.input} onChange={e => setFormData({...formData, soil_type: e.target.value})}>
+              <option value="">SELECT TYPE</option>
+              <option value="Loamy">LOAMY</option>
+              <option value="Clay">CLAY</option>
+              <option value="Sandy">SANDY</option>
+            </select>
+          </div>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>LOCATION (REGION/ZONE)</label>
+            <input style={styles.input} placeholder="E.g. Oromia, Arsi" onChange={e => setFormData({...formData, region: e.target.value})} />
+          </div>
+        </div>
+
+        <div style={styles.sectionHeader}><Leaf size={18}/> 3. BIOLOGICAL ASSETS (CROPS)</div>
+        {crops.map((crop, i) => (
+          <div key={i} style={styles.assetRow}>
+            <input placeholder="CROP NAME" style={styles.input} onChange={e => {
+              let nc = [...crops]; nc[i].crop_name = e.target.value; setCrops(nc);
+            }} />
+            <input placeholder="QUANTITY" style={styles.input} onChange={e => {
+              let nc = [...crops]; nc[i].quantity = e.target.value; setCrops(nc);
+            }} />
+            <button type="button" onClick={() => setCrops(crops.filter((_, idx) => idx !== i))} style={styles.removeBtn}><Trash2 size={16}/></button>
+          </div>
+        ))}
+        <button type="button" onClick={() => setCrops([...crops, {crop_name: '', quantity: ''}])} style={styles.addBtn}><PlusCircle size={16}/> ADD CROP NODE</button>
+
+        <div style={styles.sectionHeader}><Camera size={18}/> 4. DOCUMENTATION</div>
+        <input type="file" style={styles.fileInput} onChange={e => setLandImage(e.target.files[0])} />
+
+        <button type="submit" style={styles.submitBtn} disabled={loading || !farmerProfile}>
+          {loading ? "EXECUTING REGISTRY DROP..." : "DROP NODE TO GLOBAL REGISTRY"}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+const styles = {
+  container: { padding: '120px 5% 60px', backgroundColor: '#f8fafc', minHeight: '100vh' },
+  header: { marginBottom: '40px' },
+  mainTitle: { fontSize: '28px', fontWeight: '900', color: '#0f172a', margin: 0 },
+  subTitle: { color: '#64748b', fontSize: '14px', margin: '5px 0 0' },
+  searchSection: { background: 'white', padding: '25px', borderRadius: '24px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0', marginBottom: '20px' },
+  sectionHeader: { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '900', color: '#166534', marginBottom: '15px', marginTop: '25px' },
+  searchWrapper: { display: 'flex', gap: '10px' },
+  searchInput: { flex: 1, padding: '12px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' },
+  lookupBtn: { background: '#0f172a', color: 'white', padding: '12px 25px', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer' },
+  farmerBadge: { background: '#f0fff4', border: '2px solid #16a34a', borderRadius: '18px', padding: '15px 25px', display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' },
+  badgeAvatar: { background: 'white', padding: '10px', borderRadius: '50%' },
+  badgeInfo: { flex: 1 },
+  form: { background: 'white', padding: '25px', borderRadius: '24px', border: '1px solid #e2e8f0' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
+  label: { fontSize: '10px', fontWeight: '900', color: '#64748b' },
+  input: { padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '14px' },
+  assetRow: { display: 'flex', gap: '10px', marginBottom: '10px' },
+  addBtn: { display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: '1px dashed #166534', color: '#166534', padding: '10px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  removeBtn: { background: '#fee2e2', color: '#ef4444', border: 'none', padding: '10px', borderRadius: '10px', cursor: 'pointer' },
+  fileInput: { padding: '10px', border: '1px dashed #cbd5e1', width: '100%', borderRadius: '12px' },
+  submitBtn: { width: '100%', marginTop: '40px', padding: '18px', background: '#166534', color: 'white', border: 'none', borderRadius: '15px', fontWeight: '900', cursor: 'pointer', letterSpacing: '1px' }
 };
 
 export default AdminAddLand;
