@@ -3,7 +3,7 @@ import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import { 
   FaPlus, FaSearch, FaEllipsisV, FaEdit, FaArchive,
-  FaUserShield, FaPhone, FaEnvelope, FaTag, FaBoxOpen, FaGlobe
+  FaUserShield, FaPhone, FaEnvelope, FaTag, FaBoxOpen, FaGlobe, FaDatabase
 } from "react-icons/fa";
 
 const AdminViewListing = () => {
@@ -45,7 +45,8 @@ const AdminViewListing = () => {
     const results = listings.filter(item => (
       item.product_name?.toLowerCase().includes(lowerSearch) ||
       item.owner_name?.toLowerCase().includes(lowerSearch) ||
-      item.product_category?.toLowerCase().includes(lowerSearch)
+      item.product_category?.toLowerCase().includes(lowerSearch) ||
+      item.listing_id?.toString().includes(lowerSearch)
     ));
     setFilteredListings(results);
   }, [searchTerm, listings]);
@@ -54,7 +55,7 @@ const AdminViewListing = () => {
     if (window.confirm("⚠️ AUTHORITY ACTION: DROP (Archive) this node?")) {
       try {
         await api.patch(`/admin/marketplace/listings/${id}/archive`);
-        setListings(prev => prev.filter(item => item.id !== id));
+        setListings(prev => prev.filter(item => item.listing_id !== id));
         alert("REGISTRY DROP SUCCESSFUL");
       } catch (err) { 
         alert("DROP Failed: Authority access denied.");
@@ -62,14 +63,20 @@ const AdminViewListing = () => {
     }
   };
 
-  if (loading) return <div style={styles.loader}>Syncing Master Registry...</div>;
+  if (loading) return (
+    <div style={styles.loader}>
+      <FaDatabase className="animate-spin" style={{ marginBottom: '15px', fontSize: '40px' }} />
+      <br />Syncing Master Registry...
+    </div>
+  );
 
   return (
     <div style={styles.pageContainer}>
       <style>{`
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .search-container {
           background: #0f172a;
-          padding: 30px;
+          padding: 40px 20px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -80,18 +87,19 @@ const AdminViewListing = () => {
           display: flex;
           background: white;
           width: 100%;
-          max-width: 800px;
-          height: 55px;
-          border-radius: 8px;
+          max-width: 700px;
+          height: 50px;
+          border-radius: 6px;
           overflow: hidden;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
         .search-bar-ui input {
           flex: 1;
           border: none;
           padding: 0 20px;
-          font-size: 16px;
+          font-size: 15px;
           outline: none;
+          color: #1e293b;
         }
         .search-icon-btn {
           width: 60px;
@@ -105,7 +113,7 @@ const AdminViewListing = () => {
         .registry-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 25px;
+          gap: 30px;
           padding: 40px;
           max-width: 1400px;
           margin: 0 auto;
@@ -115,41 +123,28 @@ const AdminViewListing = () => {
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid #e2e8f0;
-          transition: 0.3s;
+          transition: all 0.3s ease;
           position: relative;
+          animation: fadeIn 0.5s ease forwards;
         }
         .card-ui:hover {
-          transform: translateY(-8px);
+          transform: translateY(-10px);
           box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-        .drop-menu {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          z-index: 10;
-        }
-        .options-trigger {
-          background: rgba(15, 23, 42, 0.7);
-          color: white;
-          border: none;
-          width: 35px;
-          height: 35px;
-          border-radius: 50%;
-          cursor: pointer;
+          border-color: #3b82f6;
         }
       `}</style>
 
       {/* COMMAND CENTER HEADER */}
       <div className="search-container">
-        <h1 style={styles.mainTitle}><FaGlobe /> GLOBAL PRODUCT REGISTRY</h1>
+        <h1 style={styles.mainTitle}><FaGlobe style={{color: '#3b82f6'}} /> MASTER PRODUCT REGISTRY</h1>
         <div className="search-bar-ui">
           <input 
             type="text" 
-            placeholder="Search Registry by Product, Farmer, or Category..." 
+            placeholder="Filter by Product, Farmer Name, Category or ID..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="search-icon-btn"><FaSearch size={20}/></button>
+          <button className="search-icon-btn"><FaSearch /></button>
         </div>
         <button onClick={() => navigate("/admin/farmers/market/add")} style={styles.addBtn}>
           <FaPlus /> ADD REGISTRY NODE
@@ -159,21 +154,24 @@ const AdminViewListing = () => {
       {/* REGISTRY NODES */}
       <div className="registry-grid">
         {filteredListings.map((item) => (
-          <div key={item.id} className="card-ui">
-            <div className="drop-menu">
-              <button className="options-trigger" onClick={(e) => {
-                e.stopPropagation();
-                setShowMenuId(showMenuId === item.id ? null : item.id);
-              }}>
+          <div key={item.listing_id} className="card-ui">
+            <div style={styles.dropMenuContainer}>
+              <button 
+                style={styles.optionsTrigger} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenuId(showMenuId === item.listing_id ? null : item.listing_id);
+                }}
+              >
                 <FaEllipsisV />
               </button>
-              {showMenuId === item.id && (
+              {showMenuId === item.listing_id && (
                 <div style={styles.dropdown} ref={menuRef}>
-                  <div style={styles.dropItem} onClick={() => navigate(`/admin/farmers/market/edit/${item.id}`)}>
-                    <FaEdit color="#3b82f6" /> Edit
+                  <div style={styles.dropItem} onClick={() => navigate(`/admin/farmers/market/edit/${item.listing_id}`)}>
+                    <FaEdit color="#3b82f6" /> Update Node
                   </div>
-                  <div style={styles.dropItem} onClick={() => handleDrop(item.id)}>
-                    <FaArchive color="#ef4444" /> DROP
+                  <div style={styles.dropItem} onClick={() => handleDrop(item.listing_id)} style={{...styles.dropItem, color: '#ef4444'}}>
+                    <FaArchive /> DROP Listing
                   </div>
                 </div>
               )}
@@ -184,17 +182,18 @@ const AdminViewListing = () => {
             <div style={styles.cardBody}>
               <div style={styles.categoryBadge}><FaTag /> {item.product_category}</div>
               <h2 style={styles.productName}>{item.product_name}</h2>
-              <div style={styles.priceTag}>ETB {item.price_per_unit} <small>/ {item.unit}</small></div>
+              <div style={styles.priceTag}>ETB {item.price_per_unit} <small style={{fontSize: '12px', color: '#64748b'}}>/ {item.unit}</small></div>
               
               <div style={styles.infoBox}>
-                <div style={styles.infoRow}><FaUserShield /> {item.owner_name}</div>
-                <div style={styles.infoRow}><FaPhone /> {item.owner_phone || 'N/A'}</div>
-                <div style={styles.infoRow}><FaBoxOpen /> Stock: {item.quantity} {item.unit}</div>
+                <div style={styles.infoRow}><FaUserShield color="#3b82f6"/> {item.owner_name}</div>
+                <div style={styles.infoRow}><FaPhone color="#3b82f6"/> {item.owner_phone || 'N/A'}</div>
+                <div style={styles.infoRow}><FaBoxOpen color="#3b82f6"/> Stock: {item.quantity} {item.unit}</div>
               </div>
 
-              <div style={{...styles.status, color: item.status === 'ACTIVE' ? '#22c55e' : '#ef4444'}}>
+              <div style={{...styles.status, color: item.status === 'ACTIVE' ? '#22c55e' : '#64748b'}}>
                 ● {item.status}
               </div>
+              <div style={styles.idLabel}>NODE_ID: {item.listing_id}</div>
             </div>
           </div>
         ))}
@@ -204,20 +203,23 @@ const AdminViewListing = () => {
 };
 
 const styles = {
-  pageContainer: { background: "#f1f5f9", minHeight: "100vh" },
-  mainTitle: { color: "white", fontSize: "24px", fontWeight: "800", letterSpacing: "1px" },
-  addBtn: { background: "#22c55e", color: "white", border: "none", padding: "12px 24px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" },
-  cardImg: { width: "100%", height: "200px", objectFit: "cover" },
-  cardBody: { padding: "20px" },
+  pageContainer: { background: "#f8fafc", minHeight: "100vh" },
+  mainTitle: { color: "white", fontSize: "22px", fontWeight: "900", letterSpacing: "1px", display: "flex", alignItems: "center", gap: "12px" },
+  addBtn: { background: "#3b82f6", color: "white", border: "none", padding: "12px 25px", borderRadius: "4px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", fontSize: "13px" },
+  cardImg: { width: "100%", height: "220px", objectFit: "cover", borderBottom: "1px solid #f1f5f9" },
+  cardBody: { padding: "20px", display: "flex", flexDirection: "column" },
   categoryBadge: { fontSize: "10px", fontWeight: "900", color: "#3b82f6", textTransform: "uppercase", marginBottom: "8px", display: "flex", alignItems: "center", gap: "5px" },
-  productName: { fontSize: "20px", fontWeight: "800", color: "#0f172a", margin: "0 0 10px 0" },
-  priceTag: { fontSize: "22px", fontWeight: "900", color: "#3b82f6" },
-  infoBox: { background: "#f8fafc", padding: "12px", borderRadius: "8px", marginTop: "15px" },
-  infoRow: { fontSize: "12px", color: "#475569", display: "flex", alignItems: "center", gap: "8px", marginBottom: "5px" },
-  status: { marginTop: "15px", fontSize: "12px", fontWeight: "bold", textTransform: "uppercase" },
-  dropdown: { position: "absolute", top: "45px", right: "10px", background: "white", border: "1px solid #ddd", borderRadius: "8px", width: "120px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", z.index: 20 },
-  dropItem: { padding: "10px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", fontWeight: "600" },
-  loader: { textAlign: "center", paddingTop: "100px", fontSize: "20px", fontWeight: "bold", color: "#3b82f6" }
+  productName: { fontSize: "19px", fontWeight: "800", color: "#0f172a", margin: "0 0 5px 0" },
+  priceTag: { fontSize: "24px", fontWeight: "900", color: "#1e293b", marginBottom: "15px" },
+  infoBox: { background: "#f1f5f9", padding: "15px", borderRadius: "8px", marginBottom: "15px" },
+  infoRow: { fontSize: "12px", color: "#334155", display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px", fontWeight: "600" },
+  status: { fontSize: "11px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "1px" },
+  idLabel: { marginTop: "10px", fontSize: "9px", color: "#94a3b8", fontFamily: "monospace" },
+  dropMenuContainer: { position: "absolute", top: "12px", right: "12px", zIndex: 10 },
+  optionsTrigger: { background: "rgba(15, 23, 42, 0.8)", color: "white", border: "none", width: "32px", height: "32px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyCenter: "center" },
+  dropdown: { position: "absolute", top: "40px", right: "0", background: "white", border: "1px solid #e2e8f0", borderRadius: "8px", width: "160px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 50, padding: "5px 0" },
+  dropItem: { padding: "12px 15px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", fontWeight: "700", borderBottom: "1px solid #f8fafc" },
+  loader: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#3b82f6', fontWeight: '900', background: '#0f172a' }
 };
 
 export default AdminViewListing;
