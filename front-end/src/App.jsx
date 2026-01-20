@@ -18,6 +18,7 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminFarmerStatsDashboard from './pages/admin/AdminFarmerStatsDashboard';
 import AdminMarketDashboard from './pages/admin/AdminMarketDashboard';
 import AdminPostLand from './pages/admin/AdminPostLand';
+import AdminViewLand from "./pages/admin/AdminViewLand";
 import AdminUpdateLand from './pages/admin/AdminUpdateLand';
 import AdminUpdateLivestock from './pages/admin/AdminUpdateLivstoke'; 
 
@@ -102,6 +103,7 @@ function App() {
           <Route path="/admin/farmers/dashboard" element={<AdminFarmerStatsDashboard />} />
           <Route path="/admin/farmers/market/view" element={<AdminMarketDashboard />} />
           <Route path="/admin/farmers/land/post" element={<AdminPostLand />} />
+          <Route path="/admin/farmers/land/view" element={<AdminViewLand/>}/>
           <Route path="/admin/farmers/land/update/:id" element={<AdminUpdateLand />} />
           <Route path="/admin/farmers/livestock/update/:id" element={<AdminUpdateLivestock />} />
           <Route path="/weather" element={<WeatherPage />} />
