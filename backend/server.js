@@ -65,24 +65,29 @@ pool.connect((err, client, release) => {
 
 // 5️⃣ MOUNT ROUTES
 app.use('/api/auth', authRoutes);
+
+/* --- ADMIN REGISTRY SECTOR --- */
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/farmers', adminFarmerRoutes);
 
 // --- MOUNTING ADMIN MARKETPLACE ---
 // This enables: /api/admin/marketplace/listings
+// Correctly handles the "Authority DROP" actions for Global/Filtered views
 app.use('/api/admin/marketplace', adminMarketplaceRoutes); 
 
-// --- LAND DROP REGISTRY ---
+/* --- FARMER/PRODUCER SECTOR --- */
+// LAND DROP REGISTRY
 app.use('/api/farmer/farm/land', farmerFarmRoutes); 
 app.use('/api/farmer/farm', farmerFarmRoutes);
 
 app.use('/api/farmer/listings', farmerListingRoutes);
-app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
-
-app.use("/api/farmer/advisory", advisoryRoutes);
+app.use('/api/farmer/advisory', advisoryRoutes);
 app.use('/api/farmer/support', farmerSupportRoutes);
-app.use("/api/farmer/notifications", notificationRoutes);
+app.use('/api/farmer/notifications', notificationRoutes);
 app.use('/api/farmers', farmerProfileRoutes); 
+
+/* --- BUYER/MARKET SECTOR --- */
+app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
 
 // 6️⃣ CATCH-ALL 404 HANDLER
 app.use((req, res) => {
