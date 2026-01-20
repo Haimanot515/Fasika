@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Added for navigation
 import axios from 'axios';
-import { HiOutlineTrash, HiOutlineRefresh } from 'react-icons/hi';
+import { HiOutlineTrash, HiOutlineRefresh, HiOutlinePencilAlt, HiOutlineDatabase } from 'react-icons/hi';
 
 const AdminMarketDashboard = () => {
+    const navigate = useNavigate();
     const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // --- INTEGRATED API LOGIC ---
-    const API_BASE_URL = 'http://localhost:5000/api/admin/farmers';
+    // Updated to match your marketplace routing structure
+    const API_BASE_URL = 'http://localhost:5000/api/admin/listings';
     
     const getAuthHeader = () => ({
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -18,28 +21,31 @@ const AdminMarketDashboard = () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await axios.get(`${API_BASE_URL}/market/view`, getAuthHeader());
+            const res = await axios.get(`${API_BASE_URL}/view-all`, getAuthHeader());
             if (res.data.success) {
-                setAds(res.data.data);
+                // Using 'listings' based on your controller response
+                setAds(res.data.listings || []);
             }
         } catch (err) {
             console.error("Failed to load market ads");
-            setError("Could not retrieve market data. Check backend connection.");
+            setError("Registry Sync Failed: Check backend authority connection.");
         } finally {
             setLoading(false);
         }
     };
 
     const handleDrop = async (id) => {
-        if (window.confirm(`⚠️ SECURITY ACTION: Are you sure you want to DROP Market Ad #${id}?`)) {
+        // Strict adherence to your 'DROP' requirement
+        if (window.confirm(`⚠️ AUTHORITY ALERT: DROP Listing Node #${id} permanently?`)) {
             try {
-                const res = await axios.delete(`${API_BASE_URL}/market/drop/${id}`, getAuthHeader());
-                if (res.data.success) {
-                    alert("Listing DROPPED successfully");
-                    fetchAds(); // Refresh table
+                // Adjusting path to match common admin patterns
+                const res = await axios.delete(`${API_BASE_URL}/listing/${id}/drop`, getAuthHeader());
+                if (res.status === 200) {
+                    alert("LISTING DROPPED FROM GLOBAL REGISTRY");
+                    fetchAds(); 
                 }
             } catch (err) {
-                alert("DROP operation failed. Record may be protected or already removed.");
+                alert("DROP FAILED: Unauthorized or active order constraint.");
             }
         }
     };
@@ -48,89 +54,84 @@ const AdminMarketDashboard = () => {
         fetchAds(); 
     }, []);
 
-    // --- RENDER ---
     if (loading) return (
-        <div style={{ padding: '60px', textAlign: 'center', fontFamily: 'sans-serif', color: '#64748b' }}>
-            🌾 Loading Market Registry...
+        <div style={styles.loadingScreen}>
+            <HiOutlineDatabase className="animate-spin" size={30} />
+            <p>SYNCING MARKETPLACE REGISTRY...</p>
         </div>
     );
 
     return (
-        <div style={{ padding: '30px', background: '#f8fafc', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+        <div style={styles.container}>
             {/* Header Section */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+            <div style={styles.header}>
                 <div>
-                    <h2 style={{ color: '#1e293b', margin: 0 }}>🛒 Global Market Listings</h2>
-                    <p style={{ color: '#64748b', fontSize: '14px', marginTop: '5px' }}>Moderation panel for active farmer advertisements.</p>
+                    <h2 style={styles.mainTitle}>🛒 MARKETPLACE AUTHORITY</h2>
+                    <p style={styles.subTitle}>Managing Global Listings & Seller Nodes</p>
                 </div>
-                <button 
-                    onClick={fetchAds} 
-                    style={{ 
-                        display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', 
-                        background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', 
-                        cursor: 'pointer', fontWeight: '600', color: '#475569', transition: '0.2s'
-                    }}
-                    onMouseOver={(e) => e.target.style.background = '#f1f5f9'}
-                    onMouseOut={(e) => e.target.style.background = '#fff'}
-                >
-                    <HiOutlineRefresh /> Refresh Data
+                <button onClick={fetchAds} style={styles.refreshBtn}>
+                    <HiOutlineRefresh /> Refresh Registry
                 </button>
             </div>
 
-            {error && (
-                <div style={{ padding: '15px', background: '#fef2f2', color: '#b91c1c', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fee2e2' }}>
-                    {error}
-                </div>
-            )}
+            {error && <div style={styles.errorAlert}>{error}</div>}
 
             {/* Table Container */}
-            <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div style={styles.tableWrapper}>
+                <table style={styles.table}>
                     <thead>
-                        <tr style={{ background: '#f8fafc', color: '#475569', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            <th style={{ padding: '18px 15px', borderBottom: '1px solid #e2e8f0' }}>ID</th>
-                            <th style={{ padding: '18px 15px', borderBottom: '1px solid #e2e8f0' }}>Product Title</th>
-                            <th style={{ padding: '18px 15px', borderBottom: '1px solid #e2e8f0' }}>Category</th>
-                            <th style={{ padding: '18px 15px', borderBottom: '1px solid #e2e8f0' }}>Price</th>
-                            <th style={{ padding: '18px 15px', borderBottom: '1px solid #e2e8f0' }}>Date Posted</th>
-                            <th style={{ padding: '18px 15px', borderBottom: '1px solid #e2e8f0' }}>Actions</th>
+                        <tr style={styles.theadRow}>
+                            <th style={styles.th}>NODE ID</th>
+                            <th style={styles.th}>PRODUCT NAME</th>
+                            <th style={styles.th}>CATEGORY</th>
+                            <th style={styles.th}>PRICE (UNIT)</th>
+                            <th style={styles.th}>STATUS</th>
+                            <th style={styles.th}>ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody style={{ fontSize: '14px', color: '#1e293b' }}>
+                    <tbody style={styles.tbody}>
                         {ads.length === 0 ? (
                             <tr>
-                                <td colSpan="6" style={{ padding: '50px', textAlign: 'center', color: '#94a3b8' }}>
-                                    No active market ads found in the registry.
+                                <td colSpan="6" style={styles.emptyCell}>
+                                    No active market nodes detected in the registry.
                                 </td>
                             </tr>
                         ) : ads.map(ad => (
-                            <tr key={ad.id} style={{ borderBottom: '1px solid #f1f5f9' }} className="table-row">
-                                <td style={{ padding: '15px', fontWeight: 'bold', color: '#64748b' }}>#{ad.id}</td>
-                                <td style={{ padding: '15px', fontWeight: '500' }}>{ad.title}</td>
-                                <td style={{ padding: '15px' }}>
-                                    <span style={{ padding: '4px 10px', background: '#f0fdf4', color: '#166534', borderRadius: '20px', fontSize: '11px', fontWeight: '600' }}>
-                                        {ad.category}
+                            <tr key={ad.listing_id} style={styles.tr}>
+                                <td style={styles.idCell}>#{ad.listing_id}</td>
+                                <td style={{ padding: '15px', fontWeight: '600' }}>{ad.product_name}</td>
+                                <td style={styles.td}>
+                                    <span style={styles.categoryBadge}>{ad.product_category}</span>
+                                </td>
+                                <td style={styles.priceCell}>
+                                    ETB {parseFloat(ad.price_per_unit).toLocaleString()} <span style={{fontSize: '10px', color: '#64748b'}}>/ {ad.unit}</span>
+                                </td>
+                                <td style={styles.td}>
+                                    <span style={{
+                                        ...styles.statusBadge,
+                                        background: ad.status === 'ACTIVE' ? '#f0fdf4' : '#fff7ed',
+                                        color: ad.status === 'ACTIVE' ? '#166534' : '#9a3412'
+                                    }}>
+                                        {ad.status}
                                     </span>
                                 </td>
-                                <td style={{ padding: '15px', fontWeight: '700', color: '#0f172a' }}>
-                                    ETB {parseFloat(ad.price).toLocaleString()}
-                                </td>
-                                <td style={{ padding: '15px', color: '#64748b' }}>
-                                    {new Date(ad.created_at).toLocaleDateString()}
-                                </td>
-                                <td style={{ padding: '15px' }}>
+                                <td style={styles.actionCell}>
+                                    {/* EDIT BUTTON: Navigates to the update form created earlier */}
                                     <button 
-                                        onClick={() => handleDrop(ad.id)}
-                                        style={{ 
-                                            background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', 
-                                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                                            padding: '6px 12px', borderRadius: '6px', transition: '0.2s'
-                                        }}
-                                        onMouseOver={(e) => e.target.style.background = '#fee2e2'}
-                                        onMouseOut={(e) => e.target.style.background = '#fef2f2'}
+                                        onClick={() => navigate(`/admin/listings/update/${ad.listing_id}`)}
+                                        style={styles.editBtn}
+                                        title="Update Node"
                                     >
-                                        <HiOutlineTrash size={16} /> 
-                                        <span style={{ fontWeight: '700', fontSize: '12px' }}>DROP</span>
+                                        <HiOutlinePencilAlt size={18} />
+                                    </button>
+
+                                    {/* DROP BUTTON */}
+                                    <button 
+                                        onClick={() => handleDrop(ad.listing_id)}
+                                        style={styles.dropBtn}
+                                        title="DROP Record"
+                                    >
+                                        <HiOutlineTrash size={18} />
                                     </button>
                                 </td>
                             </tr>
@@ -139,11 +140,36 @@ const AdminMarketDashboard = () => {
                 </table>
             </div>
             
-            <div style={{ marginTop: '20px', fontSize: '12px', color: '#94a3b8', textAlign: 'right' }}>
-                * All DROP actions are permanent and recorded in admin logs.
+            <div style={styles.footerNote}>
+                * All DROP actions are final. Synchronized with Authority Audit Logs.
             </div>
         </div>
     );
+};
+
+const styles = {
+    container: { padding: '40px', background: '#f8fafc', minHeight: '100vh', fontFamily: 'Inter, sans-serif' },
+    loadingScreen: { height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#1e40af', gap: '15px' },
+    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' },
+    mainTitle: { color: '#0f172a', margin: 0, fontWeight: '900', letterSpacing: '-0.5px' },
+    subTitle: { color: '#64748b', fontSize: '14px', marginTop: '4px' },
+    refreshBtn: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', color: '#475569' },
+    errorAlert: { padding: '15px', background: '#fef2f2', color: '#b91c1c', borderRadius: '10px', marginBottom: '25px', border: '1px solid #fee2e2', fontWeight: '600' },
+    tableWrapper: { background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', overflow: 'hidden', border: '1px solid #e2e8f0' },
+    table: { width: '100%', borderCollapse: 'collapse' },
+    theadRow: { background: '#f1f5f9', textAlign: 'left' },
+    th: { padding: '18px', fontSize: '11px', fontWeight: '800', color: '#475569', textTransform: 'uppercase' },
+    tr: { borderBottom: '1px solid #f1f5f9', transition: '0.2s' },
+    td: { padding: '15px' },
+    idCell: { padding: '15px', fontWeight: 'bold', color: '#94a3b8', fontSize: '13px' },
+    priceCell: { padding: '15px', fontWeight: '800', color: '#0f172a' },
+    categoryBadge: { padding: '4px 12px', background: '#eff6ff', color: '#1e40af', borderRadius: '8px', fontSize: '11px', fontWeight: '700' },
+    statusBadge: { padding: '4px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: '700' },
+    actionCell: { padding: '15px', display: 'flex', gap: '10px' },
+    editBtn: { background: '#f1f5f9', color: '#0f172a', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' },
+    dropBtn: { background: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' },
+    emptyCell: { padding: '60px', textAlign: 'center', color: '#94a3b8', fontStyle: 'italic' },
+    footerNote: { marginTop: '20px', fontSize: '11px', color: '#94a3b8', textAlign: 'right', fontWeight: '600' }
 };
 
 export default AdminMarketDashboard;
