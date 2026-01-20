@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 const AdminUpdateLand = () => {
-    const { farmId } = useParams(); // Get ID from URL
+    const { id } = useParams(); // Matches the /update/:id path
     const navigate = useNavigate();
     
     const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ const AdminUpdateLand = () => {
     const [landImage, setLandImage] = useState(null);
     const [existingImageUrl, setExistingImageUrl] = useState("");
 
-    // Metadata about the owner (fetched from the registry)
+    // Metadata about the linked farmer (Already selected via the ID)
     const [ownerInfo, setOwnerInfo] = useState(null);
 
     const [formData, setFormData] = useState({
@@ -28,13 +28,13 @@ const AdminUpdateLand = () => {
     const [crops, setCrops] = useState([]);
     const [animals, setAnimals] = useState([]);
 
-    // --- 1. Load Existing Data ---
+    // --- 1. Load Data for the selected Node ---
     useEffect(() => {
         const fetchLandDetails = async () => {
             try {
-                // We fetch all farms to find the specific one, or use a specific GET route if available
-                const response = await api.get(`/admin/farmers/view-all`);
-                const farm = response.data.data.find(f => f.id.toString() === farmId);
+                // Fetch the specific land record from the registry
+                const response = await api.get("/admin/farmers/view-all");
+                const farm = response.data.data.find(f => f.id.toString() === id);
 
                 if (farm) {
                     setFormData({
@@ -55,16 +55,16 @@ const AdminUpdateLand = () => {
                         email: farm.owner_email
                     });
                 } else {
-                    setStatus({ type: "error", message: "Registry node not found." });
+                    setStatus({ type: "error", message: "Node ID not found in Registry." });
                 }
             } catch (err) {
-                setStatus({ type: "error", message: "Failed to sync with registry." });
+                setStatus({ type: "error", message: "Failed to sync with Authority connection." });
             } finally {
                 setFetching(false);
             }
         };
         fetchLandDetails();
-    }, [farmId]);
+    }, [id]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -87,8 +87,7 @@ const AdminUpdateLand = () => {
         setAnimals(updated);
     };
 
-    // --- 2. Submit Update ---
-    // Matches Router: router.put('/land/:farmId/update', ...)
+    // --- 2. Submit Logic ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -98,48 +97,44 @@ const AdminUpdateLand = () => {
         Object.keys(formData).forEach(key => data.append(key, formData[key]));
         data.append("crops", JSON.stringify(crops));
         data.append("animals", JSON.stringify(animals));
-        
-        if (landImage) {
-            data.append("land_image", landImage);
-        } else {
-            data.append("land_image_url", existingImageUrl);
-        }
+        if (landImage) data.append("land_image", landImage);
 
         try {
-            const response = await api.put(`/admin/farmers/land/${farmId}/update`, data, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
+            // Path: /api/admin/farmers/land/:id/update
+            const response = await api.put(
+                `/admin/farmers/land/${id}/update`, 
+                data, 
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
 
             if (response.data.success) {
-                setStatus({ type: "success", message: "Registry node UPDATED and DROPPED by Authority" });
+                setStatus({ type: "success", message: "Authority DROP Success: Node Updated" });
                 setTimeout(() => navigate("/admin/farmers/land/view"), 2000);
             }
         } catch (err) {
-            setStatus({ type: "error", message: err.response?.data?.error || "Update DROP failed." });
+            setStatus({ type: "error", message: err.response?.data?.error || "DROP update failed." });
         } finally {
             setLoading(false);
         }
     };
 
-    if (fetching) {
-        return (
-            <div style={{...styles.container, textAlign: 'center', padding: '100px'}}>
-                <Loader2 className="animate-spin" size={48} color="#166534" style={{margin: '0 auto'}} />
-                <p style={{marginTop: '20px', fontWeight: '700', color: '#64748b'}}>Syncing with Global Registry...</p>
-            </div>
-        );
-    }
+    if (fetching) return (
+        <div style={styles.loader}>
+            <Loader2 className="animate-spin" size={40} color="#166534" />
+            <p>SYNCING NODE DATA...</p>
+        </div>
+    );
 
     return (
         <div style={styles.container}>
             <div style={styles.header}>
                 <RefreshCw size={32} color="#1e40af" />
-                <h2 style={styles.title}>Update Registry Authority Node</h2>
+                <h2 style={styles.title}>Update Registered Land Node</h2>
             </div>
 
-            {/* OWNER INFO SECTION */}
+            {/* PRE-SELECTED OWNER INFO (READ ONLY) */}
             <div style={{...styles.fileUploadBox, marginBottom: '30px', border: '2px solid #1e40af', background: '#eff6ff'}}>
-                <label style={{...styles.label, color: '#1e40af'}}>Registry Owner Information</label>
+                <label style={{...styles.label, color: '#1e40af'}}>Verified Node Owner</label>
                 {ownerInfo && (
                     <div style={{marginTop: '10px', display: 'flex', gap: '20px', justifyContent: 'center'}}>
                         <div style={{display: 'flex', alignItems: 'center', gap: '8px', color: '#1e3a8a', fontWeight: '800'}}><User size={16}/> {ownerInfo.name}</div>
@@ -225,28 +220,28 @@ const AdminUpdateLand = () => {
                 <hr style={styles.hr} />
 
                 <div style={{ marginBottom: '30px' }}>
-                    <label style={{ ...styles.label, marginBottom: '15px' }}><Upload size={16}/> Update Registry Image (Optional)</label>
+                    <label style={{ ...styles.label, marginBottom: '15px' }}><Upload size={16}/> Update Registry Image</label>
                     <div style={styles.fileUploadBox}>
                         <input type="file" onChange={(e) => setLandImage(e.target.files[0])} />
                         {landImage ? (
-                             <p style={{ fontSize: '12px', color: '#166534', marginTop: '10px' }}>✓ New image: {landImage.name} selected</p>
+                            <p style={{ fontSize: '12px', color: '#166534', marginTop: '10px' }}>✓ {landImage.name} selected</p>
                         ) : existingImageUrl && (
-                             <p style={{ fontSize: '12px', color: '#1e40af', marginTop: '10px' }}>Current image exists in registry</p>
+                            <p style={{ fontSize: '12px', color: '#1e40af', marginTop: '10px' }}>Registry contains existing image</p>
                         )}
                     </div>
                 </div>
 
                 <button type="submit" disabled={loading} style={{...styles.submitBtn, backgroundColor: '#1e40af'}}>
-                    {loading ? <><Loader2 className="animate-spin" size={20}/> UPDATING REGISTRY...</> : <><Save size={20}/> COMMIT UPDATE DROP</>}
+                    {loading ? <><Loader2 className="animate-spin" size={20}/> COMMITTING DROP UPDATE...</> : <><Save size={20}/> DROP UPDATE INTO REGISTRY</>}
                 </button>
             </form>
         </div>
     );
 };
 
-// Styles remain identical to Add component to maintain consistency
 const styles = {
     container: { maxWidth: '950px', margin: '50px auto', padding: '40px', background: '#ffffff', borderRadius: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' },
+    loader: { height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontWeight: '900', color: '#166534', gap: '10px' },
     header: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px', justifyContent: 'center' },
     title: { color: '#0f172a', margin: 0, fontSize: '26px', fontWeight: '800' },
     statusBox: { padding: '16px', borderRadius: '12px', marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '600', fontSize: '14px' },
