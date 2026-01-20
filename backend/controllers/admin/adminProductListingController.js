@@ -18,7 +18,6 @@ const uploadToSupabase = async (file, bucket = 'FarmerListing', folder = 'listin
 };
 
 /* ───── AUTHORITY SEARCH (Registry Discovery) ───── */
-
 exports.searchFarmers = async (req, res) => {
     try {
         const { query } = req.query;
@@ -43,7 +42,6 @@ exports.searchFarmers = async (req, res) => {
             [searchVal]
         );
 
-        // SYNC: Returns 'farmers' key to match AdminAddListing frontend
         res.status(200).json({ success: true, farmers: result.rows });
     } catch (err) {
         console.error("SEARCH ERROR:", err.message);
@@ -62,7 +60,6 @@ exports.getAllListings = async (req, res) => {
              LEFT JOIN farmers f ON u.id = f.user_internal_id
              ORDER BY ml.created_at DESC`
         );
-        // SYNC: Returns 'listings' key to match AdminViewListing frontend
         res.json({ success: true, listings: rows });
     } catch (err) {
         res.status(500).json({ error: "Registry Fetch Error" });
@@ -71,8 +68,12 @@ exports.getAllListings = async (req, res) => {
 
 exports.getListingById = async (req, res) => {
     try {
+        // SYNC: Join added to provide 'owner_name' to the Frontend Farmer Badge
         const { rows } = await pool.query(
-            "SELECT * FROM marketplace_listings WHERE id = $1", 
+            `SELECT ml.*, u.full_name as owner_name, u.email as owner_email, u.phone as owner_phone
+             FROM marketplace_listings ml
+             LEFT JOIN users u ON ml.seller_internal_id = u.id
+             WHERE ml.id = $1`, 
             [req.params.listing_id]
         );
         if (!rows.length) return res.status(404).json({ error: "Node not found" });
@@ -111,20 +112,29 @@ exports.adminCreateListing = async (req, res) => {
 
 exports.adminUpdateListing = async (req, res) => {
     try {
-        const { product_name, price_per_unit, quantity, status, unit, description } = req.body;
+        // SYNC: Added seller_internal_id and product_category to support frontend overrides
+        const { seller_internal_id, product_category, product_name, price_per_unit, quantity, status, unit, description } = req.body;
+        
         const { rows } = await pool.query(
             `UPDATE marketplace_listings 
-             SET product_name=COALESCE($1, product_name), price_per_unit=COALESCE($2, price_per_unit), 
-                 quantity=COALESCE($3, quantity), status=COALESCE($4, status), 
-                 unit=COALESCE($5, unit), description=COALESCE($6, description), updated_at=NOW()
-             WHERE id=$7 RETURNING *`,
-            [product_name, price_per_unit, quantity, status, unit, description, req.params.listing_id]
+             SET seller_internal_id=COALESCE($1, seller_internal_id),
+                 product_name=COALESCE($2, product_name), 
+                 price_per_unit=COALESCE($3, price_per_unit), 
+                 quantity=COALESCE($4, quantity), 
+                 status=COALESCE($5, status), 
+                 unit=COALESCE($6, unit), 
+                 description=COALESCE($7, description),
+                 product_category=COALESCE($8, product_category),
+                 updated_at=NOW()
+             WHERE id=$9 RETURNING *`,
+            [seller_internal_id, product_name, price_per_unit, quantity, status, unit, description, product_category, req.params.listing_id]
         );
         
         if (rows.length === 0) return res.status(404).json({ error: "Node not found for update" });
         
         res.json({ success: true, message: "REGISTRY DROP: Update committed", data: rows[0] });
     } catch (err) {
+        console.error("UPDATE ERROR:", err.message);
         res.status(500).json({ error: "DROP update failed" });
     }
 };
