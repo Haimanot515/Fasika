@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from "../../api/axios"; 
-import { HiOutlineTrash, HiOutlineRefresh, HiOutlinePencilAlt, HiOutlineDatabase } from 'react-icons/hi';
+import { HiOutlineTrash, HiOutlineRefresh, HiOutlinePencilAlt, HiOutlineDatabase, HiOutlineUser } from 'react-icons/hi';
 
 const AdminMarketDashboard = () => {
     const navigate = useNavigate();
@@ -9,38 +9,25 @@ const AdminMarketDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    /* =========================
-        FETCH REGISTRY DATA
-    ========================= */
     const fetchAds = async () => {
         setLoading(true);
         setError(null);
         try {
-            // THE FIX: This matches your exact combined backend path
             const res = await api.get('/admin/marketplace/admin/marketplace/listings');
-            
             if (res.data.success) {
-                // Ensure we use 'listings' to match your controller response
                 setAds(res.data.listings || []);
             }
         } catch (err) {
-            console.error("Registry Sync Failed:", err);
-            setError("404: Node Path Not Found. Backend is looking for the marketplace sub-route.");
+            setError("404: Registry Sync Failed. Check Node Path.");
         } finally {
             setLoading(false);
         }
     };
 
-    /* =========================
-        COMMIT DROP ACTION
-    ========================= */
     const handleDrop = async (id) => {
-        // Requirement: Always use 'DROP' in the interface
         if (window.confirm(`⚠️ AUTHORITY ACTION: DROP Listing Node #${id}?`)) {
             try {
-                // Using the archive PATCH as the DROP mechanism
                 const res = await api.patch(`/admin/marketplace/admin/marketplace/listings/${id}/archive`);
-                
                 if (res.status === 200 || res.data.success) {
                     alert("LISTING DROPPED SUCCESSFULLY");
                     fetchAds(); 
@@ -51,9 +38,7 @@ const AdminMarketDashboard = () => {
         }
     };
 
-    useEffect(() => { 
-        fetchAds(); 
-    }, []);
+    useEffect(() => { fetchAds(); }, []);
 
     if (loading) return (
         <div style={styles.loadingScreen}>
@@ -67,7 +52,7 @@ const AdminMarketDashboard = () => {
             <div style={styles.header}>
                 <div>
                     <h2 style={styles.mainTitle}>🛒 MARKETPLACE REGISTRY</h2>
-                    <p style={styles.subTitle}>Moderation Panel for Active Farmer Nodes</p>
+                    <p style={styles.subTitle}>Authority Grid View: Managing Global Farmer Nodes</p>
                 </div>
                 <button onClick={fetchAds} style={styles.refreshBtn}>
                     <HiOutlineRefresh /> Sync Data
@@ -76,88 +61,93 @@ const AdminMarketDashboard = () => {
 
             {error && <div style={styles.errorAlert}>{error}</div>}
 
-            <div style={styles.tableWrapper}>
-                <table style={styles.table}>
-                    <thead>
-                        <tr style={styles.theadRow}>
-                            <th style={styles.th}>NODE ID</th>
-                            <th style={styles.th}>PRODUCT</th>
-                            <th style={styles.th}>CATEGORY</th>
-                            <th style={styles.th}>PRICE</th>
-                            <th style={styles.th}>STATUS</th>
-                            <th style={styles.th}>ACTIONS</th>
-                        </tr>
-                    </thead>
-                    <tbody style={styles.tbody}>
-                        {ads.length === 0 ? (
-                            <tr>
-                                <td colSpan="6" style={styles.emptyCell}>No records found in the Global Registry.</td>
-                            </tr>
-                        ) : ads.map(ad => (
-                            <tr key={ad.listing_id} style={styles.tr}>
-                                <td style={styles.idCell}>#{ad.listing_id}</td>
-                                <td style={styles.boldCell}>{ad.product_name}</td>
-                                <td style={styles.td}>
-                                    <span style={styles.categoryBadge}>{ad.product_category}</span>
-                                </td>
-                                <td style={styles.priceCell}>
+            {ads.length === 0 ? (
+                <div style={styles.emptyState}>No records found in the Global Registry.</div>
+            ) : (
+                <div style={styles.gridContainer}>
+                    {ads.map(ad => (
+                        <div key={ad.listing_id} style={styles.card}>
+                            {/* Product Image */}
+                            <div style={styles.imageWrapper}>
+                                <img 
+                                    src={ad.primary_image_url || 'https://via.placeholder.com/300?text=No+Image'} 
+                                    alt={ad.product_name} 
+                                    style={styles.image}
+                                />
+                                <span style={{
+                                    ...styles.statusBadge,
+                                    backgroundColor: ad.status === 'ACTIVE' ? '#22c55e' : '#ef4444'
+                                }}>
+                                    {ad.status}
+                                </span>
+                            </div>
+
+                            {/* Content */}
+                            <div style={styles.cardBody}>
+                                <div style={styles.categoryRow}>
+                                    <span style={styles.categoryTag}>{ad.product_category}</span>
+                                    <span style={styles.idTag}>#{ad.listing_id}</span>
+                                </div>
+                                
+                                <h3 style={styles.productTitle}>{ad.product_name}</h3>
+                                
+                                <div style={styles.ownerRow}>
+                                    <HiOutlineUser color="#64748b" />
+                                    <span style={styles.ownerText}>{ad.owner_name || 'Anonymous Farmer'}</span>
+                                </div>
+
+                                <div style={styles.priceTag}>
                                     ETB {parseFloat(ad.price_per_unit).toLocaleString()}
-                                </td>
-                                <td style={styles.td}>
-                                    <span style={{
-                                        ...styles.statusBadge,
-                                        color: ad.status === 'ACTIVE' ? '#166534' : '#991b1b',
-                                        backgroundColor: ad.status === 'ACTIVE' ? '#f0fdf4' : '#fef2f2'
-                                    }}>
-                                        {ad.status}
-                                    </span>
-                                </td>
-                                <td style={styles.actionCell}>
+                                </div>
+
+                                {/* Actions */}
+                                <div style={styles.actionRow}>
                                     <button 
                                         onClick={() => navigate(`/admin/listings/update/${ad.listing_id}`)}
                                         style={styles.editBtn}
                                     >
-                                        <HiOutlinePencilAlt size={18} />
+                                        <HiOutlinePencilAlt size={18} /> Update
                                     </button>
                                     <button 
                                         onClick={() => handleDrop(ad.listing_id)}
                                         style={styles.dropBtn}
                                     >
-                                        <HiOutlineTrash size={18} />
+                                        <HiOutlineTrash size={18} /> DROP
                                     </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
 
 const styles = {
-    container: { padding: '40px', background: '#f8fafc', minHeight: '100vh', fontFamily: 'sans-serif' },
-    loadingScreen: { height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#1e40af', gap: '10px' },
+    container: { padding: '40px', background: '#f1f5f9', minHeight: '100vh', fontFamily: 'sans-serif' },
+    loadingScreen: { height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#1e40af' },
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' },
-    mainTitle: { color: '#0f172a', margin: 0, fontWeight: '800' },
+    mainTitle: { color: '#0f172a', margin: 0, fontWeight: '900', letterSpacing: '-1px' },
     subTitle: { color: '#64748b', fontSize: '14px' },
-    refreshBtn: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
-    errorAlert: { padding: '15px', background: '#fef2f2', color: '#b91c1c', borderRadius: '8px', marginBottom: '20px', border: '1px solid #fee2e2' },
-    tableWrapper: { background: '#fff', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', overflow: 'hidden', border: '1px solid #e2e8f0' },
-    table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left' },
-    theadRow: { background: '#f8fafc', borderBottom: '1px solid #e2e8f0' },
-    th: { padding: '18px 15px', fontSize: '12px', color: '#475569', textTransform: 'uppercase' },
-    tr: { borderBottom: '1px solid #f1f5f9' },
-    td: { padding: '15px' },
-    idCell: { padding: '15px', fontWeight: 'bold', color: '#94a3b8' },
-    boldCell: { padding: '15px', fontWeight: '600', color: '#1e293b' },
-    priceCell: { padding: '15px', fontWeight: '700', color: '#0f172a' },
-    categoryBadge: { padding: '4px 10px', background: '#eff6ff', color: '#1e40af', borderRadius: '20px', fontSize: '11px', fontWeight: '600' },
-    statusBadge: { padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600' },
-    actionCell: { padding: '15px', display: 'flex', gap: '8px' },
-    editBtn: { background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#475569', padding: '6px', borderRadius: '6px', cursor: 'pointer' },
-    dropBtn: { background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '6px', borderRadius: '6px', cursor: 'pointer' },
-    emptyCell: { padding: '50px', textAlign: 'center', color: '#94a3b8' }
+    refreshBtn: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' },
+    gridContainer: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' },
+    card: { background: '#fff', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', transition: '0.3s' },
+    imageWrapper: { position: 'relative', height: '180px', width: '100%', background: '#f8fafc' },
+    image: { width: '100%', height: '100%', objectFit: 'cover' },
+    statusBadge: { position: 'absolute', top: '12px', right: '12px', padding: '4px 10px', color: '#fff', borderRadius: '6px', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' },
+    cardBody: { padding: '15px' },
+    categoryRow: { display: 'flex', justifyContent: 'space-between', marginBottom: '8px' },
+    categoryTag: { fontSize: '10px', fontWeight: '700', color: '#3b82f6', textTransform: 'uppercase', background: '#eff6ff', padding: '2px 8px', borderRadius: '4px' },
+    idTag: { fontSize: '10px', color: '#94a3b8', fontWeight: 'bold' },
+    productTitle: { margin: '0 0 10px 0', fontSize: '18px', color: '#1e293b', fontWeight: '700' },
+    ownerRow: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '15px' },
+    ownerText: { fontSize: '13px', color: '#64748b', fontWeight: '500' },
+    priceTag: { fontSize: '20px', fontWeight: '900', color: '#0f172a', marginBottom: '20px' },
+    actionRow: { display: 'flex', gap: '10px' },
+    editBtn: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', color: '#475569' },
+    dropBtn: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px', background: '#fef2f2', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', color: '#ef4444' },
+    emptyState: { textAlign: 'center', padding: '100px', color: '#94a3b8', fontSize: '18px' }
 };
 
 export default AdminMarketDashboard;
