@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import api from "../../api/axios"; 
 import { useNavigate } from "react-router-dom";
 import { 
-  FaPlus, FaStar, FaShieldAlt, FaSearch, FaCaretDown, 
-  FaEllipsisV, FaEdit, FaTrash, FaArchive, FaPause, FaPlay,
+  FaPlus, FaSearch, FaEllipsisV, FaEdit, FaArchive,
   FaUserShield, FaIdBadge, FaDatabase
 } from "react-icons/fa";
 
@@ -17,7 +16,6 @@ const AdminViewListing = () => {
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
-  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -32,7 +30,6 @@ const AdminViewListing = () => {
 
   const fetchGlobalRegistry = async () => {
     try {
-      // Calls the Admin Authority endpoint we set up in the backend
       const { data } = await api.get("/admin/marketplace/listings");
       setListings(data.listings || []);
       setFilteredListings(data.listings || []);
@@ -45,20 +42,20 @@ const AdminViewListing = () => {
 
   useEffect(() => {
     const results = listings.filter(item =>
-      item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.product_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredListings(results);
   }, [searchTerm, listings]);
 
+  // FIXED: Now matches App.jsx path perfectly
   const handleEdit = (id) => {
-    navigate(`/admin/marketplace/edit-listing/${id}`);
+    navigate(`/admin/farmers/market/edit/${id}`);
   };
 
   const handleDrop = async (id) => {
     if (window.confirm("⚠️ AUTHORITY ACTION: DROP (Archive) this node from the active registry?")) {
       try {
-        // Points to our .patch('/listings/:listing_id/archive') route
         await api.patch(`/admin/marketplace/listings/${id}/archive`);
         setListings(prev => prev.filter(item => item.listing_id !== id));
         alert("NODE DROPPED SUCCESSFULLY");
@@ -101,7 +98,7 @@ const AdminViewListing = () => {
             />
             <button className="search-button"><FaSearch size={18} /></button>
           </div>
-          <button onClick={() => navigate("/admin/marketplace/add-listing")} style={premiumStyles.headerAddBtn}>
+          <button onClick={() => navigate("/admin/farmers/market/add")} style={premiumStyles.headerAddBtn}>
             <FaPlus /> New Node
           </button>
         </div>
