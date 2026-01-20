@@ -17,7 +17,6 @@ const uploadToSupabase = async (file, bucket = 'FarmerListing') => {
 
 /**
  * HELPER: Identity Resolver
- * Resolves Email, Phone, or ID to internal user primary key
  */
 const resolveFarmerId = async (input) => {
     if (!input) return null;
@@ -53,16 +52,17 @@ exports.searchFarmers = async (req, res) => {
 };
 
 /**
- * 2. GLOBAL VIEW: Full Registry Authority (Syncs with UI)
- * Fetches all land plots with owner names, soil types, and nested crop/animal lists
+ * 2. GLOBAL VIEW: Full Registry Authority
+ * FIX: owner_name is pulled from 'users', not 'farmers'.
  */
 exports.getAllFarms = async (req, res) => {
     try {
         const result = await pool.query(
             `SELECT 
                 lp.*, 
-                f.full_name as owner_name, 
-                u.email as owner_email,
+                u.full_name AS owner_name, 
+                u.email AS owner_email,
+                u.phone AS owner_phone,
                 s.soil_type_name,
                 COALESCE((
                     SELECT json_agg(c) FROM (
@@ -71,7 +71,7 @@ exports.getAllFarms = async (req, res) => {
                 ), '[]'::json) as crop_list,
                 COALESCE((
                     SELECT json_agg(a) FROM (
-                        SELECT animal_id, animal_type, head_count, tag_number FROM animals WHERE current_land_plot_id = lp.id
+                        SELECT id, animal_type, head_count, tag_number FROM animals WHERE current_land_plot_id = lp.id
                     ) a
                 ), '[]'::json) as animal_list
              FROM land_plots lp 
@@ -80,15 +80,15 @@ exports.getAllFarms = async (req, res) => {
              LEFT JOIN soils s ON lp.soil_id = s.id
              ORDER BY lp.created_at DESC`
         );
-        res.status(200).json({ success: true, data: result.rows });
+        res.status(200).json({ success: true, message: "Registry DROP Fetched Successfully", data: result.rows });
     } catch (err) {
         console.error("GLOBAL REGISTRY SYNC ERROR:", err.message);
-        res.status(500).json({ success: false, message: 'Database query failed' });
+        res.status(500).json({ success: false, message: 'Database query failed', error: err.message });
     }
 };
 
 /**
- * 3. TARGETED VIEW: Get Lands for a Specific Farmer
+ * 3. TARGETED VIEW: Specific Farmer's Lands
  */
 exports.getFarmsByFarmer = async (req, res) => {
     try {
