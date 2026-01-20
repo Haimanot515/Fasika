@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 // 3️⃣ IMPORT ROUTES
 const authRoutes = require('./routes/authentication/authRoutes'); 
 const adminUserRoutes = require('./routes/admin/adminUserRoutes');
-const adminFarmerRoutes = require('./routes/adminFarmerRoutes'); 
+const adminFarmerRoutes = require('./routes/admin/adminFarmerFarmRoutes'); 
 const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes'); 
 const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); 
 const advisoryRoutes = require("./routes/farmer/farmerAdvisoryRoutes");
