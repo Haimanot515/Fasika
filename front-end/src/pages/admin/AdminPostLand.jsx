@@ -31,16 +31,15 @@ const AdminAddLand = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // --- Search Logic (Matches your searchFarmers controller) ---
+    // --- Search Logic ---
+    // Matches: app.use('/api/admin/farmers', adminFarmerRoutes) -> router.get('/search')
     const handleFarmerSearch = async () => {
         if (!searchQuery) return;
         setSearching(true);
         setStatus({ type: "", message: "" });
         try {
-            // Hits: exports.searchFarmers
             const response = await api.get(`/admin/farmers/search?query=${searchQuery}`);
             if (response.data.success && response.data.data.length > 0) {
-                // We take the first match for this specific flow
                 setSelectedFarmer(response.data.data[0]);
             } else {
                 setStatus({ type: "error", message: "Farmer not found in registry." });
@@ -69,7 +68,8 @@ const AdminAddLand = () => {
         setAnimals(updated);
     };
 
-    // --- Submit Logic (Matches your addFarmForFarmer controller) ---
+    // --- Submit Logic ---
+    // Matches: app.use('/api/admin/farmers', adminFarmerRoutes) -> router.post('/farmer/:farmerId/add')
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!selectedFarmer) return;
@@ -84,14 +84,15 @@ const AdminAddLand = () => {
         if (landImage) data.append("land_image", landImage);
 
         try {
-            // Hits: exports.addFarmForFarmer
-            // Uses selectedFarmer.id (resolves via your resolveFarmerId helper in backend)
-            const response = await api.post(`/admin/farmers/land/${selectedFarmer.id}`, data, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
+            const response = await api.post(
+                `/admin/farmers/farmer/${selectedFarmer.id}/add`, 
+                data, 
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
 
             if (response.data.success) {
                 setStatus({ type: "success", message: "Authority DROP Success: Node Registered" });
+                // Return to the View Admin page as requested
                 setTimeout(() => navigate("/admin/farmers/land/view"), 2000);
             }
         } catch (err) {
@@ -191,7 +192,6 @@ const AdminAddLand = () => {
 
                 <hr style={styles.hr} />
 
-                {/* ASSETS SECTIONS */}
                 <div style={styles.sectionHeader}><Plus size={18} /> Biological Assets: Crops</div>
                 {crops.map((crop, index) => (
                     <div key={index} style={styles.assetRow}>
