@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+// 🟢 Changed import to use your centralized axios instance
+import api from '../../api/axios'; 
 import { 
   HiOutlineUserGroup, HiOutlineTrash, HiOutlineSearch,
   HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineChevronLeft, 
@@ -20,10 +21,7 @@ const AdminUsersPage = () => {
   });
 
   const limit = 10;
-  const api = axios.create({
-    baseURL: 'http://localhost:5000/api/admin/users',
-    withCredentials: true
-  });
+  // 🟢 Removed local 'const api = axios.create...' as we now use the import
 
   const theme = {
     primaryGreen: '#065f46',
@@ -33,12 +31,13 @@ const AdminUsersPage = () => {
     textMain: '#064e3b',
     border: '#d1fae5',
     danger: '#ef4444',
-    warning: '#f59e0b' // Gold/Orange for Suspension actions
+    warning: '#f59e0b'
   };
 
   const fetchMetrics = useCallback(async () => {
     try {
-      const res = await api.get('/stats');
+      // Points to: base_url + /admin/users/stats
+      const res = await api.get('/admin/users/stats');
       if (res.data.success) setMetrics(res.data);
     } catch (err) { console.error("Stats Error", err); }
   }, []);
@@ -46,7 +45,8 @@ const AdminUsersPage = () => {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/?limit=${limit}&offset=${page * limit}`);
+      // Points to: base_url + /admin/users/?limit...
+      const response = await api.get(`/admin/users/?limit=${limit}&offset=${page * limit}`);
       setUsers(response.data.users || []);
     } catch (err) { console.error("Fetch Error", err); } 
     finally { setLoading(false); }
@@ -57,7 +57,6 @@ const AdminUsersPage = () => {
     fetchMetrics(); 
   }, [fetchUsers, fetchMetrics]);
 
-  // --- NEW: ADVANCED SUSPENSION HANDLER ---
   const handleStatusToggle = async (id, currentStatus) => {
     const action = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     const confirmMsg = action === 'SUSPENDED' 
@@ -66,7 +65,7 @@ const AdminUsersPage = () => {
     
     if (window.confirm(confirmMsg)) {
       try {
-        const res = await api.patch(`/${id}/status`, { action });
+        const res = await api.patch(`/admin/users/${id}/status`, { action });
         if (res.data.success) {
           setUsers(prev => prev.map(u => u.id === id ? { ...u, account_status: action } : u));
           fetchMetrics();
@@ -77,7 +76,7 @@ const AdminUsersPage = () => {
 
   const handleRoleChange = async (id, newRole) => {
     try {
-      await api.patch(`/${id}/role`, { role: newRole });
+      await api.patch(`/admin/users/${id}/role`, { role: newRole });
       setUsers(prev => prev.map(u => u.id === id ? { ...u, role: newRole } : u));
       fetchMetrics();
     } catch (err) { alert('Unauthorized'); }
@@ -86,7 +85,8 @@ const AdminUsersPage = () => {
   const handleDrop = async (id) => {
     if (window.confirm('CRITICAL: Execute DROP sequence for this identity? This cannot be undone.')) {
       try {
-        await api.delete(`/${id}`);
+        // 🟢 Using DROP logic via DELETE request
+        await api.delete(`/admin/users/${id}`);
         setUsers(prev => prev.filter(user => user.id !== id));
         fetchMetrics();
       } catch (err) { alert('DROP Failed'); }
