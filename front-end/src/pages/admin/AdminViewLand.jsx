@@ -1,50 +1,60 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { 
-    ShieldCheck, MapPin, Leaf, Dog, Ruler, Layers, Loader2, Trash2, Edit3, User
+    ShieldCheck, MapPin, Leaf, Ruler, Layers, Loader2, Trash2, Edit3, User
 } from "lucide-react";
 
 const AdminViewLand = () => {
   const [lands, setLands] = useState([]);
-  const [stats, setStats] = useState({ total_lands: 0, total_animals: 0, total_hectares: 0 });
+  const [stats, setStats] = useState({ total_lands: 0, total_hectares: 0 });
   const [loading, setLoading] = useState(true);
 
   const fetchGlobalRegistry = async () => {
     try {
-      // Logic adjusted for Admin Authority endpoints
-      const res = await api.get("/admin/farms/view-all");
+      /** * FIXED: Path adjusted to match server.js mounting: 
+       * app.use('/api/admin/farmers', adminFarmerRoutes)
+       */
+      const res = await api.get("/admin/farmers/view-all");
       
       if (res.data.success) {
-        setLands(res.data.data || []);
+        const data = res.data.data || [];
+        setLands(data);
         
-        // Calculating stats locally from global data for the header
-        const totalHectares = res.data.data.reduce((acc, curr) => acc + parseFloat(curr.area_size || 0), 0);
+        // Local calculation for global stats
+        const totalHectares = data.reduce((acc, curr) => acc + parseFloat(curr.area_size || 0), 0);
         setStats({
-          total_lands: res.data.data.length,
-          total_hectares: totalHectares.toFixed(2),
-          total_animals: "Global View" // Admin view summarizes all nodes
+          total_lands: data.length,
+          total_hectares: totalHectares.toFixed(2)
         });
       }
     } catch (err) { 
-      console.error("Admin Sync Error", err); 
+      console.error("Admin Sync Error:", err); 
     } finally { 
       setLoading(false); 
     }
   };
 
   const handleDropNode = async (id) => {
-    if (window.confirm(`⚠️ AUTHORITY ALERT: DROP Land Node #${id} permanently?`)) {
+    if (window.confirm(`⚠️ AUTHORITY ALERT: DROP Land Node #${id} permanently from registry?`)) {
       try {
-        await api.delete(`/admin/farms/land/${id}/drop`);
+        // FIXED: Path adjusted to match backend router mounting
+        await api.delete(`/admin/farmers/land/${id}/drop`);
         alert("Registry Node DROPPED");
         fetchGlobalRegistry();
-      } catch (err) { alert("Operation Failed"); }
+      } catch (err) { 
+        alert("Operation Failed: Node could not be dropped."); 
+      }
     }
   };
 
   useEffect(() => { fetchGlobalRegistry(); }, []);
 
-  if (loading) return <div style={styles.loader}><Loader2 className="spin" /> SYNCING GLOBAL REGISTRY...</div>;
+  if (loading) return (
+    <div style={styles.loader}>
+      <Loader2 className="animate-spin" size={32} /> 
+      SYNCING GLOBAL REGISTRY...
+    </div>
+  );
 
   return (
     <div style={styles.container}>
@@ -67,7 +77,11 @@ const AdminViewLand = () => {
       <div style={styles.grid}>
         {lands.map((plot) => (
           <div key={plot.id} style={styles.card}>
-            <div style={{...styles.banner, backgroundImage: `url(${plot.land_image_url || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'})`}}>
+            {/* Banner with Background Image */}
+            <div style={{
+              ...styles.banner, 
+              backgroundImage: `url(${plot.land_image_url || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'})`
+            }}>
                <div style={styles.badge}><ShieldCheck size={14}/> NODE: #00{plot.id}</div>
                
                {/* ADMIN ACTION OVERLAY */}
@@ -82,11 +96,15 @@ const AdminViewLand = () => {
             </div>
 
             <div style={styles.content}>
-              <h2 style={styles.title}>{plot.plot_name.toUpperCase()}</h2>
+              <h2 style={styles.title}>{plot.plot_name?.toUpperCase() || "UNNAMED PLOT"}</h2>
+              
               <div style={styles.ownerInfo}>
-                <User size={14} color="#16a34a"/> <b>Owner:</b> {plot.owner_name}
+                <User size={14} color="#16a34a"/> <b>Owner:</b> {plot.owner_name || "Unknown Farmer"}
               </div>
-              <div style={styles.loc}><MapPin size={14}/> {plot.woreda}, {plot.region}</div>
+              
+              <div style={styles.loc}>
+                <MapPin size={14}/> {plot.woreda || "N/A"}, {plot.region || "N/A"}
+              </div>
               
               <div style={styles.soilInfo}>
                 <div style={styles.soilPill}><b>SOIL:</b> {plot.soil_type_name}</div>
@@ -94,11 +112,10 @@ const AdminViewLand = () => {
                 <div style={styles.soilPill}><b>AREA:</b> {plot.area_size} Ha</div>
               </div>
 
-              {/* ASSETS SUMMARY FOR ADMIN */}
+              {/* ASSETS SUMMARY */}
               <div style={styles.assetSection}>
                 <h4 style={styles.assetHeader}><Leaf size={16}/> PRIMARY CROPS</h4>
                 <div style={styles.assetContainer}>
-                  {/* Using data mapped from joined crops if available */}
                   {plot.crop_list?.length > 0 ? plot.crop_list.slice(0, 3).map((c, i) => (
                     <div key={i} style={styles.assetPill}>
                       <b>{c.crop_name}</b> <span>{c.quantity} Units</span>
