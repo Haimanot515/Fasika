@@ -3,7 +3,7 @@ import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import { 
   FaPlus, FaSearch, FaEllipsisV, FaEdit, FaArchive,
-  FaUserShield, FaIdBadge, FaDatabase, FaPhone, FaEnvelope, FaTag
+  FaUserShield, FaPhone, FaEnvelope, FaTag, FaBoxOpen, FaGlobe
 } from "react-icons/fa";
 
 const AdminViewListing = () => {
@@ -40,154 +40,184 @@ const AdminViewListing = () => {
     }
   };
 
-  // UPDATED SEARCH LOGIC: Now filters by Name, Owner, Email, Phone, and Category
   useEffect(() => {
     const lowerSearch = searchTerm.toLowerCase();
-    const results = listings.filter(item => {
-      return (
-        item.product_name?.toLowerCase().includes(lowerSearch) ||
-        item.owner_name?.toLowerCase().includes(lowerSearch) ||
-        item.owner_email?.toLowerCase().includes(lowerSearch) ||
-        item.owner_phone?.toLowerCase().includes(lowerSearch) ||
-        item.product_category?.toLowerCase().includes(lowerSearch)
-      );
-    });
+    const results = listings.filter(item => (
+      item.product_name?.toLowerCase().includes(lowerSearch) ||
+      item.owner_name?.toLowerCase().includes(lowerSearch) ||
+      item.product_category?.toLowerCase().includes(lowerSearch)
+    ));
     setFilteredListings(results);
   }, [searchTerm, listings]);
 
-  const handleEdit = (id) => {
-    navigate(`/admin/farmers/market/edit/${id}`);
-  };
-
   const handleDrop = async (id) => {
-    if (window.confirm("⚠️ AUTHORITY ACTION: DROP (Archive) this node from the active registry?")) {
+    if (window.confirm("⚠️ AUTHORITY ACTION: DROP (Archive) this node?")) {
       try {
         await api.patch(`/admin/marketplace/listings/${id}/archive`);
-        setListings(prev => prev.filter(item => item.listing_id !== id));
-        alert("NODE DROPPED SUCCESSFULLY");
+        setListings(prev => prev.filter(item => item.id !== id));
+        alert("REGISTRY DROP SUCCESSFUL");
       } catch (err) { 
-        console.error("Drop Error:", err);
         alert("DROP Failed: Authority access denied.");
       }
     }
   };
 
-  if (loading) return <div style={premiumStyles.loader}><FaDatabase className="animate-spin" /> Syncing Master Registry...</div>;
+  if (loading) return <div style={styles.loader}>Syncing Master Registry...</div>;
 
   return (
-    <div style={premiumStyles.pageWrapper} onClick={() => setShowMenuId(null)}>
+    <div style={styles.pageContainer}>
       <style>{`
-        .admin-search-bar { display: flex; justify-content: center; align-items: center; padding: 25px 0; background: #1e293b; width: 100%; gap: 15px; border-bottom: 4px solid #3b82f6; position: sticky; top: 78px; z-index: 100; }
-        .search-wrapper { display: flex; width: 700px; height: 45px; border-radius: 6px; overflow: hidden; background: #fff; border: 2px solid transparent; transition: 0.3s; }
-        .search-wrapper:focus-within { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
-        .registry-tag { background: #334155; color: #3b82f6; border-right: 1px solid #475569; padding: 0 15px; display: flex; align-items: center; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        .search-input { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
-        .search-button { background: #3b82f6; border: none; width: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; }
-        .registry-card { background: #fff; min-height: 520px; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; position: relative; transition: 0.3s; }
-        .registry-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .admin-options-btn { position: absolute; top: 12px; right: 12px; background: rgba(30, 41, 59, 0.8); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; z-index: 5; color: white; border: none; cursor: pointer; }
-        .dropdown-menu { position: absolute; top: 50px; right: 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 100; width: 180px; padding: 8px 0; }
-        .menu-item { padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #1e293b; cursor: pointer; }
-        .menu-item:hover { background: #f1f5f9; }
-        .node-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 240px; background: rgba(30, 41, 59, 0.6); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 900; z-index: 2; }
+        .search-container {
+          background: #0f172a;
+          padding: 30px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          border-bottom: 4px solid #3b82f6;
+        }
+        .search-bar-ui {
+          display: flex;
+          background: white;
+          width: 100%;
+          max-width: 800px;
+          height: 55px;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .search-bar-ui input {
+          flex: 1;
+          border: none;
+          padding: 0 20px;
+          font-size: 16px;
+          outline: none;
+        }
+        .search-icon-btn {
+          width: 60px;
+          background: #3b82f6;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+        }
+        .registry-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 25px;
+          padding: 40px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+        .card-ui {
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          border: 1px solid #e2e8f0;
+          transition: 0.3s;
+          position: relative;
+        }
+        .card-ui:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .drop-menu {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          z-index: 10;
+        }
+        .options-trigger {
+          background: rgba(15, 23, 42, 0.7);
+          color: white;
+          border: none;
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          cursor: pointer;
+        }
       `}</style>
-      
-      <div style={premiumStyles.scrollLayer}>
-        <div className="admin-search-bar">
-          <div className="search-wrapper">
-            <div className="registry-tag"><FaDatabase style={{marginRight: '5px'}} /> Master</div>
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Search by Product, Category, Owner, Email or Phone..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button className="search-button"><FaSearch size={18} /></button>
-          </div>
-          <button onClick={() => navigate("/admin/farmers/market/add")} style={premiumStyles.headerAddBtn}>
-            <FaPlus /> Add Node
-          </button>
-        </div>
 
-        <div style={premiumStyles.fullViewportGrid}>
-          {filteredListings.map((item) => (
-            <div key={item.listing_id} className="registry-card">
-              <button 
-                className="admin-options-btn" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenuId(showMenuId === item.listing_id ? null : item.listing_id);
-                }}
-              >
+      {/* COMMAND CENTER HEADER */}
+      <div className="search-container">
+        <h1 style={styles.mainTitle}><FaGlobe /> GLOBAL PRODUCT REGISTRY</h1>
+        <div className="search-bar-ui">
+          <input 
+            type="text" 
+            placeholder="Search Registry by Product, Farmer, or Category..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="search-icon-btn"><FaSearch size={20}/></button>
+        </div>
+        <button onClick={() => navigate("/admin/farmers/market/add")} style={styles.addBtn}>
+          <FaPlus /> ADD REGISTRY NODE
+        </button>
+      </div>
+
+      {/* REGISTRY NODES */}
+      <div className="registry-grid">
+        {filteredListings.map((item) => (
+          <div key={item.id} className="card-ui">
+            <div className="drop-menu">
+              <button className="options-trigger" onClick={(e) => {
+                e.stopPropagation();
+                setShowMenuId(showMenuId === item.id ? null : item.id);
+              }}>
                 <FaEllipsisV />
               </button>
-
-              {showMenuId === item.listing_id && (
-                <div className="dropdown-menu" ref={menuRef}>
-                  <div className="menu-item" onClick={() => handleEdit(item.listing_id)}>
-                    <FaEdit color="#3b82f6"/> Update Node
+              {showMenuId === item.id && (
+                <div style={styles.dropdown} ref={menuRef}>
+                  <div style={styles.dropItem} onClick={() => navigate(`/admin/farmers/market/edit/${item.id}`)}>
+                    <FaEdit color="#3b82f6" /> Edit
                   </div>
-                  <div className="menu-item" onClick={() => handleDrop(item.listing_id)} style={{color: '#ef4444'}}>
-                    <FaArchive /> DROP Listing
+                  <div style={styles.dropItem} onClick={() => handleDrop(item.id)}>
+                    <FaArchive color="#ef4444" /> DROP
                   </div>
                 </div>
               )}
+            </div>
 
-              <div style={premiumStyles.imageHalf}>
-                {item.status === "PAUSED" && <div className="node-overlay">NODE PAUSED</div>}
-                {item.status === "ARCHIVED" && <div className="node-overlay" style={{background: 'rgba(239, 68, 68, 0.7)'}}>DROPPED</div>}
-                <img src={item.primary_image_url || "https://via.placeholder.com/300"} alt={item.product_name} style={premiumStyles.productImg} />
-                <div style={premiumStyles.idTag}>ID: {item.listing_id}</div>
+            <img src={item.primary_image_url || "https://via.placeholder.com/400"} style={styles.cardImg} alt="product" />
+            
+            <div style={styles.cardBody}>
+              <div style={styles.categoryBadge}><FaTag /> {item.product_category}</div>
+              <h2 style={styles.productName}>{item.product_name}</h2>
+              <div style={styles.priceTag}>ETB {item.price_per_unit} <small>/ {item.unit}</small></div>
+              
+              <div style={styles.infoBox}>
+                <div style={styles.infoRow}><FaUserShield /> {item.owner_name}</div>
+                <div style={styles.infoRow}><FaPhone /> {item.owner_phone || 'N/A'}</div>
+                <div style={styles.infoRow}><FaBoxOpen /> Stock: {item.quantity} {item.unit}</div>
               </div>
 
-              <div style={premiumStyles.textHalf}>
-                <div style={premiumStyles.ownerBadge}>
-                    <FaUserShield size={10} /> {item.owner_name || "Unknown"}
-                </div>
-                <h2 style={premiumStyles.productTitle}>{item.product_name}</h2>
-                <div style={premiumStyles.priceRow}>
-                  <span style={premiumStyles.priceMain}>ETB {item.price_per_unit}</span>
-                  <span style={premiumStyles.unit}>/ {item.unit}</span>
-                </div>
-                
-                <div style={premiumStyles.metaBox}>
-                    <div style={premiumStyles.metaItem}><FaTag /> Category: {item.product_category}</div>
-                    <div style={premiumStyles.metaItem}><FaPhone /> {item.owner_phone || 'No Phone'}</div>
-                    <div style={premiumStyles.metaItem}><FaEnvelope /> {item.owner_email || 'No Email'}</div>
-                    <div style={premiumStyles.metaItem}><FaDatabase /> Stock: {item.quantity}</div>
-                </div>
-
-                <div style={{...premiumStyles.statusIndicator, color: item.status === 'ACTIVE' ? '#22c55e' : '#64748b'}}>
-                    ● {item.status}
-                </div>
+              <div style={{...styles.status, color: item.status === 'ACTIVE' ? '#22c55e' : '#ef4444'}}>
+                ● {item.status}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-const premiumStyles = {
-  pageWrapper: { width: "100vw", minHeight: "100vh", background: "#f8fafc", zIndex: 10005 },
-  scrollLayer: { marginTop: "78px", width: "100%" },
-  fullViewportGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", width: "100%", padding: "40px 20px", gap: "25px" },
-  headerAddBtn: { background: "#3b82f6", border: "none", borderRadius: "6px", color: "white", padding: "0 20px", height: "45px", cursor: "pointer", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" },
-  imageHalf: { height: "240px", width: "100%", position: "relative", background: "#e2e8f0" },
-  productImg: { width: "100%", height: "100%", objectFit: "cover" },
-  idTag: { position: "absolute", bottom: "10px", right: "10px", background: "rgba(30, 41, 59, 0.9)", color: "#fff", padding: "2px 8px", fontSize: "10px", borderRadius: "4px", fontFamily: "monospace" },
-  textHalf: { padding: "15px", display: "flex", flexDirection: "column", flex: 1 },
-  ownerBadge: { display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", fontWeight: "bold", color: "#3b82f6", marginBottom: "8px", textTransform: "uppercase" },
-  productTitle: { fontSize: "17px", color: "#0f172a", fontWeight: "800", margin: "0 0 10px 0" },
-  priceRow: { display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "15px" },
-  priceMain: { fontSize: "22px", fontWeight: "900", color: "#0f172a" },
-  unit: { fontSize: "12px", color: "#64748b", fontWeight: "600" },
-  metaBox: { background: "#f1f5f9", padding: "10px", borderRadius: "8px", marginBottom: "10px" },
-  metaItem: { display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "#475569", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  statusIndicator: { marginTop: "auto", fontSize: "11px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "1px" },
-  loader: { textAlign: 'center', padding: '150px', color: '#3b82f6', fontWeight: 'bold' }
+const styles = {
+  pageContainer: { background: "#f1f5f9", minHeight: "100vh" },
+  mainTitle: { color: "white", fontSize: "24px", fontWeight: "800", letterSpacing: "1px" },
+  addBtn: { background: "#22c55e", color: "white", border: "none", padding: "12px 24px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" },
+  cardImg: { width: "100%", height: "200px", objectFit: "cover" },
+  cardBody: { padding: "20px" },
+  categoryBadge: { fontSize: "10px", fontWeight: "900", color: "#3b82f6", textTransform: "uppercase", marginBottom: "8px", display: "flex", alignItems: "center", gap: "5px" },
+  productName: { fontSize: "20px", fontWeight: "800", color: "#0f172a", margin: "0 0 10px 0" },
+  priceTag: { fontSize: "22px", fontWeight: "900", color: "#3b82f6" },
+  infoBox: { background: "#f8fafc", padding: "12px", borderRadius: "8px", marginTop: "15px" },
+  infoRow: { fontSize: "12px", color: "#475569", display: "flex", alignItems: "center", gap: "8px", marginBottom: "5px" },
+  status: { marginTop: "15px", fontSize: "12px", fontWeight: "bold", textTransform: "uppercase" },
+  dropdown: { position: "absolute", top: "45px", right: "10px", background: "white", border: "1px solid #ddd", borderRadius: "8px", width: "120px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", z.index: 20 },
+  dropItem: { padding: "10px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", fontWeight: "600" },
+  loader: { textAlign: "center", paddingTop: "100px", fontSize: "20px", fontWeight: "bold", color: "#3b82f6" }
 };
 
 export default AdminViewListing;
