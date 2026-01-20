@@ -1,98 +1,67 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 const authenticate = require('../../middleware/authMiddleware');
 const authorizeAdmin = require('../../middleware/adminMiddleware');
 
 const {
-  getAllFarms,
-  getFarmById,
-  deleteFarmAdmin,
-  getFarmsByFarmer,
-  getFarmByFarmer,
-  addFarmForFarmer,
-  updateFarmByFarmer,
-  deleteFarmByFarmer
+  searchFarmers,           // NEW: Search by letter/email/phone
+  getAllFarms,             // View all lands in registry
+  deleteAllFarmsGlobal,    // NEW: Drop entire registry
+  getFarmsByFarmer,        // View lands for specific farmer
+  deleteAllFarmsForFarmer, // NEW: Drop all lands for one farmer
+  addFarmForFarmer,        // Add land for a farmer (with image)
+  updateFarmAdmin,         // Update specific land
+  deleteFarmAdmin          // Delete specific land
 } = require('../../controllers/admin/adminFarmController');
 
 /**
- * ==============================
- * ADMIN FARM ROUTES
- * ==============================
- * Base path example:
- * /api/admin/farms
+ * ==========================================
+ * ADMIN AUTHORITY ROUTES (LAND REGISTRY)
+ * All routes require Auth & Admin Privileges
+ * ==========================================
  */
 
-/* =========================
-   GENERAL ADMIN FARM
-========================= */
+// --- 1. SEARCH & DISCOVERY ---
+// Search for farmers by name/email/phone for the sidebar list
+router.get('/farmers/search', authenticate, authorizeAdmin, searchFarmers);
 
-// 1️⃣ Get all farms (pagination)
-router.get(
-  '/admin/farms',
-  authenticate,
-  authorizeAdmin,
-  getAllFarms
-);
+// --- 2. GLOBAL REGISTRY MANAGEMENT ---
+// Get every land plot in the system
+router.get('/view-all', authenticate, authorizeAdmin, getAllFarms);
 
-// 2️⃣ Get single farm by id
-router.get(
-  '/admin/farms/:farmId',
-  authenticate,
-  authorizeAdmin,
-  getFarmById
-);
+// CRITICAL: Drop every single land plot from the database
+router.delete('/drop-all', authenticate, authorizeAdmin, deleteAllFarmsGlobal);
 
-// 3️⃣ Delete any farm
-router.delete(
-  '/admin/farms/:farmId',
-  authenticate,
-  authorizeAdmin,
-  deleteFarmAdmin
-);
+// --- 3. FARMER-SPECIFIC MANAGEMENT ---
+// Get all lands belonging to one specific farmer (via Email/Phone/UUID)
+router.get('/farmer/:farmerId', authenticate, authorizeAdmin, getFarmsByFarmer);
 
-/* =========================
-   FARMER-SPECIFIC FARM
-========================= */
+// Drop ALL lands belonging to one specific farmer
+router.delete('/farmer/:farmerId/drop-all', authenticate, authorizeAdmin, deleteAllFarmsForFarmer);
 
-// 4️⃣ Get all farms of a farmer
-router.get(
-  '/admin/farmers/:farmerId/farms',
-  authenticate,
-  authorizeAdmin,
-  getFarmsByFarmer
-);
-
-// 5️⃣ Get a single farm of a farmer
-router.get(
-  '/admin/farmers/:farmerId/farms/:farmId',
-  authenticate,
-  authorizeAdmin,
-  getFarmByFarmer
-);
-
-// 6️⃣ Add farm for a farmer
+// --- 4. INDIVIDUAL LAND NODE ACTIONS ---
+// Add a new land plot for a farmer (Includes Multi-part for Image)
 router.post(
-  '/admin/farmers/:farmerId/farms',
-  authenticate,
-  authorizeAdmin,
+  '/farmer/:farmerId/add', 
+  authenticate, 
+  authorizeAdmin, 
+  upload.single('land_image'), 
   addFarmForFarmer
 );
 
-// 7️⃣ Update farm of a farmer
+// Update an existing land plot (Includes Multi-part for Image updates)
 router.put(
-  '/admin/farmers/:farmerId/farms/:farmId',
-  authenticate,
-  authorizeAdmin,
-  updateFarmByFarmer
+  '/land/:farmId/update', 
+  authenticate, 
+  authorizeAdmin, 
+  upload.single('land_image'), 
+  updateFarmAdmin
 );
 
-// 8️⃣ Delete farm of a farmer
-router.delete(
-  '/admin/farmers/:farmerId/farms/:farmId',
-  authenticate,
-  authorizeAdmin,
-  deleteFarmByFarmer
-);
+// Drop a single specific land plot
+router.delete('/land/:farmId/drop', authenticate, authorizeAdmin, deleteFarmAdmin);
 
 module.exports = router;
