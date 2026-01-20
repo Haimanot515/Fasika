@@ -9,9 +9,9 @@ const app = express();
 /* ✅ REQUIRED FOR RENDER (SECURE COOKIES) */
 app.set('trust proxy', 1);
 
-// 1️⃣ CORS CONFIGURATION (MUST BE FIRST)
+// 1️⃣ CORS CONFIGURATION
 app.use(cors({
-  origin: 'https://fasika-frontend.onrender.com', // No trailing slash
+  origin: 'https://fasika-frontend.onrender.com', 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -32,6 +32,10 @@ app.use((req, res, next) => {
 const authRoutes = require('./routes/authentication/authRoutes'); 
 const adminUserRoutes = require('./routes/admin/adminUserRoutes');
 const adminFarmerRoutes = require('./routes/admin/adminFarmerFarmRoutes'); 
+
+// --- NEW ADMIN MARKETPLACE ROUTE ---
+const adminMarketplaceRoutes = require('./routes/admin/adminProductListingRoutes'); 
+
 const farmerFarmRoutes = require('./routes/farmer/farmerFarmRoutes'); 
 const farmerListingRoutes = require('./routes/farmer/farmerListingRoutes'); 
 const advisoryRoutes = require("./routes/farmer/farmerAdvisoryRoutes");
@@ -39,9 +43,6 @@ const farmerSupportRoutes = require('./routes/farmer/farmerSupportRoutes');
 const notificationRoutes = require("./routes/farmer/farmerNotificationsRoutes");
 const buyerMarketplaceRoutes = require('./routes/buyer/buyerMarketplaceRoutes'); 
 const farmerProfileRoutes = require('./routes/farmer/farmerProfileRoutes');
-
-// --- LAND REGISTRY ROUTE (Linked to your updated farmerFarmRoutes) ---
-const landRoutes = require('./routes/farmer/farmerFarmRoutes');
 
 // 🏠 ROOT HEALTH CHECK
 app.get('/', (req, res) => {
@@ -62,20 +63,22 @@ pool.connect((err, client, release) => {
   }
 });
 
-// 5️⃣ MOUNT ROUTES (Organized to avoid conflicts)
+// 5️⃣ MOUNT ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/farmers', adminFarmerRoutes);
 
+// --- MOUNTING ADMIN MARKETPLACE ---
+// This enables: /api/admin/marketplace/listings
+app.use('/api/admin/marketplace', adminMarketplaceRoutes); 
+
 // --- LAND DROP REGISTRY ---
-// These handles: /api/farmer/farm/land/view-detailed and /api/farmer/farm/land/stats
-app.use('/api/farmer/farm/land', landRoutes); 
+app.use('/api/farmer/farm/land', farmerFarmRoutes); 
 app.use('/api/farmer/farm', farmerFarmRoutes);
 
 app.use('/api/farmer/listings', farmerListingRoutes);
 app.use('/api/buyer/marketplace', buyerMarketplaceRoutes);
 
-// Specialized Farmer Registry Routes
 app.use("/api/farmer/advisory", advisoryRoutes);
 app.use('/api/farmer/support', farmerSupportRoutes);
 app.use("/api/farmer/notifications", notificationRoutes);
