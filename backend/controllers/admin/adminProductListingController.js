@@ -19,7 +19,6 @@ const uploadToSupabase = async (file, bucket = 'FarmerListing', folder = 'listin
 
 /* ───── AUTHORITY SEARCH (Registry Discovery) ───── */
 
-// This function MUST be exported for your search button to work!
 exports.searchFarmers = async (req, res) => {
     try {
         const { query } = req.query;
@@ -29,18 +28,25 @@ exports.searchFarmers = async (req, res) => {
 
         const searchVal = `%${query.toLowerCase()}%`;
         
+        // FIXED: Using LOWER(u.role) to match 'farmer' and added farm_name search
         const result = await pool.query(
             `SELECT u.id, u.full_name, u.email, u.phone, f.farm_name 
              FROM users u
              INNER JOIN farmers f ON u.id = f.user_internal_id
-             WHERE (LOWER(u.full_name) LIKE $1 OR LOWER(f.farm_name) LIKE $1 OR u.phone LIKE $1)
-             AND u.role = 'FARMER' 
+             WHERE (
+                LOWER(u.full_name) LIKE $1 OR 
+                LOWER(f.farm_name) LIKE $1 OR 
+                u.phone LIKE $1 OR
+                LOWER(u.email) LIKE $1
+             )
+             AND LOWER(u.role) = 'farmer' 
              LIMIT 15`,
             [searchVal]
         );
 
         res.status(200).json({ success: true, farmers: result.rows });
     } catch (err) {
+        console.error("SEARCH ERROR:", err.message);
         res.status(500).json({ success: false, message: "DROP: Search logic failed" });
     }
 };
@@ -81,7 +87,11 @@ exports.adminCreateListing = async (req, res) => {
     try {
         const { seller_internal_id, product_category, product_name, quantity, unit, price_per_unit, description } = req.body;
 
-        const primaryImageUrl = await uploadToSupabase(req.files?.primary_image?.[0]);
+        // Process images with safety check
+        const primaryImageUrl = req.files?.primary_image 
+            ? await uploadToSupabase(req.files.primary_image[0]) 
+            : null;
+
         const galleryUrls = req.files?.gallery_images
             ? await Promise.all(req.files.gallery_images.map(f => uploadToSupabase(f)))
             : [];
@@ -94,6 +104,7 @@ exports.adminCreateListing = async (req, res) => {
         );
         res.status(201).json({ success: true, message: "REGISTRY DROP: Node Created", data: rows[0] });
     } catch (err) {
+        console.error("CREATE ERROR:", err.message);
         res.status(500).json({ error: "DROP failure: " + err.message });
     }
 };
@@ -109,6 +120,9 @@ exports.adminUpdateListing = async (req, res) => {
              WHERE id=$7 RETURNING *`,
             [product_name, price_per_unit, quantity, status, unit, description, req.params.listing_id]
         );
+        
+        if (rows.length === 0) return res.status(404).json({ error: "Node not found for update" });
+        
         res.json({ success: true, message: "REGISTRY DROP: Update committed", data: rows[0] });
     } catch (err) {
         res.status(500).json({ error: "DROP update failed" });
@@ -117,10 +131,13 @@ exports.adminUpdateListing = async (req, res) => {
 
 exports.adminArchiveListing = async (req, res) => {
     try {
-        await pool.query(
+        const result = await pool.query(
             "UPDATE marketplace_listings SET status = 'ARCHIVED', updated_at = NOW() WHERE id = $1", 
             [req.params.listing_id]
         );
+        
+        if (result.rowCount === 0) return res.status(404).json({ error: "Node not found" });
+        
         res.json({ success: true, message: "REGISTRY DROP: Node Archived" });
     } catch (err) {
         res.status(500).json({ error: "DROP archive failure" });
