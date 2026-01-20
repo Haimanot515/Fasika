@@ -3,7 +3,7 @@ import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import { 
   FaPlus, FaSearch, FaEllipsisV, FaEdit, FaArchive,
-  FaUserShield, FaPhone, FaEnvelope, FaTag, FaBoxOpen, FaGlobe, FaDatabase
+  FaUserShield, FaPhone, FaTag, FaBoxOpen, FaGlobe, FaDatabase
 } from "react-icons/fa";
 
 const AdminViewListing = () => {
@@ -16,6 +16,7 @@ const AdminViewListing = () => {
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
+  // Handle clicking outside the dropdown menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -30,6 +31,7 @@ const AdminViewListing = () => {
 
   const fetchGlobalRegistry = async () => {
     try {
+      // Hits the authority path in adminProductListingRoutes
       const { data } = await api.get("/admin/marketplace/listings");
       setListings(data.listings || []);
       setFilteredListings(data.listings || []);
@@ -40,6 +42,7 @@ const AdminViewListing = () => {
     }
   };
 
+  // Filter logic for Master Registry
   useEffect(() => {
     const lowerSearch = searchTerm.toLowerCase();
     const results = listings.filter(item => (
@@ -66,7 +69,7 @@ const AdminViewListing = () => {
   if (loading) return (
     <div style={styles.loader}>
       <FaDatabase className="animate-spin" style={{ marginBottom: '15px', fontSize: '40px' }} />
-      <br />Syncing Master Registry...
+      <br />Syncing Master Registry (DROP)...
     </div>
   );
 
@@ -112,7 +115,7 @@ const AdminViewListing = () => {
         }
         .registry-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
           gap: 30px;
           padding: 40px;
           max-width: 1400px;
@@ -140,7 +143,7 @@ const AdminViewListing = () => {
         <div className="search-bar-ui">
           <input 
             type="text" 
-            placeholder="Filter by Product, Farmer Name, Category or ID..." 
+            placeholder="Filter by Product, Farmer, Category or Node ID..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -155,6 +158,7 @@ const AdminViewListing = () => {
       <div className="registry-grid">
         {filteredListings.map((item) => (
           <div key={item.listing_id} className="card-ui">
+            {/* ACTION DROPDOWN */}
             <div style={styles.dropMenuContainer}>
               <button 
                 style={styles.optionsTrigger} 
@@ -167,22 +171,35 @@ const AdminViewListing = () => {
               </button>
               {showMenuId === item.listing_id && (
                 <div style={styles.dropdown} ref={menuRef}>
-                  <div style={styles.dropItem} onClick={() => navigate(`/admin/farmers/market/edit/${item.listing_id}`)}>
+                  <div 
+                    style={styles.dropItem} 
+                    onClick={() => navigate(`/admin/farmers/market/edit/${item.listing_id}`)}
+                  >
                     <FaEdit color="#3b82f6" /> Update Node
                   </div>
-                  <div style={styles.dropItem} onClick={() => handleDrop(item.listing_id)} style={{...styles.dropItem, color: '#ef4444'}}>
+                  <div 
+                    style={{...styles.dropItem, color: '#ef4444', borderBottom: 'none'}} 
+                    onClick={() => handleDrop(item.listing_id)}
+                  >
                     <FaArchive /> DROP Listing
                   </div>
                 </div>
               )}
             </div>
 
-            <img src={item.primary_image_url || "https://via.placeholder.com/400"} style={styles.cardImg} alt="product" />
+            <img 
+              src={item.primary_image_url || "https://via.placeholder.com/400x250"} 
+              style={styles.cardImg} 
+              alt="product" 
+            />
             
             <div style={styles.cardBody}>
               <div style={styles.categoryBadge}><FaTag /> {item.product_category}</div>
               <h2 style={styles.productName}>{item.product_name}</h2>
-              <div style={styles.priceTag}>ETB {item.price_per_unit} <small style={{fontSize: '12px', color: '#64748b'}}>/ {item.unit}</small></div>
+              <div style={styles.priceTag}>
+                ETB {item.price_per_unit} 
+                <small style={{fontSize: '12px', color: '#64748b', fontWeight: 'normal'}}> / {item.unit}</small>
+              </div>
               
               <div style={styles.infoBox}>
                 <div style={styles.infoRow}><FaUserShield color="#3b82f6"/> {item.owner_name}</div>
@@ -190,10 +207,12 @@ const AdminViewListing = () => {
                 <div style={styles.infoRow}><FaBoxOpen color="#3b82f6"/> Stock: {item.quantity} {item.unit}</div>
               </div>
 
-              <div style={{...styles.status, color: item.status === 'ACTIVE' ? '#22c55e' : '#64748b'}}>
-                ● {item.status}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{...styles.status, color: item.status === 'ACTIVE' ? '#22c55e' : '#f59e0b'}}>
+                  ● {item.status}
+                </div>
+                <div style={styles.idLabel}>NODE_ID: {item.listing_id}</div>
               </div>
-              <div style={styles.idLabel}>NODE_ID: {item.listing_id}</div>
             </div>
           </div>
         ))}
@@ -214,9 +233,9 @@ const styles = {
   infoBox: { background: "#f1f5f9", padding: "15px", borderRadius: "8px", marginBottom: "15px" },
   infoRow: { fontSize: "12px", color: "#334155", display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px", fontWeight: "600" },
   status: { fontSize: "11px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "1px" },
-  idLabel: { marginTop: "10px", fontSize: "9px", color: "#94a3b8", fontFamily: "monospace" },
+  idLabel: { fontSize: "9px", color: "#94a3b8", fontFamily: "monospace" },
   dropMenuContainer: { position: "absolute", top: "12px", right: "12px", zIndex: 10 },
-  optionsTrigger: { background: "rgba(15, 23, 42, 0.8)", color: "white", border: "none", width: "32px", height: "32px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyCenter: "center" },
+  optionsTrigger: { background: "rgba(15, 23, 42, 0.8)", color: "white", border: "none", width: "32px", height: "32px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
   dropdown: { position: "absolute", top: "40px", right: "0", background: "white", border: "1px solid #e2e8f0", borderRadius: "8px", width: "160px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 50, padding: "5px 0" },
   dropItem: { padding: "12px 15px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px", fontWeight: "700", borderBottom: "1px solid #f8fafc" },
   loader: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#3b82f6', fontWeight: '900', background: '#0f172a' }
