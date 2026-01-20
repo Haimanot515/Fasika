@@ -1,117 +1,187 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from "react";
 import api from "../../api/axios"; 
-import { HiOutlineTrash, HiOutlineRefresh, HiOutlinePencilAlt, HiOutlineDatabase, HiOutlineUser, HiOutlineOfficeBuilding } from 'react-icons/hi';
+import { useNavigate } from "react-router-dom";
+import { 
+  FaPlus, FaStar, FaShieldAlt, FaSearch, FaCaretDown, 
+  FaEllipsisV, FaEdit, FaTrash, FaArchive, FaPause, FaPlay,
+  FaUserShield, FaIdBadge, FaDatabase
+} from "react-icons/fa";
 
-const AdminMarketDashboard = () => {
-    const navigate = useNavigate();
-    const [ads, setAds] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+const AdminProductListingView = () => {
+  const [listings, setListings] = useState([]);
+  const [filteredListings, setFilteredListings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [showMenuId, setShowMenuId] = useState(null);
+  
+  const menuRef = useRef(null);
+  const navigate = useNavigate();
 
-    const fetchAds = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get('/admin/marketplace/admin/marketplace/listings');
-            if (res.data.success) setAds(res.data.listings || []);
-        } catch (err) {
-            setError("404: Node path unreachable. Check backend mount point.");
-        } finally {
-            setLoading(false);
-        }
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenuId(null);
+      }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMenuId]);
 
-    const handleDrop = async (id) => {
-        if (window.confirm(`⚠️ AUTHORITY ACTION: DROP Listing Node #${id}?`)) {
-            try {
-                // Path must match your adminProductListingRoutes.js
-                await api.patch(`/admin/marketplace/admin/marketplace/listings/${id}/archive`);
-                alert("LISTING DROPPED SUCCESSFULLY");
-                fetchAds(); 
-            } catch (err) {
-                alert("DROP FAILED: Authority connection error.");
-            }
-        }
-    };
+  useEffect(() => { fetchGlobalRegistry(); }, []);
 
-    useEffect(() => { fetchAds(); }, []);
+  const fetchGlobalRegistry = async () => {
+    try {
+      // Calls the Admin Authority endpoint we set up in the backend
+      const { data } = await api.get("/admin/marketplace/listings");
+      setListings(data.listings || []);
+      setFilteredListings(data.listings || []);
+    } catch (err) { 
+      console.error("Registry Fetch Error:", err); 
+    } finally { 
+      setLoading(false); 
+    }
+  };
 
-    if (loading) return <div style={styles.loadingScreen}><HiOutlineDatabase className="animate-spin" size={30} /><p>SYNCING REGISTRY...</p></div>;
-
-    return (
-        <div style={styles.container}>
-            <div style={styles.header}>
-                <div>
-                    <h2 style={styles.mainTitle}>🛒 MARKETPLACE REGISTRY</h2>
-                    <p style={styles.subTitle}>Authority Moderation: Global Product Nodes</p>
-                </div>
-                <button onClick={fetchAds} style={styles.refreshBtn}><HiOutlineRefresh /> Sync Registry</button>
-            </div>
-
-            <div style={styles.gridContainer}>
-                {ads.map(ad => (
-                    <div key={ad.listing_id} style={styles.card}>
-                        <div style={styles.imageBox}>
-                            <img src={ad.primary_image_url || 'https://via.placeholder.com/400x250'} alt={ad.product_name} style={styles.productImg} />
-                            <div style={{...styles.statusBadge, backgroundColor: ad.status === 'ACTIVE' ? '#22c55e' : '#ef4444'}}>{ad.status}</div>
-                        </div>
-
-                        <div style={styles.cardContent}>
-                            <div style={styles.metaHeader}>
-                                <span style={styles.categoryBadge}>{ad.product_category}</span>
-                                <span style={styles.idBadge}>ID: {ad.listing_id}</span>
-                            </div>
-
-                            <h3 style={styles.titleText}>{ad.product_name}</h3>
-
-                            {/* OWNER & FARM LOGIC */}
-                            <div style={styles.ownerSection}>
-                                <div style={styles.infoRow}><HiOutlineUser size={14} /> <span><b>Owner:</b> {ad.owner_name}</span></div>
-                                <div style={styles.infoRow}><HiOutlineOfficeBuilding size={14} /> <span><b>Farm:</b> {ad.farm_name}</span></div>
-                            </div>
-
-                            <div style={styles.priceContainer}>
-                                <span style={styles.currency}>ETB</span>
-                                <span style={styles.price}>{parseFloat(ad.price_per_unit).toLocaleString()}</span>
-                            </div>
-
-                            <div style={styles.actionGrid}>
-                                <button onClick={() => navigate(`/admin/listings/update/${ad.listing_id}`)} style={styles.btnEdit}><HiOutlinePencilAlt /> Update</button>
-                                <button onClick={() => handleDrop(ad.listing_id)} style={styles.btnDrop}><HiOutlineTrash /> DROP</button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+  useEffect(() => {
+    const results = listings.filter(item =>
+      item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    setFilteredListings(results);
+  }, [searchTerm, listings]);
+
+  const handleEdit = (id) => {
+    navigate(`/admin/marketplace/edit-listing/${id}`);
+  };
+
+  const handleDrop = async (id) => {
+    if (window.confirm("⚠️ AUTHORITY ACTION: DROP (Archive) this node from the active registry?")) {
+      try {
+        // Points to our .patch('/listings/:listing_id/archive') route
+        await api.patch(`/admin/marketplace/listings/${id}/archive`);
+        setListings(prev => prev.filter(item => item.listing_id !== id));
+        alert("NODE DROPPED SUCCESSFULLY");
+      } catch (err) { 
+        console.error("Drop Error:", err);
+        alert("DROP Failed: Authority access denied.");
+      }
+    }
+  };
+
+  if (loading) return <div style={premiumStyles.loader}><FaDatabase className="animate-spin" /> Syncing Master Registry...</div>;
+
+  return (
+    <div style={premiumStyles.pageWrapper} onClick={() => setShowMenuId(null)}>
+      <style>{`
+        .admin-search-bar { display: flex; justify-content: center; align-items: center; padding: 25px 0; background: #1e293b; width: 100%; gap: 15px; border-bottom: 4px solid #3b82f6; }
+        .search-wrapper { display: flex; width: 700px; height: 45px; border-radius: 6px; overflow: hidden; background: #fff; }
+        .registry-tag { background: #334155; color: #3b82f6; border-right: 1px solid #475569; padding: 0 15px; display: flex; align-items: center; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        .search-input { flex: 1; border: none; padding: 0 15px; outline: none; font-size: 15px; }
+        .search-button { background: #3b82f6; border: none; width: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; }
+        .registry-card { background: #fff; height: 500px; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; position: relative; transition: transform 0.2s; }
+        .registry-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .admin-options-btn { position: absolute; top: 12px; right: 12px; background: rgba(30, 41, 59, 0.8); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; z-index: 5; color: white; border: none; cursor: pointer; }
+        .dropdown-menu { position: absolute; top: 50px; right: 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 100; width: 180px; padding: 8px 0; }
+        .menu-item { padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #1e293b; cursor: pointer; }
+        .menu-item:hover { background: #f1f5f9; }
+        .node-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 240px; background: rgba(30, 41, 59, 0.6); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 900; z-index: 2; }
+      `}</style>
+      
+      <div style={premiumStyles.scrollLayer}>
+        <div className="admin-search-bar">
+          <div className="search-wrapper">
+            <div className="registry-tag"><FaDatabase style={{marginRight: '5px'}} /> Registry</div>
+            <input 
+              type="text" 
+              className="search-input" 
+              placeholder="Search by product name or farmer..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button className="search-button"><FaSearch size={18} /></button>
+          </div>
+          <button onClick={() => navigate("/admin/marketplace/add-listing")} style={premiumStyles.headerAddBtn}>
+            <FaPlus /> New Node
+          </button>
+        </div>
+
+        <div style={premiumStyles.fullViewportGrid}>
+          {filteredListings.map((item) => (
+            <div key={item.listing_id} className="registry-card">
+              <button 
+                className="admin-options-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenuId(showMenuId === item.listing_id ? null : item.listing_id);
+                }}
+              >
+                <FaEllipsisV />
+              </button>
+
+              {showMenuId === item.listing_id && (
+                <div className="dropdown-menu" ref={menuRef}>
+                  <div className="menu-item" onClick={() => handleEdit(item.listing_id)}>
+                    <FaEdit color="#3b82f6"/> Update Node
+                  </div>
+                  <div className="menu-item" onClick={() => handleDrop(item.listing_id)} style={{color: '#ef4444'}}>
+                    <FaArchive /> DROP Listing
+                  </div>
+                </div>
+              )}
+
+              <div style={premiumStyles.imageHalf}>
+                {item.status === "PAUSED" && <div className="node-overlay">NODE PAUSED</div>}
+                {item.status === "ARCHIVED" && <div className="node-overlay" style={{background: 'rgba(239, 68, 68, 0.7)'}}>DROPPED</div>}
+                <img src={item.primary_image_url || "https://via.placeholder.com/300"} alt={item.product_name} style={premiumStyles.productImg} />
+                <div style={premiumStyles.idTag}>ID: {item.listing_id}</div>
+              </div>
+
+              <div style={premiumStyles.textHalf}>
+                <div style={premiumStyles.ownerBadge}>
+                    <FaUserShield size={10} /> {item.owner_name || "Unknown Farmer"}
+                </div>
+                <h2 style={premiumStyles.productTitle}>{item.product_name}</h2>
+                <div style={premiumStyles.priceRow}>
+                  <span style={premiumStyles.priceMain}>ETB {item.price_per_unit}</span>
+                  <span style={premiumStyles.unit}>/ {item.unit}</span>
+                </div>
+                
+                <div style={premiumStyles.metaBox}>
+                    <div style={premiumStyles.metaItem}><FaIdBadge /> Farm: {item.farm_name || 'N/A'}</div>
+                    <div style={premiumStyles.metaItem}><FaDatabase /> Stock: {item.quantity}</div>
+                </div>
+
+                <div style={{...premiumStyles.statusIndicator, color: item.status === 'ACTIVE' ? '#22c55e' : '#64748b'}}>
+                    ● {item.status}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
-const styles = {
-    container: { padding: '30px', background: '#f8fafc', minHeight: '100vh', fontFamily: 'Inter, sans-serif' },
-    loadingScreen: { height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#1e40af', gap: '15px' },
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '2px solid #e2e8f0', paddingBottom: '20px' },
-    mainTitle: { color: '#0f172a', margin: 0, fontWeight: '900', fontSize: '26px' },
-    subTitle: { color: '#64748b', fontSize: '14px' },
-    refreshBtn: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
-    gridContainer: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '25px' },
-    card: { background: '#fff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9' },
-    imageBox: { position: 'relative', height: '180px' },
-    productImg: { width: '100%', height: '100%', objectFit: 'cover' },
-    statusBadge: { position: 'absolute', top: '12px', right: '12px', padding: '4px 10px', borderRadius: '20px', color: '#fff', fontSize: '10px', fontWeight: 'bold' },
-    cardContent: { padding: '20px' },
-    metaHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: '10px' },
-    categoryBadge: { fontSize: '10px', background: '#eff6ff', color: '#1e40af', padding: '3px 8px', borderRadius: '4px', fontWeight: '700' },
-    idBadge: { fontSize: '10px', color: '#94a3b8' },
-    titleText: { margin: '0 0 15px 0', fontSize: '19px', color: '#1e293b', fontWeight: '700' },
-    ownerSection: { background: '#f8fafc', padding: '10px', borderRadius: '8px', marginBottom: '15px' },
-    infoRow: { display: 'flex', alignItems: 'center', gap: '8px', color: '#475569', fontSize: '12px', marginBottom: '4px' },
-    priceContainer: { display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '20px' },
-    currency: { fontSize: '12px', fontWeight: '700', color: '#64748b' },
-    price: { fontSize: '22px', fontWeight: '900', color: '#0f172a' },
-    actionGrid: { display: 'flex', gap: '10px' },
-    btnEdit: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', color: '#475569' },
-    btnDrop: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px', background: '#fef2f2', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', color: '#ef4444' }
+const premiumStyles = {
+  pageWrapper: { width: "100vw", minHeight: "100vh", background: "#f8fafc", zIndex: 10005 },
+  scrollLayer: { marginTop: "78px", width: "100%" },
+  fullViewportGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", width: "100%", padding: "40px 20px", gap: "25px" },
+  headerAddBtn: { background: "#3b82f6", border: "none", borderRadius: "6px", color: "white", padding: "0 20px", height: "45px", cursor: "pointer", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" },
+  imageHalf: { height: "240px", width: "100%", position: "relative", background: "#e2e8f0" },
+  productImg: { width: "100%", height: "100%", objectFit: "cover" },
+  idTag: { position: "absolute", bottom: "10px", right: "10px", background: "rgba(30, 41, 59, 0.9)", color: "#fff", padding: "2px 8px", fontSize: "10px", borderRadius: "4px", fontFamily: "monospace" },
+  textHalf: { padding: "15px", display: "flex", flexDirection: "column", flex: 1 },
+  ownerBadge: { display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", fontWeight: "bold", color: "#3b82f6", marginBottom: "8px", textTransform: "uppercase" },
+  productTitle: { fontSize: "17px", color: "#0f172a", fontWeight: "800", margin: "0 0 10px 0" },
+  priceRow: { display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "15px" },
+  priceMain: { fontSize: "22px", fontWeight: "900", color: "#0f172a" },
+  unit: { fontSize: "12px", color: "#64748b", fontWeight: "600" },
+  metaBox: { background: "#f1f5f9", padding: "10px", borderRadius: "8px", marginBottom: "10px" },
+  metaItem: { display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#475569", marginBottom: "4px" },
+  statusIndicator: { marginTop: "auto", fontSize: "11px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "1px" },
+  loader: { textAlign: 'center', padding: '150px', color: '#3b82f6', fontWeight: 'bold' }
 };
 
-export default AdminMarketDashboard;
+export default AdminProductListingView;
