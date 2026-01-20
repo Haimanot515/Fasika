@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 /**
  * HELPER: Supabase Authority Upload
+ * Ensures images are stored in the land_registry folder with an ADMIN prefix
  */
 const uploadToSupabase = async (file, bucket = 'FarmerListing') => {
     if (!file) return null;
@@ -18,28 +19,24 @@ const uploadToSupabase = async (file, bucket = 'FarmerListing') => {
 
 /**
  * HELPER: Identity Resolver
- * Converts Email, Phone, or UUID into a valid User ID
+ * Allows Admin to target a farmer by Email, Phone, or UUID
  */
 const resolveFarmerId = async (input) => {
     if (!input) return null;
-    
-    // 1. Check if input is a UUID
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (uuidRegex.test(input)) return input;
 
-    // 2. Otherwise, lookup by Email or Phone
     const result = await pool.query(
         `SELECT id FROM users WHERE email = $1 OR phone = $1 LIMIT 1`,
         [input]
     );
-    
     return result.rowCount > 0 ? result.rows[0].id : null;
 };
 
 /**
- * ==============================
- * General Admin Farm Actions
- * ==============================
+ * ==========================================
+ * GENERAL ADMIN REGISTRY ACTIONS (GLOBAL)
+ * ==========================================
  */
 
 const getAllFarms = async (req, res) => {
@@ -47,7 +44,10 @@ const getAllFarms = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const offset = parseInt(req.query.offset) || 0;
         const result = await pool.query(
-            `SELECT * FROM land_plots ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+            `SELECT lp.*, s.soil_type_name 
+             FROM land_plots lp 
+             LEFT JOIN soils s ON lp.soil_id = s.id 
+             ORDER BY lp.created_at DESC LIMIT $1 OFFSET $2`,
             [limit, offset]
         );
         res.status(200).json({ success: true, count: result.rowCount, data: result.rows });
@@ -82,9 +82,9 @@ const deleteFarmAdmin = async (req, res) => {
 };
 
 /**
- * ==============================
- * Admin CRUD for a specific farmer (Supports Email/Phone/UUID)
- * ==============================
+ * ============================================================
+ * ADMIN ACTIONS FOR SPECIFIC FARMER (AUTHORITY INJECTION)
+ * ============================================================
  */
 
 const getFarmsByFarmer = async (req, res) => {
@@ -92,12 +92,11 @@ const getFarmsByFarmer = async (req, res) => {
         const farmerId = await resolveFarmerId(req.params.farmerId);
         if (!farmerId) return res.status(404).json({ success: false, message: 'Identity not found in registry' });
 
-        const limit = parseInt(req.query.limit) || 20;
-        const offset = parseInt(req.query.offset) || 0;
-
         const result = await pool.query(
-            `SELECT * FROM land_plots WHERE farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1) ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
-            [farmerId, limit, offset]
+            `SELECT lp.* FROM land_plots lp 
+             WHERE lp.farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1) 
+             ORDER BY lp.created_at DESC`,
+            [farmerId]
         );
         res.status(200).json({ success: true, count: result.rowCount, data: result.rows });
     } catch (err) {
@@ -113,7 +112,8 @@ const getFarmByFarmer = async (req, res) => {
         if (!farmerId) return res.status(404).json({ success: false, message: 'Identity not found' });
 
         const result = await pool.query(
-            `SELECT * FROM land_plots WHERE farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1) AND id = $2`,
+            `SELECT * FROM land_plots 
+             WHERE farmer_id = (SELECT id FROM farmers WHERE user_internal_id = $1) AND id = $2`,
             [farmerId, farmId]
         );
         if (!result.rowCount) return res.status(404).json({ success: false, message: 'Farm record not found' });
@@ -127,37 +127,31 @@ const getFarmByFarmer = async (req, res) => {
 const addFarmForFarmer = async (req, res) => {
     const client = await pool.connect();
     try {
-        const farmerId = await resolveFarmerId(req.params.farmerId);
-        if (!farmerId) return res.status(404).json({ success: false, message: 'Identity resolution failed' });
+        const userId = await resolveFarmerId(req.params.farmerId);
+        if (!userId) return res.status(404).json({ success: false, message: 'Identity resolution failed' });
 
-        const {
-            plot_name, area_size, soil_type, climate_zone, 
-            region, zone, woreda, kebele, crops, animals
-        } = req.body;
-
+        const { plot_name, area_size, soil_type, climate_zone, region, zone, woreda, kebele, crops, animals } = req.body;
+        
         await client.query('BEGIN');
 
-        // 1. Process Authority Image Upload
+        // 1. Supabase Image Drop
         let landImageUrl = req.file ? await uploadToSupabase(req.file) : null;
 
-        // 2. Resolve Soil ID
+        // 2. Resolve IDs
         const soilRes = await client.query("SELECT id FROM soils WHERE soil_type_name = $1", [soil_type]);
         const soilId = soilRes.rows.length > 0 ? soilRes.rows[0].id : null;
+        const farmerRes = await client.query(`SELECT id FROM farmers WHERE user_internal_id = $1`, [userId]);
+        const farmerId = farmerRes.rows[0].id;
 
-        // 3. Resolve Farmer Table ID (Internal linkage)
-        const farmerTableRes = await client.query(`SELECT id FROM farmers WHERE user_internal_id = $1`, [farmerId]);
-        const internalFarmerId = farmerTableRes.rows[0].id;
-
-        // 4. DROP Land Plot
+        // 3. DROP Land Plot
         const landResult = await client.query(
-            `INSERT INTO land_plots 
-            (farmer_id, plot_name, area_size, soil_id, climate_zone, region, zone, woreda, kebele, land_image_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-            [internalFarmerId, plot_name, area_size, soilId, climate_zone, region, zone, woreda, kebele, landImageUrl]
+            `INSERT INTO land_plots (farmer_id, plot_name, area_size, soil_id, climate_zone, region, zone, woreda, kebele, land_image_url)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+            [farmerId, plot_name, area_size, soilId, climate_zone, region, zone, woreda, kebele, landImageUrl]
         );
         const newLandId = landResult.rows[0].id;
 
-        // 5. DROP Biological Assets: Crops
+        // 4. DROP Crops
         if (crops) {
             const parsedCrops = typeof crops === 'string' ? JSON.parse(crops) : crops;
             for (let c of parsedCrops) {
@@ -168,35 +162,33 @@ const addFarmForFarmer = async (req, res) => {
             }
         }
         
-        // 6. DROP Biological Assets: Animals
+        // 5. DROP Animals
         if (animals) {
             const parsedAnimals = typeof animals === 'string' ? JSON.parse(animals) : animals;
             for (let a of parsedAnimals) {
                 await client.query(
                     `INSERT INTO animals (user_internal_id, current_land_plot_id, animal_type, head_count, tag_number) 
                      VALUES ($1, $2, $3, $4, $5)`, 
-                    [farmerId, newLandId, a.animal_type, a.head_count, a.tag_number || `ADM-TAG-${uuidv4().substring(0,8)}`]
+                    [userId, newLandId, a.animal_type, a.head_count, a.tag_number || `ADM-TAG-${Date.now()}`]
                 );
             }
         }
 
         await client.query('COMMIT');
-        res.status(201).json({ success: true, message: 'Registry Entry successfully DROPPED!', landId: newLandId });
+        res.status(201).json({ success: true, message: 'Registry node DROPPED successfully', landId: newLandId });
     } catch (err) {
         await client.query('ROLLBACK');
         console.error('addFarmForFarmer error:', err);
-        res.status(500).json({ success: false, message: 'Server error during DROP' });
-    } finally {
-        client.release();
-    }
+        res.status(500).json({ success: false, message: err.message });
+    } finally { client.release(); }
 };
 
 const updateFarmByFarmer = async (req, res) => {
     const client = await pool.connect();
     try {
         const { farmId } = req.params;
-        const farmerId = await resolveFarmerId(req.params.farmerId);
-        if (!farmerId) return res.status(404).json({ success: false, message: 'Identity not found' });
+        const userId = await resolveFarmerId(req.params.farmerId);
+        if (!userId) return res.status(404).json({ success: false, message: 'Identity not found' });
 
         const { plot_name, area_size, soil_type, climate_zone, region, zone, woreda, kebele, crops, animals } = req.body;
 
@@ -211,9 +203,10 @@ const updateFarmByFarmer = async (req, res) => {
         await client.query(
             `UPDATE land_plots SET plot_name=$1, area_size=$2, soil_id=$3, climate_zone=$4, region=$5, zone=$6, woreda=$7, kebele=$8, land_image_url=$9, updated_at=NOW()
              WHERE id=$10 AND farmer_id=(SELECT id FROM farmers WHERE user_internal_id=$11)`,
-            [plot_name, area_size, soilId, climate_zone, region, zone, woreda, kebele, landImageUrl, farmId, farmerId]
+            [plot_name, area_size, soilId, climate_zone, region, zone, woreda, kebele, landImageUrl, farmId, userId]
         );
 
+        // Sync Biological Assets
         if (crops) {
             await client.query(`DELETE FROM crops WHERE land_plot_id = $1`, [farmId]);
             const parsedCrops = typeof crops === 'string' ? JSON.parse(crops) : crops;
@@ -229,31 +222,28 @@ const updateFarmByFarmer = async (req, res) => {
                 await client.query(
                     `INSERT INTO animals (user_internal_id, current_land_plot_id, animal_type, head_count, tag_number) 
                      VALUES ($1, $2, $3, $4, $5)`,
-                    [farmerId, farmId, a.animal_type, a.head_count, a.tag_number || `ADM-UPD-${uuidv4().substring(0,8)}`]
+                    [userId, farmId, a.animal_type, a.head_count, a.tag_number || `ADM-UPD-${Date.now()}`]
                 );
             }
         }
 
         await client.query('COMMIT');
-        res.json({ success: true, message: 'Registry update DROPPED', data: farmId });
+        res.json({ success: true, message: 'Registry update DROPPED' });
     } catch (err) {
         await client.query('ROLLBACK');
         console.error('updateFarmByFarmer error:', err);
         res.status(500).json({ success: false, message: 'Server error' });
-    } finally {
-        client.release();
-    }
+    } finally { client.release(); }
 };
 
 const deleteFarmByFarmer = async (req, res) => {
     try {
         const { farmId } = req.params;
-        const farmerId = await resolveFarmerId(req.params.farmerId);
-        if (!farmerId) return res.status(404).json({ success: false, message: 'Identity not found' });
-
+        const userId = await resolveFarmerId(req.params.farmerId);
+        
         const result = await pool.query(
             `DELETE FROM land_plots WHERE id=$1 AND farmer_id=(SELECT id FROM farmers WHERE user_internal_id=$2) RETURNING *`,
-            [farmId, farmerId]
+            [farmId, userId]
         );
         if (!result.rowCount) return res.status(404).json({ success: false, message: 'Farm not found' });
 
