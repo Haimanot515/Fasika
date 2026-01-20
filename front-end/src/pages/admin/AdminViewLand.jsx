@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 import api from "../../api/axios";
 import { 
     ShieldCheck, MapPin, Leaf, Ruler, Layers, Loader2, Trash2, Edit3, User, Search, AlertTriangle
 } from "lucide-react";
 
 const AdminViewLand = () => {
+  const navigate = useNavigate(); // Hook to trigger the update path
   const [lands, setLands] = useState([]);
   const [stats, setStats] = useState({ total_lands: 0, total_hectares: 0 });
   const [loading, setLoading] = useState(true);
@@ -18,9 +20,6 @@ const AdminViewLand = () => {
 
       /**
        * PATH VERIFICATION:
-       * Axios baseURL: .../api
-       * Server mount: /admin/farmers
-       * Route: /view-all
        * Target: /api/admin/farmers/view-all
        */
       const res = await api.get("/admin/farmers/view-all");
@@ -46,9 +45,10 @@ const AdminViewLand = () => {
   };
 
   const handleDropNode = async (id) => {
+    // Using 'DROP' terminology as per your instructions
     if (window.confirm(`⚠️ AUTHORITY ALERT: DROP Land Node #${id} permanently?`)) {
       try {
-        // Path: /api/admin/farmers/land/:id/drop
+        // Path matches your router: .delete('/land/:farmId/drop', ...)
         await api.delete(`/admin/farmers/land/${id}/drop`);
         alert("NODE DROPPED FROM REGISTRY");
         fetchGlobalRegistry();
@@ -135,7 +135,12 @@ const AdminViewLand = () => {
                     <button onClick={() => handleDropNode(plot.id)} style={styles.dropBtn} title="DROP RECORD">
                         <Trash2 size={16} />
                     </button>
-                    <button style={styles.editBtn}>
+                    {/* UPDATED PATH: Uses the /admin/farmers/land/update/:id route */}
+                    <button 
+                      onClick={() => navigate(`/admin/farmers/land/update/${plot.id}`)} 
+                      style={styles.editBtn} 
+                      title="UPDATE NODE"
+                    >
                         <Edit3 size={16} />
                     </button>
                 </div>
