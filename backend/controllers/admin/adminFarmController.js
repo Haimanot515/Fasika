@@ -17,6 +17,7 @@ const uploadToSupabase = async (file, bucket = 'FarmerListing') => {
 
 /**
  * HELPER: Identity Resolver
+ * Resolves user search input to the 'id' in the users table
  */
 const resolveFarmerId = async (input) => {
     if (!input) return null;
@@ -53,7 +54,7 @@ exports.searchFarmers = async (req, res) => {
 
 /**
  * 2. GLOBAL VIEW: Full Registry Authority
- * FIX: owner_name is pulled from 'users', not 'farmers'.
+ * Verified against: users(id), farmers(user_internal_id), crops(id), animals(animal_id), soils(id)
  */
 exports.getAllFarms = async (req, res) => {
     try {
@@ -63,15 +64,23 @@ exports.getAllFarms = async (req, res) => {
                 u.full_name AS owner_name, 
                 u.email AS owner_email,
                 u.phone AS owner_phone,
+                u.photo_url AS owner_photo,
+                f.farm_name,
+                f.farm_type,
                 s.soil_type_name,
+                s.texture_category AS soil_texture,
                 COALESCE((
                     SELECT json_agg(c) FROM (
-                        SELECT id, crop_name, quantity FROM crops WHERE land_plot_id = lp.id
+                        SELECT id, crop_name, quantity, crop_variety, current_stage 
+                        FROM crops 
+                        WHERE land_plot_id = lp.id
                     ) c
                 ), '[]'::json) as crop_list,
                 COALESCE((
                     SELECT json_agg(a) FROM (
-                        SELECT id, animal_type, head_count, tag_number FROM animals WHERE current_land_plot_id = lp.id
+                        SELECT animal_id, animal_type, head_count, tag_number, health_status 
+                        FROM animals 
+                        WHERE current_land_plot_id = lp.id
                     ) a
                 ), '[]'::json) as animal_list
              FROM land_plots lp 
