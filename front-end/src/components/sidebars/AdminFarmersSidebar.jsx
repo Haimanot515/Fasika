@@ -84,17 +84,18 @@ const AdminFarmersSidebar = ({ isOpen = true }) => {
       <nav>
         {/* 1. FARMERS MANAGEMENT */}
         <SectionItem icon={<HiOutlineUserGroup/>} label="FARMERS MANAGEMENT" isOpen={openL1.FARMERS} collapsed={collapsed} toggle={() => toggleL1('FARMERS')}>
-          <NavLink style={subLinkStyle} to="/admin/farmers/view">
+          {/* UPDATED: Path changed to match App.jsx Farmer Stats */}
+          <NavLink style={subLinkStyle} to="/admin/farmers/dashboard">
             <span style={{display: 'flex', alignItems: 'center', gap: '12px'}}><HiOutlineViewList /> View All Farmers</span>
           </NavLink>
           
-          <NavLink style={subLinkStyle} to="/admin/farmers/stats">
+          <NavLink style={subLinkStyle} to="/admin/farmers/dashboard">
             <span style={{display: 'flex', alignItems: 'center', gap: '12px'}}><HiOutlineChartPie /> Total Farmers</span>
             {!collapsed && <span style={{background: '#059669', color: '#fff', padding: '2px 8px', borderRadius: '10px', fontSize: '10px'}}>{farmerCount}</span>}
           </NavLink>
 
-          <NavLink style={subLinkStyle} to="/admin/farmers/register">
-            <span style={{display: 'flex', alignItems: 'center', gap: '12px'}}><HiOutlinePlusCircle /> Register New Farmer</span>
+          <NavLink style={subLinkStyle} to="/admin/users/list">
+            <span style={{display: 'flex', alignItems: 'center', gap: '12px'}}><HiOutlinePlusCircle /> User Registry</span>
           </NavLink>
         </SectionItem>
 
@@ -110,10 +111,11 @@ const AdminFarmersSidebar = ({ isOpen = true }) => {
 
         {/* 3. PRODUCT LISTING MANAGEMENT */}
         <SectionItem icon={<HiOutlineShoppingCart/>} label="PRODUCT LISTINGS" isOpen={openL1.PRODUCTS} collapsed={collapsed} toggle={() => toggleL1('PRODUCTS')}>
+          {/* UPDATED: Paths adjusted to match App.jsx */}
           <NavLink style={subLinkStyle} to="/admin/farmers/market/view">
             <span style={{display: 'flex', alignItems: 'center', gap: '12px'}}><HiOutlineViewList /> View Marketplace</span>
           </NavLink>
-          <NavLink style={subLinkStyle} to="/admin/farmers/market/post">
+          <NavLink style={subLinkStyle} to="/admin/farmers/market/add">
             <span style={{display: 'flex', alignItems: 'center', gap: '12px'}}><HiOutlinePlusCircle /> Create New Listing</span>
           </NavLink>
         </SectionItem>
