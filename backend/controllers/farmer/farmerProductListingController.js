@@ -1,146 +1,135 @@
+
 const pool = require('../../config/dbConfig');
 const supabase = require('../../config/supabase');
 
-/* =========================
-   Helper: Supabase Upload
-========================= */
-const uploadToSupabase = async (file, folder = 'marketplace') => {
+/* ───── HELPER: Supabase Image Upload ───── */
+const uploadToSupabase = async (file, bucket, folder = 'listings') => {
     if (!file) return null;
     const fileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
     const filePath = `${folder}/${fileName}`;
 
     const { data, error } = await supabase.storage
-        .from('FarmerListing')
-        .upload(filePath, file.buffer, {
-            contentType: file.mimetype,
-            upsert: false
-        });
+        .from(bucket)
+        .upload(filePath, file.buffer, { contentType: file.mimetype, upsert: false });
 
     if (error) throw error;
 
-    const { data: urlData } = supabase.storage
-        .from('FarmerListing')
-        .getPublicUrl(filePath);
-
+    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
     return urlData.publicUrl;
 };
 
-/* =========================
-   1. CRUD OPERATIONS
-========================= */
-
-// Create a new listing
-exports.createListing = async (req, res) => {
+/* ───── INTERNAL HELPER: Status Updater ───── */
+const setStatus = async (req, res, newStatus) => {
     try {
-        const userId = req.user.userInternalId;
-        const fields = req.body;
+        const { listing_id } = req.params;
+        const sellerInternalId = req.user.userInternalId; 
 
-        const primary_image_url = req.files?.primary_image 
-            ? await uploadToSupabase(req.files.primary_image[0], 'products') 
-            : null;
-
-        const gallery_urls = req.files?.gallery_images 
-            ? await Promise.all(req.files.gallery_images.map(f => uploadToSupabase(f, 'gallery'))) 
-            : [];
-
-        const result = await pool.query(
-            `INSERT INTO marketplace_listings (
-                seller_id, product_category, product_name, variety_or_breed,
-                quantity, unit, price_per_unit, primary_image_url, gallery_urls, status
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'ACTIVE') RETURNING listing_id`,
-            [userId, fields.product_category, fields.product_name, fields.variety_or_breed,
-             fields.quantity, fields.unit, fields.price_per_unit, primary_image_url, gallery_urls]
+        const { rowCount } = await pool.query(
+            "UPDATE marketplace_listings SET status = $1, updated_at = NOW() WHERE id = $2 AND seller_internal_id = $3",
+            [newStatus, listing_id, sellerInternalId]
         );
 
-        res.status(201).json({ success: true, message: "Registry Node DROPPED", listing_id: result.rows[0].listing_id });
+        if (rowCount === 0) return res.status(404).json({ error: "Listing not found or unauthorized" });
+        res.json({ success: true, message: `Status updated to ${newStatus}` });
     } catch (err) {
-        res.status(500).json({ error: "Authority: Failed to create listing" });
+        res.status(500).json({ error: err.message });
     }
 };
 
-// Get all for dashboard (Excludes ARCHIVED by default)
+/* ───── EXPORTED FUNCTIONS ───── */
+
+// 1. Create Listing
+exports.createListing = async (req, res) => {
+    try {
+        const sellerInternalId = req.user.userInternalId;
+        const { product_category, product_name, quantity, unit, price_per_unit, description } = req.body;
+
+        const primaryImageUrl = await uploadToSupabase(req.files?.primary_image?.[0], 'FarmerListing');
+        const galleryUrls = req.files?.gallery_images
+            ? await Promise.all(req.files.gallery_images.map(f => uploadToSupabase(f, 'FarmerListing')))
+            : [];
+
+        const { rows } = await pool.query(
+            `INSERT INTO marketplace_listings 
+            (seller_internal_id, product_category, product_name, quantity, unit, price_per_unit, description, primary_image_url, gallery_urls, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'ACTIVE') RETURNING *`,
+            [sellerInternalId, product_category, product_name, quantity, unit || 'KG', price_per_unit, description, primaryImageUrl, galleryUrls]
+        );
+        res.status(201).json({ success: true, data: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// 2. Get All Active/Paused Listings (Excludes Archived)
 exports.getFarmerListings = async (req, res) => {
     try {
-        const userId = req.user.userInternalId;
-        const result = await pool.query(
-            `SELECT * FROM marketplace_listings WHERE seller_id = $1 AND status != 'ARCHIVED' ORDER BY created_at DESC`,
-            [userId]
+        const { rows } = await pool.query(
+            "SELECT * FROM marketplace_listings WHERE seller_internal_id = $1 AND status != 'ARCHIVED' ORDER BY created_at DESC",
+            [req.user.userInternalId]
         );
-        res.json({ success: true, listings: result.rows });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        res.json({ success: true, data: rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-// Get single listing for Edit Page
+// 3. Get Single Listing
 exports.getFarmerListingById = async (req, res) => {
     try {
-        const { listing_id } = req.params;
-        const userId = req.user.userInternalId;
-        const result = await pool.query(
-            `SELECT * FROM marketplace_listings WHERE listing_id = $1 AND seller_id = $2`,
-            [listing_id, userId]
+        const { rows } = await pool.query(
+            "SELECT * FROM marketplace_listings WHERE id = $1 AND seller_internal_id = $2",
+            [req.params.listing_id, req.user.userInternalId]
         );
-        if (!result.rowCount) return res.status(404).json({ error: "Node not found" });
-        res.json({ success: true, listing: result.rows[0] });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        if (!rows.length) return res.status(404).json({ error: "Listing not found" });
+        res.json({ success: true, data: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-// Update Listing
+// 4. Full Update (PUT)
 exports.updateListing = async (req, res) => {
     try {
-        const { listing_id } = req.params;
-        const userId = req.user.userInternalId;
-        const fields = { ...req.body };
-
-        if (req.files?.primary_image) {
-            fields.primary_image_url = await uploadToSupabase(req.files.primary_image[0], 'products');
-        }
-
-        const keys = Object.keys(fields).filter(k => k !== 'listing_id');
-        const setClause = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
-        const values = [...keys.map(k => fields[k]), listing_id, userId];
-
-        await pool.query(
-            `UPDATE marketplace_listings SET ${setClause}, updated_at = NOW() 
-             WHERE listing_id = $${keys.length + 1} AND seller_id = $${keys.length + 2}`,
-            values
+        const { product_name, price_per_unit, quantity, status, unit, description } = req.body;
+        const { rows } = await pool.query(
+            `UPDATE marketplace_listings 
+             SET product_name=COALESCE($1, product_name), price_per_unit=COALESCE($2, price_per_unit), 
+                 quantity=COALESCE($3, quantity), status=COALESCE($4, status), 
+                 unit=COALESCE($5, unit), description=COALESCE($6, description), updated_at=NOW()
+             WHERE id=$7 AND seller_internal_id=$8 RETURNING *`,
+            [product_name, price_per_unit, quantity, status, unit, description, req.params.listing_id, req.user.userInternalId]
         );
-        res.json({ success: true, message: "Registry Node UPDATED" });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        if (!rows.length) return res.status(404).json({ error: "Listing not found" });
+        res.json({ success: true, data: rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-/* =========================
-   2. STATE MANAGEMENT
-========================= */
+/* ───── STATE TOGGLES (PATCH) ───── */
 
-exports.pauseListing = (req, res) => changeStatus(req, res, 'PAUSED');
-exports.resumeListing = (req, res) => changeStatus(req, res, 'ACTIVE');
-exports.archiveListing = (req, res) => changeStatus(req, res, 'ARCHIVED');
-exports.undoArchive = (req, res) => changeStatus(req, res, 'ACTIVE');
+exports.pauseListing = (req, res) => setStatus(req, res, 'PAUSED');
 
-async function changeStatus(req, res, status) {
-    try {
-        const { listing_id } = req.params;
-        const userId = req.user.userInternalId;
-        await pool.query(
-            `UPDATE marketplace_listings SET status = $1 WHERE listing_id = $2 AND seller_id = $3`,
-            [status, listing_id, userId]
-        );
-        res.json({ success: true, message: `Status changed to ${status}` });
-    } catch (err) { res.status(500).json({ error: err.message }); }
-}
+exports.resumeListing = (req, res) => setStatus(req, res, 'ACTIVE');
 
-/* =========================
-   3. PERMANENT DELETION
-========================= */
+exports.archiveListing = (req, res) => setStatus(req, res, 'ARCHIVED');
+
+// Matches your router's undo-archive path
+exports.undoArchive = (req, res) => setStatus(req, res, 'ACTIVE');
+
+/* ───── HARD DELETE ───── */
 
 exports.deleteListing = async (req, res) => {
     try {
-        const { listing_id } = req.params;
-        const userId = req.user.userInternalId;
-        await pool.query(
-            `DELETE FROM marketplace_listings WHERE listing_id = $1 AND seller_id = $2`,
-            [listing_id, userId]
+        const { rowCount } = await pool.query(
+            "DELETE FROM marketplace_listings WHERE id = $1 AND seller_internal_id = $2",
+            [req.params.listing_id, req.user.userInternalId]
         );
-        res.json({ success: true, message: "Registry Node DROPPED permanently" });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        if (rowCount === 0) return res.status(404).json({ error: "Not found" });
+        res.json({ success: true, message: "Listing permanently deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
+
