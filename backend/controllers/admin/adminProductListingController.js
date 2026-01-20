@@ -22,33 +22,58 @@ const uploadToSupabase = async (file, folder = 'marketplace') => {
 };
 
 /* =========================
-   1️⃣ Get all listings (Global or Farmer-Specific)
-   Sync: Uses seller_internal_id and joins with users table
+   1️⃣ Get all listings (Enhanced Search)
+   Filters by: Product Name, Owner Name, Email, Phone, Category
 ========================= */
 const getAllListings = async (req, res) => {
     try {
-        const { status, category, sellerId, limit = 20, offset = 0 } = req.query;
+        const { status, category, sellerId, search, limit = 50, offset = 0 } = req.query;
 
         const conditions = [];
         const values = [];
         let counter = 1;
 
-        if (status) { conditions.push(`ml.status = $${counter++}`); values.push(status.toUpperCase()); }
-        if (category) { conditions.push(`ml.product_category = $${counter++}`); values.push(category); }
+        // 1. Filter by Status (DROP status naming)
+        if (status) { 
+            conditions.push(`ml.status = $${counter++}`); 
+            values.push(status.toUpperCase()); 
+        }
+
+        // 2. Filter by Category
+        if (category) { 
+            conditions.push(`ml.product_category = $${counter++}`); 
+            values.push(category.toUpperCase()); 
+        }
         
-        // Matches schema: seller_internal_id
+        // 3. Filter by Specific Farmer ID
         if (sellerId) { 
             conditions.push(`ml.seller_internal_id = $${counter++}`); 
             values.push(sellerId); 
         }
 
+        // 4. MULTI-FIELD SEARCH (The requested "Find by anything" logic)
+        if (search) {
+            const searchVal = `%${search.toLowerCase()}%`;
+            conditions.push(`(
+                LOWER(ml.product_name) LIKE $${counter} OR 
+                LOWER(ml.product_category) LIKE $${counter} OR
+                LOWER(u.full_name) LIKE $${counter} OR 
+                LOWER(u.email) LIKE $${counter} OR 
+                u.phone LIKE $${counter}
+            )`);
+            values.push(searchVal);
+            counter++;
+        }
+
         const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
-        const result = await pool.query(
-            `SELECT 
+        const query = `
+            SELECT 
                 ml.*, 
                 ml.id AS listing_id, 
                 u.full_name AS owner_name, 
+                u.email AS owner_email,
+                u.phone AS owner_phone,
                 f.farm_name,
                 f.farm_type
              FROM marketplace_listings ml
@@ -56,9 +81,10 @@ const getAllListings = async (req, res) => {
              LEFT JOIN farmers f ON u.id = f.user_internal_id
              ${whereClause}
              ORDER BY ml.created_at DESC
-             LIMIT $${counter++} OFFSET $${counter}`,
-            [...values, limit, offset]
-        );
+             LIMIT $${counter++} OFFSET $${counter}
+        `;
+
+        const result = await pool.query(query, [...values, limit, offset]);
 
         res.status(200).json({ 
             success: true, 
@@ -77,9 +103,15 @@ const getAllListings = async (req, res) => {
 ========================= */
 const getListingById = async (req, res) => {
     try {
-        const { listing_id } = req.params; // Corresponds to 'id' in schema
+        const { listing_id } = req.params; 
         const result = await pool.query(
-            `SELECT ml.*, ml.id AS listing_id, u.full_name as owner_name, f.farm_name 
+            `SELECT 
+                ml.*, 
+                ml.id AS listing_id, 
+                u.full_name as owner_name, 
+                u.email as owner_email,
+                u.phone as owner_phone,
+                f.farm_name 
              FROM marketplace_listings ml
              JOIN users u ON ml.seller_internal_id = u.id
              LEFT JOIN farmers f ON u.id = f.user_internal_id
@@ -101,7 +133,6 @@ const adminCreateListing = async (req, res) => {
     try {
         const fields = req.body;
         
-        // Media Processing
         const primary_image_url = req.files?.primary_image
             ? await uploadToSupabase(req.files.primary_image[0], 'marketplace/images')
             : null;
@@ -169,7 +200,7 @@ const adminArchiveListing = (req, res) => adminChangeStatus(req, res, 'ARCHIVED'
 async function adminChangeStatus(req, res, status, action) {
     try {
         const { listing_id } = req.params;
-        const admin_id = req.user.id; // Admin performing the action
+        const admin_id = req.user.id; 
 
         const result = await pool.query(
             `UPDATE marketplace_listings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id`,
@@ -178,7 +209,6 @@ async function adminChangeStatus(req, res, status, action) {
 
         if (!result.rowCount) return res.status(404).json({ message: 'Node not found' });
 
-        // Audit the DROP action
         await pool.query(
             `INSERT INTO admin_audit_logs (admin_id, action, target_type, target_id) VALUES ($1,$2,'LISTING',$3)`,
             [admin_id, action, listing_id]
