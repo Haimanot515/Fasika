@@ -3,11 +3,9 @@ const supabase = require('../../config/supabase');
 
 /* =========================
    Helper: Upload to Supabase
-   Bucket: FarmerListing
 ========================= */
 const uploadToSupabase = async (file, folder = 'marketplace') => {
     if (!file) return null;
-    // Clean filename and set path
     const fileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
     const filePath = `${folder}/${fileName}`;
 
@@ -19,21 +17,17 @@ const uploadToSupabase = async (file, folder = 'marketplace') => {
         });
 
     if (error) throw error;
-
-    const { data: urlData } = supabase.storage
-        .from('FarmerListing')
-        .getPublicUrl(filePath);
-
+    const { data: urlData } = supabase.storage.from('FarmerListing').getPublicUrl(filePath);
     return urlData.publicUrl;
 };
 
 /* =========================
-   1️⃣ Get all listings (admin)
-   Logic: JOIN with Farmers & Users to get Owner details
+   1️⃣ Get all listings (Global or Farmer-Specific)
+   Sync: Uses seller_internal_id and joins with users table
 ========================= */
 const getAllListings = async (req, res) => {
     try {
-        const { status, category, sellerId, startDate, endDate, limit = 20, offset = 0 } = req.query;
+        const { status, category, sellerId, limit = 20, offset = 0 } = req.query;
 
         const conditions = [];
         const values = [];
@@ -41,23 +35,25 @@ const getAllListings = async (req, res) => {
 
         if (status) { conditions.push(`ml.status = $${counter++}`); values.push(status.toUpperCase()); }
         if (category) { conditions.push(`ml.product_category = $${counter++}`); values.push(category); }
-        if (sellerId) { conditions.push(`ml.seller_id = $${counter++}`); values.push(sellerId); }
-        if (startDate) { conditions.push(`ml.created_at >= $${counter++}`); values.push(startDate); }
-        if (endDate) { conditions.push(`ml.created_at <= $${counter++}`); values.push(endDate); }
+        
+        // Matches schema: seller_internal_id
+        if (sellerId) { 
+            conditions.push(`ml.seller_internal_id = $${counter++}`); 
+            values.push(sellerId); 
+        }
 
         const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
         const result = await pool.query(
             `SELECT 
                 ml.*, 
+                ml.id AS listing_id, 
                 u.full_name AS owner_name, 
-                u.phone AS owner_phone,
-                u.photo_url AS owner_photo,
                 f.farm_name,
                 f.farm_type
              FROM marketplace_listings ml
-             JOIN farmers f ON ml.seller_id = f.user_internal_id
-             JOIN users u ON f.user_internal_id = u.id
+             JOIN users u ON ml.seller_internal_id = u.id
+             LEFT JOIN farmers f ON u.id = f.user_internal_id
              ${whereClause}
              ORDER BY ml.created_at DESC
              LIMIT $${counter++} OFFSET $${counter}`,
@@ -71,23 +67,23 @@ const getAllListings = async (req, res) => {
             listings: result.rows 
         });
     } catch (err) {
-        console.error('getAllListings error:', err);
-        res.status(500).json({ success: false, message: 'Server error during registry fetch' });
+        console.error('Registry Fetch Error:', err);
+        res.status(500).json({ success: false, message: 'Authority: Server error during registry fetch' });
     }
 };
 
 /* =========================
-   2️⃣ Get single listing (With Owner Info)
+   2️⃣ Get single listing (Node Detail)
 ========================= */
 const getListingById = async (req, res) => {
     try {
-        const { listing_id } = req.params;
+        const { listing_id } = req.params; // Corresponds to 'id' in schema
         const result = await pool.query(
-            `SELECT ml.*, u.full_name as owner_name, f.farm_name 
+            `SELECT ml.*, ml.id AS listing_id, u.full_name as owner_name, f.farm_name 
              FROM marketplace_listings ml
-             JOIN farmers f ON ml.seller_id = f.user_internal_id
-             JOIN users u ON f.user_internal_id = u.id
-             WHERE ml.listing_id = $1`,
+             JOIN users u ON ml.seller_internal_id = u.id
+             LEFT JOIN farmers f ON u.id = f.user_internal_id
+             WHERE ml.id = $1`,
             [listing_id]
         );
 
@@ -99,16 +95,13 @@ const getListingById = async (req, res) => {
 };
 
 /* =========================
-   3️⃣ Create listing (admin)
+   3️⃣ Create listing (Authority Action)
 ========================= */
 const adminCreateListing = async (req, res) => {
     try {
         const fields = req.body;
-        if (!fields.seller_id || !fields.product_category || !fields.product_name) {
-            return res.status(400).json({ message: 'Missing Authority required fields' });
-        }
-
-        // Media Processing via Supabase
+        
+        // Media Processing
         const primary_image_url = req.files?.primary_image
             ? await uploadToSupabase(req.files.primary_image[0], 'marketplace/images')
             : null;
@@ -119,17 +112,15 @@ const adminCreateListing = async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO marketplace_listings (
-                seller_id, product_category, product_name, variety_or_breed,
-                dynamic_attributes, quantity, unit, quality_grade, price_per_unit,
-                negotiability, region, zone, seller_name, primary_image_url, gallery_urls, status
+                seller_internal_id, product_category, product_name, description,
+                quantity, unit, price_per_unit, primary_image_url, gallery_urls, status
             ) VALUES (
-                $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16
-            ) RETURNING listing_id`,
+                $1,$2,$3,$4,$5,$6,$7,$8,$9,$10
+            ) RETURNING id AS listing_id`,
             [
-                fields.seller_id, fields.product_category, fields.product_name, fields.variety_or_breed, 
-                fields.dynamic_attributes || {}, fields.quantity, fields.unit, fields.quality_grade, 
-                fields.price_per_unit, fields.negotiability, fields.region, fields.zone, 
-                fields.seller_name, primary_image_url, gallery_urls, fields.status || 'ACTIVE'
+                fields.seller_internal_id, fields.product_category, fields.product_name, fields.description,
+                fields.quantity, fields.unit || 'KG', fields.price_per_unit, 
+                primary_image_url, gallery_urls, fields.status || 'ACTIVE'
             ]
         );
 
@@ -141,14 +132,12 @@ const adminCreateListing = async (req, res) => {
 };
 
 /* =========================
-   4️⃣ Update listing (admin)
+   4️⃣ Update listing (Authority Action)
 ========================= */
 const adminUpdateListing = async (req, res) => {
     try {
         const { listing_id } = req.params;
         const fields = { ...req.body };
-
-        if (typeof fields.dynamic_attributes === 'string') fields.dynamic_attributes = JSON.parse(fields.dynamic_attributes);
 
         if (req.files?.primary_image) {
             fields.primary_image_url = await uploadToSupabase(req.files.primary_image[0], 'marketplace/images');
@@ -162,7 +151,7 @@ const adminUpdateListing = async (req, res) => {
         values.push(listing_id);
 
         const result = await pool.query(
-            `UPDATE marketplace_listings SET ${setClause}, updated_at = NOW() WHERE listing_id = $${values.length} RETURNING listing_id`,
+            `UPDATE marketplace_listings SET ${setClause}, updated_at = NOW() WHERE id = $${values.length} RETURNING id AS listing_id`,
             values
         );
 
@@ -173,24 +162,23 @@ const adminUpdateListing = async (req, res) => {
 };
 
 /* =========================
-   5️⃣ Admin Actions (Status Changes)
+   5️⃣ Admin Actions (DROP / Archive)
 ========================= */
 const adminArchiveListing = (req, res) => adminChangeStatus(req, res, 'ARCHIVED', 'DROP_LISTING');
-const adminPauseListing = (req, res) => adminChangeStatus(req, res, 'PAUSED', 'PAUSE_LISTING');
-const adminUndoArchive = (req, res) => adminChangeStatus(req, res, 'ACTIVE', 'UNDO_ARCHIVE');
 
 async function adminChangeStatus(req, res, status, action) {
     try {
         const { listing_id } = req.params;
-        const admin_id = req.user.user_id;
+        const admin_id = req.user.id; // Admin performing the action
 
         const result = await pool.query(
-            `UPDATE marketplace_listings SET status = $1, updated_at = NOW() WHERE listing_id = $2 RETURNING listing_id`,
+            `UPDATE marketplace_listings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id`,
             [status, listing_id]
         );
 
-        if (!result.rowCount) return res.status(404).json({ message: 'Listing not found' });
+        if (!result.rowCount) return res.status(404).json({ message: 'Node not found' });
 
+        // Audit the DROP action
         await pool.query(
             `INSERT INTO admin_audit_logs (admin_id, action, target_type, target_id) VALUES ($1,$2,'LISTING',$3)`,
             [admin_id, action, listing_id]
@@ -202,25 +190,10 @@ async function adminChangeStatus(req, res, status, action) {
     }
 }
 
-/* =========================
-   6️⃣ Other Actions
-========================= */
-const boostListing = async (req, res) => {
-    res.json({ success: true, message: "Authority: Listing Node Boosted" });
-};
-
-const markListingSold = async (req, res) => {
-    res.json({ success: true, message: "Authority: Listing Node Marked Sold" });
-};
-
 module.exports = {
     getAllListings,
     getListingById,
     adminCreateListing,
     adminUpdateListing,
-    adminPauseListing,
-    adminArchiveListing,
-    adminUndoArchive,
-    boostListing,
-    markListingSold
+    adminArchiveListing
 };
