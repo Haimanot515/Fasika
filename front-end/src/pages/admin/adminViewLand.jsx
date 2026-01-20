@@ -4,7 +4,7 @@ import {
     ShieldCheck, MapPin, Leaf, Dog, Ruler, Layers, Loader2, Trash2, Edit3, User
 } from "lucide-react";
 
-const AdminViewAllLands = () => {
+const AdminViewLand = () => {
   const [lands, setLands] = useState([]);
   const [stats, setStats] = useState({ total_lands: 0, total_animals: 0, total_hectares: 0 });
   const [loading, setLoading] = useState(true);
@@ -139,4 +139,4 @@ const styles = {
   none: { fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }
 };
 
-export default AdminViewAllLands;
+export default AdminViewLand;
