@@ -3,7 +3,8 @@ import api from "../../api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
   HiOutlineShieldCheck, HiOutlineDatabase, HiOutlineUser, 
-  HiOutlinePhotograph, HiOutlineTag, HiOutlineArrowLeft 
+  HiOutlinePhotograph, HiOutlineTag, HiOutlineArrowLeft,
+  HiOutlineSearch, HiOutlineCheckCircle
 } from "react-icons/hi";
 
 const AdminEditListing = () => {
@@ -12,8 +13,14 @@ const AdminEditListing = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Search States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedFarmer, setSelectedFarmer] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+
   const [form, setForm] = useState({
-    seller_internal_id: "", // Registry Authority: Link to Farmer
+    seller_internal_id: "", 
     product_category: "CROPS",
     product_name: "",
     quantity: "",
@@ -34,13 +41,13 @@ const AdminEditListing = () => {
     inputField: { width: "100%", padding: "12px 16px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "15px", outline: "none", boxSizing: "border-box" },
     label: { display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: "700", color: "#475569", marginBottom: "8px", textTransform: "uppercase" },
     uploadBox: { border: "2px dashed #3b82f6", borderRadius: "12px", padding: "20px", textAlign: "center", cursor: "pointer", background: "#eff6ff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" },
-    submitBtn: { width: "100%", padding: "16px", background: saving ? "#94a3b8" : "#1e40af", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: saving ? "not-allowed" : "pointer", marginTop: "20px" }
+    submitBtn: { width: "100%", padding: "16px", background: saving ? "#94a3b8" : "#1e40af", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: saving ? "not-allowed" : "pointer", marginTop: "20px" },
+    searchDropdown: { position: "absolute", width: "100%", background: "white", border: "1px solid #e2e8f0", borderRadius: "8px", boxShadow: "0 10px 15px rgba(0,0,0,0.1)", zIndex: 10, marginTop: "5px", maxHeight: "200px", overflowY: "auto" }
   };
 
   useEffect(() => {
     const fetchNode = async () => {
       try {
-        // Points to our Admin-specific Registry Detail Route
         const res = await api.get(`/admin/marketplace/listings/${listing_id}`);
         if (res.data.success) {
           const node = res.data.listing;
@@ -55,17 +62,49 @@ const AdminEditListing = () => {
             status: node.status || "ACTIVE"
           });
           if (node.primary_image_url) setPrimaryPreview(node.primary_image_url);
+          
+          // Pre-populate Selected Farmer if name exists in node
+          if (node.owner_name) {
+            setSelectedFarmer({ full_name: node.owner_name, phone: node.owner_phone || "Stored" });
+          }
         }
       } catch (err) {
         console.error("Fetch Error:", err);
         alert("REGISTRY_ERROR: Node not found in master database.");
-        navigate("/admin/marketplace");
+        navigate("/admin/farmers/market/view");
       } finally {
         setLoading(false);
       }
     };
     fetchNode();
   }, [listing_id, navigate]);
+
+  // Farmer Search Logic
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchTerm.length > 2) {
+        setIsSearching(true);
+        try {
+          const { data } = await api.get(`/admin/farmers/search?query=${searchTerm}`);
+          setSearchResults(data.farmers || []);
+        } catch (err) {
+          console.error("Search error", err);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const selectFarmer = (farmer) => {
+    setSelectedFarmer(farmer);
+    setForm({ ...form, seller_internal_id: farmer.id || farmer.user_id });
+    setSearchTerm("");
+    setSearchResults([]);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,23 +114,20 @@ const AdminEditListing = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     setSaving(true);
-    
     try {
       const fd = new FormData();
       Object.keys(form).forEach(key => fd.append(key, form[key]));
-      
       if (primaryImage) fd.append("primary_image", primaryImage);
       if (galleryImages.length > 0) {
         galleryImages.forEach(img => fd.append("gallery_images", img));
       }
 
-      // Admin PUT Route
       await api.put(`/admin/marketplace/listings/${listing_id}`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       alert("REGISTRY DROP UPDATED: Node changes committed successfully.");
-      navigate("/admin/marketplace");
+      navigate("/admin/farmers/market/view");
     } catch (err) {
       alert(err.response?.data?.message || "Registry commit failed.");
     } finally {
@@ -117,17 +153,40 @@ const AdminEditListing = () => {
         </div>
 
         <form onSubmit={handleUpdate} style={{ padding: "40px" }}>
-          {/* ASSIGNMENT SECTION */}
+          {/* ASSIGNMENT SECTION WITH SEARCH */}
           <h3 style={{ fontSize: "14px", color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px" }}>Identity assignment</h3>
-          <div style={{ marginBottom: "25px" }}>
-            <label style={theme.label}><HiOutlineUser /> Farmer Internal ID</label>
-            <input 
-              name="seller_internal_id" 
-              style={{...theme.inputField, background: "#f8fafc"}} 
-              value={form.seller_internal_id} 
-              onChange={handleChange} 
-              required 
-            />
+          <div style={{ marginBottom: "25px", position: "relative" }}>
+            <label style={theme.label}><HiOutlineUser /> Linked Farmer (Search to Change)</label>
+            
+            {selectedFarmer ? (
+              <div style={{ ...theme.inputField, background: "#ecfdf5", borderColor: "#10b981", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span><HiOutlineCheckCircle color="#10b981" /> <strong>{selectedFarmer.full_name}</strong></span>
+                <button type="button" onClick={() => setSelectedFarmer(null)} style={{ border: "none", background: "none", color: "#ef4444", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>Change</button>
+              </div>
+            ) : (
+              <>
+                <div style={{ position: "relative" }}>
+                  <input 
+                    style={theme.inputField} 
+                    placeholder="Search name, email or phone..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <HiOutlineSearch style={{ position: "absolute", right: "15px", top: "15px", color: "#94a3b8" }} />
+                </div>
+                {searchResults.length > 0 && (
+                  <div style={theme.searchDropdown}>
+                    {searchResults.map(f => (
+                      <div key={f.id} onClick={() => selectFarmer(f)} style={{ padding: "10px", borderBottom: "1px solid #f1f5f9", cursor: "pointer" }}>
+                        <div style={{ fontWeight: "700", fontSize: "13px" }}>{f.full_name}</div>
+                        <div style={{ fontSize: "11px", color: "#64748b" }}>{f.phone}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            <input type="hidden" name="seller_internal_id" value={form.seller_internal_id} required />
           </div>
 
           {/* PRODUCT SPECS */}
@@ -177,11 +236,6 @@ const AdminEditListing = () => {
             </select>
           </div>
 
-          <div style={{ marginBottom: "25px" }}>
-            <label style={theme.label}>Technical Description</label>
-            <textarea name="description" style={{ ...theme.inputField, minHeight: "80px", resize: "none" }} value={form.description} onChange={handleChange} />
-          </div>
-
           {/* MEDIA OVERRIDE */}
           <label style={theme.label}><HiOutlinePhotograph /> Node Media Override</label>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
@@ -209,7 +263,7 @@ const AdminEditListing = () => {
           
           <button 
             type="button" 
-            onClick={() => navigate("/admin/marketplace")}
+            onClick={() => navigate("/admin/farmers/market/view")}
             style={{ width: "100%", background: "none", border: "none", color: "#64748b", cursor: "pointer", marginTop: "15px", fontWeight: "600", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}
           >
             <HiOutlineArrowLeft /> Abort Update
