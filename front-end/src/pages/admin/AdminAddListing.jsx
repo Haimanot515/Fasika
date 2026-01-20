@@ -5,7 +5,7 @@ import {
   HiOutlineUser, HiOutlinePhotograph, HiOutlineTag, 
   HiOutlinePlusCircle, HiOutlineShieldCheck, HiOutlineSearch,
   HiOutlineCheckCircle, HiOutlineMail, HiOutlinePhone, HiOutlineX,
-  HiOutlineRefresh
+  HiOutlineRefresh, HiOutlineDatabase
 } from "react-icons/hi";
 
 const AdminAddListing = () => {
@@ -31,11 +31,9 @@ const AdminAddListing = () => {
   });
 
   const [primaryImage, setPrimaryImage] = useState(null);
-  const [primaryPreview, setPrimaryPreview] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
 
-  // --- LIVE SEARCH LOGIC ---
-  // This triggers automatically while the admin is typing
+  // --- LIVE SEARCH LOGIC (CORRECTED PATH) ---
   useEffect(() => {
     const fetchFarmers = async () => {
       if (searchTerm.trim().length < 2) {
@@ -45,17 +43,22 @@ const AdminAddListing = () => {
 
       setIsSearching(true);
       try {
-        // This hits your backend search endpoint (e.g., searchFarmers controller)
-        const { data } = await api.get(`/admin/farmers/search?query=${searchTerm}`);
+        /**
+         * FIX: Added '/marketplace' to the path to match your app.js mounting:
+         * app.use('/api/admin/marketplace', adminMarketplaceRoutes);
+         */
+        const { data } = await api.get(`/admin/marketplace/farmers/search?query=${searchTerm}`);
+        
+        // Ensure we are using the 'farmers' key from the controller response
         setSearchResults(data.farmers || []);
       } catch (err) {
-        console.error("Database search failed:", err);
+        console.error("Database discovery search failed:", err);
       } finally {
         setIsSearching(false);
       }
     };
 
-    const delayDebounceFn = setTimeout(fetchFarmers, 300); // 300ms delay to prevent spamming the DB
+    const delayDebounceFn = setTimeout(fetchFarmers, 400); 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
@@ -84,11 +87,13 @@ const AdminAddListing = () => {
     try {
       const fd = new FormData();
       Object.keys(form).forEach(key => fd.append(key, form[key]));
+      
       if (primaryImage) fd.append("primary_image", primaryImage);
       if (galleryImages.length > 0) {
         galleryImages.forEach(img => fd.append("gallery_images", img));
       }
 
+      // Consistent Marketplace path
       await api.post("/admin/marketplace/listings", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -96,7 +101,7 @@ const AdminAddListing = () => {
       alert("REGISTRY DROP SUCCESSFUL: Node published.");
       navigate("/admin/farmers/market/view");
     } catch (err) {
-      alert(err.response?.data?.message || "Authority connection error");
+      alert(err.response?.data?.message || "DROP failure: Authority connection error");
     } finally {
       setLoading(false);
     }
@@ -119,14 +124,14 @@ const AdminAddListing = () => {
           <HiOutlineShieldCheck size={40} />
           <div>
             <h1 style={{ margin: 0, fontSize: "20px" }}>MARKETPLACE REGISTRY</h1>
-            <p style={{ margin: 0, opacity: 0.8, fontSize: "11px" }}>AUTHORITY ACTION: CREATE NODE</p>
+            <p style={{ margin: 0, opacity: 0.8, fontSize: "11px" }}>AUTHORITY ACTION: CREATE DROP NODE</p>
           </div>
         </div>
 
         <div style={{ padding: "40px" }}>
-          {/* STEP 1: FARMER SEARCH */}
+          {/* STEP 1: FARMER DISCOVERY */}
           <h3 style={{ fontSize: "14px", color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px" }}>
-            1. Farmer Identity Verification
+            1. Farmer Identity Verification (Discovery)
           </h3>
           
           {!selectedFarmer ? (
@@ -134,13 +139,12 @@ const AdminAddListing = () => {
               <label style={theme.label}>
                 <HiOutlineSearch /> 
                 Search Farmer Registry
-                {isSearching && <span style={{color: '#3b82f6', fontSize: '10px', marginLeft: '10px'}}>Querying Database...</span>}
               </label>
               
               <div style={{ position: "relative" }}>
                 <input 
                   style={{...theme.inputField, paddingRight: '40px', borderColor: isSearching ? "#3b82f6" : "#cbd5e1"}}
-                  placeholder="Type Name, Email, or Phone number..." 
+                  placeholder="Search by Name, Email, or Phone..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -161,8 +165,8 @@ const AdminAddListing = () => {
                         <span style={{fontSize: '10px', color: '#10b981', background: '#dcfce7', padding: '2px 6px', borderRadius: '4px'}}>FOUND</span>
                       </div>
                       <div style={{ fontSize: "12px", color: "#64748b", display: "flex", gap: "10px", marginTop: '4px' }}>
-                        <span><HiOutlineMail style={{verticalAlign: 'middle'}}/> {f.email}</span>
-                        <span><HiOutlinePhone style={{verticalAlign: 'middle'}}/> {f.phone}</span>
+                        <span><HiOutlineDatabase size={12} style={{verticalAlign: 'middle'}}/> {f.farm_name || 'Generic Farm'}</span>
+                        <span><HiOutlinePhone size={12} style={{verticalAlign: 'middle'}}/> {f.phone}</span>
                       </div>
                     </div>
                   ))}
@@ -187,7 +191,7 @@ const AdminAddListing = () => {
           {/* STEP 2: PRODUCT DETAILS */}
           <form onSubmit={handleSubmit} style={{ opacity: selectedFarmer ? 1 : 0.4, pointerEvents: selectedFarmer ? "auto" : "none" }}>
             <h3 style={{ fontSize: "14px", color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px" }}>
-              2. Product Registry Details
+              2. Product Registry Metadata
             </h3>
             
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
@@ -198,11 +202,12 @@ const AdminAddListing = () => {
                   <option value="VEGETABLES">Vegetables</option>
                   <option value="FRUITS">Fruits</option>
                   <option value="LIVESTOCK">Livestock</option>
+                  <option value="DAIRY">Dairy</option>
                 </select>
               </div>
               <div>
                 <label style={theme.label}><HiOutlinePlusCircle /> Product Name</label>
-                <input name="product_name" style={theme.inputField} placeholder="e.g. Teff" value={form.product_name} onChange={handleChange} required />
+                <input name="product_name" style={theme.inputField} placeholder="e.g. White Teff" value={form.product_name} onChange={handleChange} required />
               </div>
             </div>
 
@@ -221,8 +226,13 @@ const AdminAddListing = () => {
               </div>
               <div>
                 <label style={theme.label}>Price (ETB)</label>
-                <input name="price_per_unit" type="number" style={theme.inputField} value={form.price_per_unit} onChange={handleChange} required />
+                <input name="price_per_unit" type="number" step="0.01" style={theme.inputField} value={form.price_per_unit} onChange={handleChange} required />
               </div>
+            </div>
+
+            <div style={{ marginBottom: "25px" }}>
+              <label style={theme.label}>Primary Image</label>
+              <input type="file" accept="image/*" onChange={(e) => setPrimaryImage(e.target.files[0])} style={{fontSize: '12px'}} />
             </div>
 
             <div style={{ marginBottom: "25px" }}>
@@ -231,7 +241,7 @@ const AdminAddListing = () => {
             </div>
 
             <button type="submit" disabled={loading || !selectedFarmer} style={{ width: "100%", padding: "16px", background: loading ? "#94a3b8" : "#1e40af", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", transition: '0.3s' }}>
-              {loading ? "COMMITTING TO REGISTRY..." : "PUBLISH REGISTRY NODE"}
+              {loading ? "COMMITTING TO REGISTRY..." : "PUBLISH REGISTRY NODE (DROP)"}
             </button>
           </form>
         </div>
