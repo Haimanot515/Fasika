@@ -184,4 +184,4 @@ const premiumStyles = {
   loader: { textAlign: 'center', padding: '150px', color: '#3b82f6', fontWeight: 'bold' }
 };
 
-export default AdminProductListingView;
+export default AdminViewListing;
