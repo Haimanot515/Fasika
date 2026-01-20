@@ -28,7 +28,6 @@ exports.searchFarmers = async (req, res) => {
 
         const searchVal = `%${query.toLowerCase()}%`;
         
-        // FIXED: Using LOWER(u.role) to match 'farmer' and added farm_name search
         const result = await pool.query(
             `SELECT u.id, u.full_name, u.email, u.phone, f.farm_name 
              FROM users u
@@ -44,6 +43,7 @@ exports.searchFarmers = async (req, res) => {
             [searchVal]
         );
 
+        // SYNC: Returning 'farmers' key to match frontend AdminAddListing.jsx
         res.status(200).json({ success: true, farmers: result.rows });
     } catch (err) {
         console.error("SEARCH ERROR:", err.message);
@@ -58,7 +58,7 @@ exports.getAllListings = async (req, res) => {
         const { rows } = await pool.query(
             `SELECT ml.*, u.full_name as owner_name, f.farm_name 
              FROM marketplace_listings ml
-             JOIN users u ON ml.seller_internal_id = u.id
+             LEFT JOIN users u ON ml.seller_internal_id = u.id
              LEFT JOIN farmers f ON u.id = f.user_internal_id
              ORDER BY ml.created_at DESC`
         );
@@ -87,7 +87,6 @@ exports.adminCreateListing = async (req, res) => {
     try {
         const { seller_internal_id, product_category, product_name, quantity, unit, price_per_unit, description } = req.body;
 
-        // Process images with safety check
         const primaryImageUrl = req.files?.primary_image 
             ? await uploadToSupabase(req.files.primary_image[0]) 
             : null;
